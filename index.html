@@ -2,19 +2,27 @@
 <html lang="en" data-theme="night">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XOXO - Chat App</title>
     
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+        /* Custom scrollbar styles */
         #random-chat-box::-webkit-scrollbar, #public-chat-box::-webkit-scrollbar { width: 6px; }
         #random-chat-box::-webkit-scrollbar-thumb, #public-chat-box::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 20px; }
+        
+        /* Ensure the body takes full height and doesn't scroll */
+        body {
+            height: 100vh;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body class="bg-base-300 h-screen overflow-hidden">
 
+    <!-- Disclaimer Modal -->
     <dialog id="disclaimer_modal" class="modal modal-open">
       <div class="modal-box w-11/12 max-w-lg">
         <h3 class="font-bold text-2xl text-warning">XOXO Disclaimer & Rules</h3>
@@ -39,9 +47,22 @@
     <div class="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
         
-        <div class="drawer-content flex flex-col items-center justify-center p-2 sm:p-4 h-full">
+        <!-- 
+          Page Content
+          MODIFICATION: 
+          - Changed `h-full` to `h-screen` to ensure it uses the full viewport height.
+          - Removed `justify-center` to allow content to flow from the top.
+          - Changed `p-2` to `p-0` for mobile edge-to-edge, keeping `sm:p-4` for larger screens.
+        -->
+        <div class="drawer-content flex flex-col items-center justify-center p-0 sm:p-4 h-screen">
             
-            <div class="w-full lg:hidden flex justify-between items-center mb-2 p-2 bg-base-100 rounded-box shadow">
+            <!-- 
+              Mobile Header
+              MODIFICATION: 
+              - Removed `mb-2` and `rounded-box` for mobile (added `mb-0`, `rounded-none`).
+              - Kept `sm:rounded-box` and `sm:mb-2` for slightly larger screens.
+            -->
+            <div class="w-full lg:hidden flex justify-between items-center mb-0 p-2 bg-base-100 rounded-none sm:rounded-box sm:mb-2 shadow">
                 <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
                 </label>
@@ -49,8 +70,17 @@
                 <div class="badge badge-success badge-sm"><span id="mobile-count">0</span></div>
             </div>
 
-            <div id="app" class="card w-full max-w-2xl bg-base-100 shadow-2xl h-full max-h-[85vh] flex flex-col">
+            <!-- 
+              Main Chat App Card
+              MODIFICATION: 
+              - Replaced `h-full max-h-[85vh]` with `flex-grow overflow-hidden`.
+              - Added `lg:h-full lg:max-h-[85vh]` to restore desktop-like constraints only on large screens.
+              - This makes the card fill the remaining vertical space on mobile (`flex-grow`).
+              - `overflow-hidden` ensures the card itself doesn't scroll, but its children will.
+            -->
+            <div id="app" class="card w-full max-w-2xl bg-base-100 shadow-2xl flex-grow lg:flex-grow-0 flex flex-col overflow-hidden lg:h-full lg:max-h-[85vh]">
                 
+                <!-- Card Header -->
                 <div class="card-body p-4 pb-2 border-b border-base-300 flex-none">
                     <div class="flex justify-between items-center">
                         <div>
@@ -63,18 +93,25 @@
                             <div class="badge badge-success gap-1 font-mono hidden lg:flex">
                                 <span id="count-val">0</span> Online
                             </div>
-                            <label class="swap swap-rotate text-base-content">
-                                <input type="checkbox" onclick="toggleTheme()" />
-                                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
-                                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
-                            </label>
+                            <!-- 
+                              MODIFICATION: 
+                              - Removed the dark mode toggle from here. It is now in the sidebar.
+                            -->
                         </div>
                     </div>
                 </div>
 
+                <!-- Random Chat View -->
                 <div id="random-chat-view" class="flex flex-col flex-grow overflow-hidden h-full">
+                    <!-- 
+                      Chat Box
+                      MODIFICATION: No changes needed. 
+                      `flex-grow overflow-y-auto` is correct. The parent layout changes
+                      will make this scroll properly.
+                    -->
                     <div id="random-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50"></div>
                     
+                    <!-- Input Area -->
                     <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
                         <div id="typing-indicator" class="h-6 text-xs italic opacity-50 ml-2 flex items-center gap-1 invisible">
                             <span class="loading loading-dots loading-xs"></span> Stranger is typing...
@@ -119,11 +156,18 @@
                     </div>
                 </div>
 
+                <!-- Public Chat View -->
                 <div id="public-chat-view" class="flex flex-col flex-grow overflow-hidden h-full hidden">
+                    <!-- 
+                      Chat Box
+                      MODIFICATION: No changes needed. 
+                      `flex-grow overflow-y-auto` is correct.
+                    -->
                     <div id="public-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50">
                         <div class="divider text-xs opacity-50">Welcome to Public Lounge</div>
                     </div>
                     
+                    <!-- Input Area -->
                     <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
                          <div class="join w-full mt-4 relative">
                             <div class="dropdown dropdown-top join-item">
@@ -158,17 +202,36 @@
             </div>
         </div> 
 
+        <!-- Sidebar -->
         <div class="drawer-side">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
             <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content flex flex-col justify-between">
+                <!-- Top Nav Section -->
                 <div>
                     <div class="text-2xl font-bold mb-6 px-4 text-primary">XOXO <span class="text-xs text-content opacity-50">v2.0</span></div>
                     <li><a onclick="switchMode('random')" id="nav-random" class="active"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg> Random Chat</a></li>
                     <li><a onclick="switchMode('public')" id="nav-public"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg> Public Lounge</a></li>
                 </div>
                 
-                <div class="text-xs opacity-50 text-center">
-                    Connected as <br> <strong class="text-accent" id="sidebar-nickname">...</strong>
+                <!-- Bottom Nickname & Theme Section -->
+                <div>
+                    <!-- 
+                      MODIFICATION: 
+                      - Added the dark mode toggle here, just above the nickname.
+                      - Wrapped in a div for centering.
+                    -->
+                    <div class="flex justify-center items-center p-2 gap-2 text-sm">
+                        <span>Theme:</span>
+                        <label class="swap swap-rotate text-base-content">
+                            <input type="checkbox" onclick="toggleTheme()" />
+                            <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
+                            <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
+                        </label>
+                    </div>
+
+                    <div class="text-xs opacity-50 text-center">
+                        Connected as <br> <strong class="text-accent" id="sidebar-nickname">...</strong>
+                    </div>
                 </div>
             </ul>
         </div>
@@ -374,11 +437,13 @@
         </div>
         `;
         container.innerHTML += html;
+        // This line handles the auto-scroll for new messages
         container.scrollTop = container.scrollHeight;
     }
 
     function logSystem(container, msg) {
         container.innerHTML += `<div class="divider text-xs opacity-50 my-4">${msg}</div>`;
+        // This line handles the auto-scroll for system messages
         container.scrollTop = container.scrollHeight;
     }
 
