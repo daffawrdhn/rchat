@@ -15,11 +15,6 @@
 </head>
 <body class="bg-base-300 h-screen overflow-hidden">
 
-    <!-- 
-      DISCLAIMER MODAL
-      Set to "modal-open" to be visible on load.
-      Backdrop is a separate div without click events.
-    -->
     <dialog id="disclaimer_modal" class="modal modal-open">
       <div class="modal-box w-11/12 max-w-lg">
         <h3 class="font-bold text-2xl text-warning">XOXO Disclaimer & Rules</h3>
@@ -37,12 +32,10 @@
           <button class="btn btn-success" onclick="handleAgree()">Agree & Connect</button>
         </div>
       </div>
-      <!-- Static backdrop with blur. It will not close the modal on click. -->
       <div class="modal-backdrop backdrop-blur-sm bg-black/30"></div>
     </dialog>
 
 
-    <!-- MAIN APP (Blurred by default) -->
     <div class="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
         
@@ -231,16 +224,6 @@
         input.focus();
     }
 
-    // --- NICKNAME GENERATOR ---
-    function generateNickname() {
-        const adjs = ['Cool', 'Super', 'Lazy', 'Hyper', 'Happy', 'Sad', 'Wild', 'Neon', 'Dark', 'Fast'];
-        const nouns = ['Panda', 'Tiger', 'Fox', 'Wolf', 'Cat', 'Dog', 'Bear', 'Eagle', 'Shark', 'Hawk'];
-        const randAdj = adjs[Math.floor(Math.random() * adjs.length)];
-        const randNoun = nouns[Math.floor(Math.random() * nouns.length)];
-        const num = Math.floor(Math.random() * 999);
-        return `${randAdj}${randNoun}${num}`;
-    }
-
     // --- MODE SWITCHING ---
     function switchMode(mode) {
         currentMode = mode;
@@ -273,11 +256,6 @@
 
     // --- WEBSOCKET ---
     function initSocket() {
-        // Generate nickname only when connecting
-        myNickname = generateNickname();
-        document.getElementById('my-nickname').innerText = myNickname;
-        document.getElementById('sidebar-nickname').innerText = myNickname;
-
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const host = '127.0.0.1';
         const socketUrl = (host === 'localhost' || host === '127.0.0.1') 
@@ -291,10 +269,7 @@
             statusBar.innerText = "Connected";
             statusBar.className = "text-xs font-bold text-success mt-1";
             
-            // 1. Send Nickname
-            conn.send(JSON.stringify({ action: 'set_nickname', name: myNickname }));
-            
-            // 2. Join default room
+            // 1. Join default room (we wait for identity msg to set nickname)
             conn.send(JSON.stringify({ action: 'join_room', room: currentMode }));
         };
 
@@ -308,7 +283,12 @@
         conn.onmessage = function(e) {
             const data = JSON.parse(e.data);
             
-            if (data.status === 'stats') {
+            if (data.status === 'identity') {
+                myNickname = data.nickname;
+                document.getElementById('my-nickname').innerText = myNickname;
+                document.getElementById('sidebar-nickname').innerText = myNickname;
+            }
+            else if (data.status === 'stats') {
                 countVal.innerText = data.count;
                 mobileCount.innerText = data.count;
             }

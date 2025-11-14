@@ -18,11 +18,19 @@ class Chat implements MessageComponentInterface {
     public function onOpen(ConnectionInterface $conn) {
         // Initialize default properties
         $conn->chatMode = 'menu'; // 'menu', 'random', or 'public'
-        $conn->nickname = 'Anonymous';
+        
+        // --- CHANGE: Generate Nickname on Server ---
+        $conn->nickname = $this->generateNickname();
         
         $this->clients->attach($conn);
-        echo "New connection! ({$conn->resourceId})\n";
+        echo "New connection! ({$conn->resourceId}) assigned name: {$conn->nickname}\n";
         
+        // Send the generated identity back to the user
+        $conn->send(json_encode([
+            'status' => 'identity',
+            'nickname' => $conn->nickname
+        ]));
+
         $this->broadcastUserCount();
     }
 
@@ -31,9 +39,7 @@ class Chat implements MessageComponentInterface {
         if (!isset($data['action'])) return;
 
         switch ($data['action']) {
-            case 'set_nickname':
-                $from->nickname = htmlspecialchars($data['name']);
-                break;
+            // 'set_nickname' case removed (handled in onOpen now)
 
             case 'join_room':
                 $this->handleJoinRoom($from, $data['room']);
@@ -98,7 +104,6 @@ class Chat implements MessageComponentInterface {
     }
 
     private function handleFindPartner($conn) {
-        // Same logic as before...
         if (isset($this->pairs[$conn->resourceId]) || $this->waitingClient === $conn) {
             return;
         }
@@ -138,7 +143,6 @@ class Chat implements MessageComponentInterface {
         $this->handleFindPartner($conn);
     }
 
-    // Logic extracted to be reusable
     private function cleanupRandomChat($conn) {
         // Disconnect current partner if exists
         if (isset($this->pairs[$conn->resourceId])) {
@@ -153,6 +157,18 @@ class Chat implements MessageComponentInterface {
         if ($this->waitingClient === $conn) {
             $this->waitingClient = null;
         }
+    }
+
+    // --- NEW: Nickname Generator ---
+    private function generateNickname() {
+        $adjs = ['Cool', 'Super', 'Lazy', 'Hyper', 'Happy', 'Sad', 'Wild', 'Neon', 'Dark', 'Fast'];
+        $nouns = ['Panda', 'Tiger', 'Fox', 'Wolf', 'Cat', 'Dog', 'Bear', 'Eagle', 'Shark', 'Hawk'];
+        
+        $randAdj = $adjs[array_rand($adjs)];
+        $randNoun = $nouns[array_rand($nouns)];
+        $num = rand(100, 999);
+        
+        return $randAdj . $randNoun . $num;
     }
 
     public function onClose(ConnectionInterface $conn) {
