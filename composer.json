@@ -1,0 +1,17 @@
+{
+    "name": "hackertampan/rchat",
+    "autoload": {
+        "psr-4": {
+            "Hackertampan\\Rchat\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "daffaW",
+            "email": "44244449+daffawrdhn@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "cboden/ratchet": "^0.4.4"
+    }
+}
