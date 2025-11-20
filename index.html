@@ -321,9 +321,8 @@
     function initSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const host = '127.0.0.1';
-        const socketUrl = (host === 'localhost' || host === '127.0.0.1') 
-            ? `${protocol}://${host}:8080` 
-            : `${protocol}://${host}/ws`;
+        const socketUrl = 'https://full-walls-wish.loca.lt/';
+        console.log("Connecting to WebSocket:", socketUrl);
 
         statusBar.innerText = "Connecting...";
         conn = new WebSocket(socketUrl);
