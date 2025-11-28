@@ -1,593 +1,659 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="night">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XOXO - Talk to Strangers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XOXO - Chat & Voice</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* DEFINISI WARNA PANTONE (Approximation Hex) */
-        :root {
-            --pantone-218: #CE4E80;
-            /* Vibrant Pink/Magenta */
-            --pantone-256: #D1A7C6;
-            /* Soft Lavender */
-            --pantone-196: #F1C8C8;
-            /* Soft Peach/Pink */
-            --msg-you: #CE4E80;
-            --msg-stranger: #4A4A4A;
+        #random-chat-box::-webkit-scrollbar,
+        #public-chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #random-chat-box::-webkit-scrollbar-thumb,
+        #public-chat-box::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 20px;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--pantone-196);
             height: 100vh;
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
         }
 
-        /* Header Styles */
-        header {
-            background-color: white;
-            padding: 0.8rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            z-index: 50;
+        /* Animasi Ringing saat ada panggilan masuk/keluar */
+        .pulse-ring {
+            animation: pulse-ring 2s infinite;
         }
 
-        .logo {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--pantone-218);
-            letter-spacing: -1px;
-            text-transform: uppercase;
-        }
-
-        .online-count {
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: 500;
-        }
-
-        /* Start Screen */
-        #start-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            text-align: center;
-            background-color: var(--pantone-196);
-        }
-
-        .big-text {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #4a4a4a;
-            margin-bottom: 2rem;
-        }
-
-        .mode-btn {
-            background-color: var(--pantone-218);
-            color: white;
-            border: none;
-            padding: 1rem 3rem;
-            font-size: 1.2rem;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.1s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 0.5rem;
-            min-width: 200px;
-        }
-
-        .mode-btn:hover {
-            transform: scale(1.02);
-        }
-
-        .mode-btn:active {
-            transform: scale(0.98);
-        }
-
-        .mode-btn.secondary {
-            background-color: #6b7280;
-        }
-
-        /* Chat Layout */
-        #chat-interface {
-            display: none;
-            /* Hidden by default */
-            flex: 1;
-            flex-direction: column;
-            height: 100%;
-            background-color: white;
-        }
-
-        /* Layout untuk Video Mode (Split Screen) */
-        .video-layout {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* Layout untuk Text Only Mode */
-        .text-layout #video-area {
-            display: none;
-        }
-
-        .text-layout #chat-log-area {
-            width: 100%;
-        }
-
-        #video-area {
-            flex: 1;
-            background: black;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #ccc;
-        }
-
-        #chat-log-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: white;
-            min-width: 320px;
-        }
-
-        #chat-log {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        /* Messages */
-        .sys-msg {
-            color: #888;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin: 0.5rem 0;
-        }
-
-        .msg-row {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 4px;
-        }
-
-        .msg-label {
-            font-weight: bold;
-            font-size: 0.8rem;
-            margin-bottom: 2px;
-        }
-
-        .msg-label.you {
-            color: var(--pantone-218);
-        }
-
-        .msg-label.stranger {
-            color: blue;
-        }
-
-        .msg-text {
-            font-size: 1rem;
-            color: #333;
-            line-height: 1.4;
-        }
-
-        /* Control Bar (Omegle Style) */
-        .control-bar {
-            background-color: var(--pantone-256);
-            /* Lavender */
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Tombol STOP / NEW */
-        #btn-action {
-            background-color: white;
-            color: #333;
-            font-weight: 700;
-            border: 2px solid #999;
-            padding: 0.8rem 1.5rem;
-            font-size: 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            min-width: 100px;
-            text-transform: uppercase;
-        }
-
-        #btn-action.stop {
-            color: red;
-            border-color: red;
-        }
-
-        #btn-action.new {
-            color: var(--pantone-218);
-            border-color: var(--pantone-218);
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 0.8rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .chat-input:focus {
-            border-color: var(--pantone-218);
-        }
-
-        .btn-send {
-            background-color: var(--pantone-218);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            font-weight: 700;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        /* Video Elements */
-        #remote-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        #local-video {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 120px;
-            height: 90px;
-            background: #333;
-            border: 2px solid white;
-            object-fit: cover;
-            border-radius: 4px;
-            transform: scaleX(-1);
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .video-layout {
-                flex-direction: column;
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
             }
 
-            #video-area {
-                height: 40vh;
-                flex: none;
-                border-right: none;
-                border-bottom: 1px solid #ccc;
+            70% {
+                box-shadow: 0 0 0 10px rgba(56, 189, 248, 0);
             }
 
-            #chat-log-area {
-                height: 60vh;
-            }
-
-            .mode-btn {
-                width: 100%;
+            100% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
             }
         }
     </style>
 </head>
 
-<body>
+<body class="bg-base-300 h-screen overflow-hidden">
 
-    <header>
-        <div class="logo">XOXO <span style="font-size:0.8em; color:#888; font-weight:400;">Talk to Strangers</span>
+    <audio id="remote-audio" autoplay></audio>
+
+    <dialog id="disclaimer_modal" class="modal modal-open">
+        <div class="modal-box w-11/12 max-w-lg">
+            <h3 class="font-bold text-2xl text-warning">XOXO Disclaimer</h3>
+            <div class="py-4 space-y-2">
+                <p>Welcome to XOXO Chat V2 (Voice Edition):</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>You must be **18 years or older**.</li>
+                    <li>We do not store your messages.</li>
+                    <li>Voice calls are **Peer-to-Peer** (Direct Connection).</li>
+                    <li>Be respectful.</li>
+                </ul>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-error" onclick="handleDisagree()">Exit</button>
+                <button class="btn btn-success" onclick="handleAgree()">Agree & Connect</button>
+            </div>
         </div>
-        <div class="online-count"><span id="count-val">0</span>+ online</div>
-    </header>
+        <div class="modal-backdrop backdrop-blur-sm bg-black/30"></div>
+    </dialog>
 
-    <div id="start-screen">
-        <div class="big-text">Start chatting:</div>
-        <button class="mode-btn" onclick="enterMode('text')">Text only</button>
-        <button class="mode-btn secondary" onclick="enterMode('video')">Video</button>
-
-        <div class="mt-8 text-sm text-gray-500 max-w-md">
-            Use XOXO to meet strangers. Video is monitored. Keep it clean.<br>
-            <strong>18+ Only.</strong>
+    <dialog id="incoming_call_modal" class="modal">
+        <div class="modal-box text-center">
+            <h3 class="font-bold text-lg text-primary">📞 Incoming Call!</h3>
+            <p class="py-4">Stranger wants to talk with you...</p>
+            <div class="modal-action justify-center">
+                <button class="btn btn-error" onclick="rejectCall()">Decline</button>
+                <button class="btn btn-success pulse-ring" onclick="acceptCall()">Accept</button>
+            </div>
         </div>
-    </div>
+    </dialog>
 
-    <div id="chat-interface">
-        <div id="main-layout" class="text-layout">
-            <div id="video-area">
-                <video id="remote-video" autoplay playsinline></video>
-                <video id="local-video" autoplay playsinline muted></video>
-                <div class="absolute top-2 left-2 bg-black/50 text-white px-2 py-1 text-xs rounded">Stranger</div>
-                <div class="absolute bottom-24 right-2 bg-black/50 text-white px-2 py-1 text-xs rounded">You</div>
+    <div class="drawer lg:drawer-open">
+        <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+
+        <div class="drawer-content flex flex-col items-center justify-center p-0 sm:p-4 h-screen">
+
+            <div class="w-full lg:hidden flex justify-between items-center mb-0 p-2 bg-base-100 shadow">
+                <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h7" />
+                    </svg>
+                </label>
+                <span class="font-bold">XOXO Voice</span>
+                <div class="badge badge-success badge-sm"><span id="mobile-count">0</span></div>
             </div>
 
-            <div id="chat-log-area">
-                <div id="chat-log">
-                    <div class="sys-msg">Welcome to XOXO! Click 'Start' to find a stranger.</div>
+            <div id="app"
+                class="card w-full max-w-2xl bg-base-100 shadow-2xl flex-grow lg:flex-grow-0 flex flex-col overflow-hidden lg:h-full lg:max-h-[85vh]">
+
+                <div class="card-body p-4 pb-2 border-b border-base-300 flex-none">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 id="chat-title" class="card-title text-xl font-bold">Random Chat</h2>
+                            <div class="text-xs opacity-60 mt-1" id="status-bar">Waiting...</div>
+                            <div class="text-[10px] text-primary">As: <span id="my-nickname"
+                                    class="font-bold">...</span></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div id="call-status" class="badge badge-info hidden animate-pulse">On Call 🔊</div>
+                            <div class="badge badge-success gap-1 font-mono hidden lg:flex"><span
+                                    id="count-val">0</span> Online</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="control-bar">
-                    <button id="btn-action" class="new" onclick="handleActionBtn()">Start</button>
+                <div id="random-chat-view" class="flex flex-col flex-grow overflow-hidden h-full">
+                    <div id="random-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50"></div>
 
-                    <input type="text" id="msg-input" class="chat-input" placeholder="Type your message..." disabled>
-                    <button class="btn-send" onclick="sendMessage()" id="btn-send" disabled>Send</button>
+                    <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
+                        <div id="typing-indicator"
+                            class="h-6 text-xs italic opacity-50 ml-2 flex items-center gap-1 invisible">
+                            <span class="loading loading-dots loading-xs"></span> Stranger is typing...
+                        </div>
+
+                        <div id="controls" class="w-full">
+                            <button id="btn-start" onclick="startRandomChat()"
+                                class="btn btn-primary w-full shadow-lg">Find Stranger</button>
+                            <button id="btn-next" onclick="nextPartner()" class="btn btn-error w-full hidden">Next
+                                (Esc)</button>
+                        </div>
+
+                        <div id="random-input-area" class="join w-full hidden relative">
+                            <div class="dropdown dropdown-top join-item">
+                                <div tabindex="0" role="button"
+                                    class="btn btn-square btn-outline border-base-300 bg-base-100">😊</div>
+                                <div tabindex="0"
+                                    class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100 mb-2">
+                                    <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
+                                </div>
+                            </div>
+
+                            <input type="text" id="random-msg-input"
+                                class="input input-bordered join-item w-full focus:outline-none"
+                                placeholder="Say something..." onkeypress="handleInput(event, 'random')"
+                                onkeyup="sendTypingSignal()">
+
+                            <button id="btn-call" onclick="startCall()" class="btn btn-info join-item"
+                                title="Voice Call">📞</button>
+                            <button id="btn-hangup" onclick="endCall()" class="btn btn-error join-item hidden"
+                                title="Hangup">🔴</button>
+
+                            <button onclick="sendMessage('random')" class="btn btn-primary join-item">Send</button>
+                        </div>
+                    </div>
                 </div>
+
+                <div id="public-chat-view" class="flex flex-col flex-grow overflow-hidden h-full hidden">
+                    <div id="public-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50">
+                        <div class="divider text-xs opacity-50">Public Lounge</div>
+                    </div>
+
+                    <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
+                        <div class="join w-full mt-4 relative">
+                            <div class="dropdown dropdown-top join-item">
+                                <div tabindex="0" role="button"
+                                    class="btn btn-square btn-outline border-base-300 bg-base-100">😊</div>
+                                <div tabindex="0"
+                                    class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100 mb-2">
+                                    <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
+                                </div>
+                            </div>
+
+                            <input type="text" id="public-msg-input" class="input input-bordered join-item w-full"
+                                placeholder="Message everyone..." onkeypress="handleInput(event, 'public')">
+                            <button onclick="sendMessage('public')" class="btn btn-secondary join-item">Send</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
+        </div>
+
+        <div class="drawer-side">
+            <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+            <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content flex flex-col justify-between">
+                <div>
+                    <div class="text-2xl font-bold mb-6 px-4 text-primary">XOXO <span
+                            class="text-xs text-content opacity-50">Voice</span></div>
+
+                    <li>
+                        <a onclick="switchMode('random')" id="nav-random" class="active justify-between">
+                            Random Chat
+                            <span id="badge-random" class="badge badge-error badge-sm hidden">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a onclick="switchMode('public')" id="nav-public" class="justify-between">
+                            Public Lounge
+                            <span id="badge-public" class="badge badge-error badge-sm hidden">0</span>
+                        </a>
+                    </li>
+                </div>
+
+                <div>
+                    <div class="flex justify-center items-center p-2 gap-2 text-sm">
+                        <span>Theme:</span>
+                        <label class="swap swap-rotate text-base-content">
+                            <input type="checkbox" onclick="toggleTheme()" />
+                            <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+                            </svg>
+                            <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="text-xs opacity-50 text-center">
+                        Playing as <br> <strong class="text-accent" id="sidebar-nickname">...</strong>
+                    </div>
+                </div>
+            </ul>
         </div>
     </div>
 
     <script>
-        // --- Variables ---
+        // --- GLOBAL VARIABLES ---
         let conn;
-        let isConnected = false;
-        let isSearching = false;
-        let mode = 'text'; // 'text' or 'video'
-        let chatState = 'idle'; // 'idle', 'searching', 'chatting'
+        let currentMode = 'random';
+        let myNickname = '';
+        let unreadRandom = 0;
+        let unreadPublic = 0;
 
-        // DOM Elements
-        const startScreen = document.getElementById('start-screen');
-        const chatInterface = document.getElementById('chat-interface');
-        const mainLayout = document.getElementById('main-layout');
-        const chatLog = document.getElementById('chat-log');
-        const msgInput = document.getElementById('msg-input');
-        const btnAction = document.getElementById('btn-action');
-        const btnSend = document.getElementById('btn-send');
+        // UI References
+        const randomView = document.getElementById('random-chat-view');
+        const publicView = document.getElementById('public-chat-view');
+        const randomBox = document.getElementById('random-chat-box');
+        const publicBox = document.getElementById('public-chat-box');
+        const chatTitle = document.getElementById('chat-title');
+        const statusBar = document.getElementById('status-bar');
         const countVal = document.getElementById('count-val');
+        const mobileCount = document.getElementById('mobile-count');
+        const badgeRandom = document.getElementById('badge-random');
+        const badgePublic = document.getElementById('badge-public');
 
-        // WebRTC
+        const btnStart = document.getElementById('btn-start');
+        const btnNext = document.getElementById('btn-next');
+        const randomInputArea = document.getElementById('random-input-area');
+        const randomInput = document.getElementById('random-msg-input');
+        const publicInput = document.getElementById('public-msg-input');
+
+        // --- WEBRTC VARIABLES ---
         let localStream;
         let peerConnection;
-        const localVideo = document.getElementById('local-video');
-        const remoteVideo = document.getElementById('remote-video');
-        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        const remoteAudio = document.getElementById('remote-audio');
+        const btnCall = document.getElementById('btn-call');
+        const btnHangup = document.getElementById('btn-hangup');
+        const callStatus = document.getElementById('call-status');
+        const incomingModal = document.getElementById('incoming_call_modal');
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' } // Google STUN Server
+            ]
+        };
 
-        // --- Core Functions ---
+        // --- INIT EMOJI ---
+        const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
+        const renderEmojis = (id, context) => {
+            const container = document.getElementById(id);
+            container.innerHTML = emojis.map(e =>
+                `<button class="btn btn-ghost btn-xs text-lg" onclick="insertEmoji('${e}', '${context}')">${e}</button>`
+            ).join('');
+        };
+        renderEmojis('emoji-grid-random', 'random');
+        renderEmojis('emoji-grid-public', 'public');
 
-        function enterMode(selectedMode) {
-            mode = selectedMode;
-            startScreen.style.display = 'none';
-            chatInterface.style.display = 'flex';
-
-            if (mode === 'video') {
-                mainLayout.className = 'video-layout';
-                initCamera();
-            } else {
-                mainLayout.className = 'text-layout';
-            }
-
+        function handleAgree() {
+            document.getElementById('disclaimer_modal').classList.remove('modal-open');
+            document.getElementById('disclaimer_modal').classList.add('hidden');
             initSocket();
         }
+        function handleDisagree() { window.location.href = 'https://google.com'; }
 
-        async function initCamera() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVideo.srcObject = localStream;
-            } catch (e) {
-                alert("Camera access denied or missing.");
-                enterMode('text'); // Fallback
-            }
-        }
-
+        // --- WEBSOCKET CONNECTION ---
         function initSocket() {
-            conn = new WebSocket('wss://chat.1year.site/ws'); // Ganti URL WebSocket Anda
+            // Ubah URL ini jika sudah dihosting di VPS (misal: wss://domain.com/ws)
+            // Untuk local: ws://localhost:8080
+            const socketUrl = 'wss://chat.1year.site/ws';
+            console.log("Connecting to:", socketUrl);
 
-            conn.onopen = () => {
-                console.log("Connected to Server");
-                // Auto start searching immediately like Omegle
-                handleActionBtn();
+            conn = new WebSocket(socketUrl);
+
+            conn.onopen = function (e) {
+                statusBar.innerText = "Connected";
+                statusBar.className = "text-xs font-bold text-success mt-1";
+                // Join Random room by default
+                conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
             };
 
-            conn.onclose = () => {
-                logSystem("Connection lost. Reconnecting...");
+            conn.onclose = function (e) {
+                statusBar.innerText = "Reconnecting...";
+                statusBar.className = "text-xs font-bold text-error mt-1";
                 setTimeout(initSocket, 3000);
+                setRandomUI('disconnected');
+                endCall(true); // Putus call jika WS putus
             };
 
-            conn.onmessage = (e) => {
+            conn.onmessage = function (e) {
                 const data = JSON.parse(e.data);
 
-                if (data.status === 'stats') {
-                    countVal.innerText = data.count;
+                if (data.status === 'identity') {
+                    myNickname = data.nickname;
+                    document.getElementById('my-nickname').innerText = myNickname;
+                    document.getElementById('sidebar-nickname').innerText = myNickname;
                 }
+                else if (data.status === 'stats') {
+                    countVal.innerText = data.count;
+                    mobileCount.innerText = data.count;
+                }
+
+                // RANDOM CHAT EVENTS
                 else if (data.status === 'waiting') {
-                    chatState = 'searching';
-                    updateUIState();
-                    logSystem("Looking for someone you can chat with...");
+                    logSystem(randomBox, data.msg);
+                    setRandomUI('waiting');
                 }
                 else if (data.status === 'connected') {
-                    chatState = 'chatting';
-                    isConnected = true;
-                    updateUIState();
-                    logSystem("You're now chatting with a random stranger. Say hi!");
-
-                    if (mode === 'video') startCall(); // Auto call logic
+                    logSystem(randomBox, data.msg);
+                    setRandomUI('connected');
                 }
                 else if (data.status === 'disconnected') {
-                    chatState = 'idle';
-                    isConnected = false;
-                    endCall();
-                    updateUIState();
-                    logSystem("Stranger has disconnected.");
+                    logSystem(randomBox, data.msg);
+                    setRandomUI('disconnected_partner');
+                    endCall(true); // Putus call jika partner disconnect
                 }
                 else if (data.status === 'message') {
-                    appendMessage("Stranger", data.msg, 'stranger');
-                }
-                else if (data.status === 'call_signal') {
-                    handleSignal(data.signal);
+                    if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
+                    showTyping(false);
+                    logMessage(randomBox, 'stranger', 'Stranger', data.msg);
                 }
                 else if (data.status === 'typing') {
-                    // Optional: Show "Stranger is typing..."
+                    showTyping(true);
+                }
+
+                // PUBLIC CHAT EVENTS
+                else if (data.status === 'public_msg') {
+                    if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
+                    logMessage(publicBox, 'other', data.name, data.msg);
+                }
+
+                // WEBRTC SIGNALING EVENTS (BARU)
+                else if (data.status === 'call_signal') {
+                    handleSignalMessage(data.signal);
                 }
             };
         }
 
-        // --- Action Button Logic (Stop / New) ---
-        function handleActionBtn() {
-            if (chatState === 'idle') {
-                // Logic: Start New
-                chatLog.innerHTML = ''; // Clear chat
-                conn.send(JSON.stringify({ action: 'find_partner' }));
-            } else if (chatState === 'searching') {
-                // Logic: Cancel Search (not implemented in server but UI can show idle)
-                // For simplified Omegle logic, we treat "Stop" as "Next" if not connected
-                // But server handles 'next' by cleaning up and finding new.
-                // Let's make button act as disconnect/new toggle.
-                // Actually server 'next' command works for both waiting and connected states to cycle.
-                // To truly "Stop" (Idle), we need a disconnect action.
+        // --- WEBRTC FUNCTIONS (VOICE CALL) ---
 
-                // For simplicity: Button cycles "New" -> "Stop" (Disconnect) -> "New"
-                // But user wants ease. Omegle button usually is "Stop" -> "Really?" -> "New".
-
-                // Let's implement: Click -> Next
-                conn.send(JSON.stringify({ action: 'next' }));
-            } else if (chatState === 'chatting') {
-                // Logic: Disconnect
-                conn.send(JSON.stringify({ action: 'disconnect' }));
-                // Note: Server needs 'disconnect' action or we use 'next' to immediately skip.
-                // Let's use 'disconnect' logic which I added to Chat.php or reuse 'next'
-                // Reusing 'next' immediately finds a new one. 
-                // To implement true "Stop" we just send 'next' to clear current, then wait.
-
-                // Let's strictly follow Omegle: Button is "Stop" (Disconnects) -> becomes "New"
-                conn.send(JSON.stringify({ action: 'disconnect' }));
-                chatState = 'idle';
-                isConnected = false;
-                endCall();
-                updateUIState();
-                logSystem("You have disconnected.");
-            }
-        }
-
-        function updateUIState() {
-            // Enable/Disable inputs
-            if (chatState === 'chatting') {
-                msgInput.disabled = false;
-                btnSend.disabled = false;
-                msgInput.focus();
-
-                btnAction.innerText = "Stop";
-                btnAction.className = "stop"; // Red color
-            } else if (chatState === 'searching') {
-                msgInput.disabled = true;
-                btnSend.disabled = true;
-
-                btnAction.innerText = "Stop"; // Can cancel search
-                btnAction.className = "stop";
-            } else { // Idle
-                msgInput.disabled = true;
-                btnSend.disabled = true;
-
-                btnAction.innerText = "New Chat";
-                btnAction.className = "new"; // Pink color
-            }
-        }
-
-        // --- Chat Functions ---
-        function sendMessage() {
-            const text = msgInput.value.trim();
-            if (!text || !isConnected) return;
-
-            appendMessage("You", text, 'you');
-            conn.send(JSON.stringify({ action: 'message', content: text }));
-            msgInput.value = '';
-        }
-
-        msgInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        function appendMessage(name, text, type) {
-            const div = document.createElement('div');
-            div.className = 'msg-row';
-            div.innerHTML = `
-                <span class="msg-label ${type}">${name}:</span>
-                <span class="msg-text">${text}</span>
-            `;
-            chatLog.appendChild(div);
-            chatLog.scrollTop = chatLog.scrollHeight;
-        }
-
-        function logSystem(text) {
-            const div = document.createElement('div');
-            div.className = 'sys-msg';
-            div.innerText = text;
-            chatLog.appendChild(div);
-            chatLog.scrollTop = chatLog.scrollHeight;
-        }
-
-        // --- WebRTC Logic ---
         async function startCall() {
-            if (peerConnection) peerConnection.close();
-            peerConnection = new RTCPeerConnection(rtcConfig);
+            btnCall.classList.add('hidden');
+            btnHangup.classList.remove('hidden');
 
-            // Add Tracks
-            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            try {
+                // 1. Minta akses Mikrofon
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                createPeerConnection();
 
-            // Handle Remote Stream
-            peerConnection.ontrack = (e) => {
-                remoteVideo.srcObject = e.streams[0];
-            };
+                // 2. Masukkan stream audio ke koneksi
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
-            // ICE Candidates
-            peerConnection.onicecandidate = (e) => {
-                if (e.candidate) conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'candidate', candidate: e.candidate } }));
-            };
+                // 3. Buat penawaran (Offer)
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
 
-            // Create Offer
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'offer', sdp: offer } }));
+                // 4. Kirim Offer ke Partner via Server
+                conn.send(JSON.stringify({
+                    action: 'call_signal',
+                    data: { type: 'offer', sdp: offer }
+                }));
+
+                logSystem(randomBox, "📞 Calling stranger...");
+            } catch (err) {
+                console.error("Error accessing mic:", err);
+                alert("Microphone access is required.");
+                endCall();
+            }
         }
 
-        async function handleSignal(signal) {
-            if (!peerConnection) {
-                // Initialize if answering
-                peerConnection = new RTCPeerConnection(rtcConfig);
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-                peerConnection.ontrack = (e) => remoteVideo.srcObject = e.streams[0];
-                peerConnection.onicecandidate = (e) => {
-                    if (e.candidate) conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'candidate', candidate: e.candidate } }));
-                };
-            }
+        async function handleSignalMessage(signal) {
+            if (!peerConnection) createPeerConnection();
 
             if (signal.type === 'offer') {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'answer', sdp: answer } }));
+                // Seseorang menelepon kita
+                incomingModal.classList.add('modal-open');
+                window.pendingOffer = signal.sdp; // Simpan dulu sampai user klik Accept
             }
             else if (signal.type === 'answer') {
+                // Partner menerima panggilan kita
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+                callStatus.classList.remove('hidden'); // Tampilkan status 'On Call'
+                logSystem(randomBox, "📞 Call Connected.");
             }
             else if (signal.type === 'candidate') {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                // Pertukaran jalur jaringan (ICE Candidate)
+                if (signal.candidate) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                }
+            }
+            else if (signal.type === 'hangup') {
+                // Partner menutup telepon
+                logSystem(randomBox, "📞 Call ended by stranger.");
+                endCall(true);
             }
         }
 
-        function endCall() {
+        async function acceptCall() {
+            incomingModal.classList.remove('modal-open');
+            btnCall.classList.add('hidden');
+            btnHangup.classList.remove('hidden');
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+                // Tambahkan track audio kita agar partner bisa mendengar
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(window.pendingOffer));
+
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                // Kirim Jawaban (Answer) ke Penelepon
+                conn.send(JSON.stringify({
+                    action: 'call_signal',
+                    data: { type: 'answer', sdp: answer }
+                }));
+
+                callStatus.classList.remove('hidden');
+                logSystem(randomBox, "📞 Call Connected.");
+            } catch (e) {
+                console.error(e);
+                endCall();
+            }
+        }
+
+        function rejectCall() {
+            incomingModal.classList.remove('modal-open');
+            conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+        }
+
+        function createPeerConnection() {
+            if (peerConnection) return;
+
+            peerConnection = new RTCPeerConnection(rtcConfig);
+
+            // Saat menemukan kandidat jaringan (STUN), kirim ke partner
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    conn.send(JSON.stringify({
+                        action: 'call_signal',
+                        data: { type: 'candidate', candidate: event.candidate }
+                    }));
+                }
+            };
+
+            // Saat stream audio partner masuk, putar di elemen <audio>
+            peerConnection.ontrack = (event) => {
+                remoteAudio.srcObject = event.streams[0];
+            };
+        }
+
+        function endCall(isRemote = false) {
+            // Jika kita yang mematikan, kirim sinyal hangup
+            if (!isRemote && conn && conn.readyState === WebSocket.OPEN) {
+                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+            }
+
+            // Bersihkan resource WebRTC
             if (peerConnection) {
                 peerConnection.close();
                 peerConnection = null;
             }
-            remoteVideo.srcObject = null;
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            remoteAudio.srcObject = null;
+            btnCall.classList.remove('hidden');
+            btnHangup.classList.add('hidden');
+            callStatus.classList.add('hidden');
         }
 
+        // --- HELPER UI ---
+
+        function updateBadges() {
+            if (unreadRandom > 0) { badgeRandom.innerText = unreadRandom; badgeRandom.classList.remove('hidden'); }
+            else badgeRandom.classList.add('hidden');
+
+            if (unreadPublic > 0) { badgePublic.innerText = unreadPublic; badgePublic.classList.remove('hidden'); }
+            else badgePublic.classList.add('hidden');
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('my-drawer-2').checked = false; // Close mobile drawer
+
+            document.getElementById('nav-random').classList.remove('active');
+            document.getElementById('nav-public').classList.remove('active');
+            document.getElementById(`nav-${mode}`).classList.add('active');
+
+            if (mode === 'random') {
+                randomView.classList.remove('hidden');
+                publicView.classList.add('hidden');
+                chatTitle.innerText = "Random Chat";
+                unreadRandom = 0; updateBadges();
+
+                if (!btnNext.classList.contains('hidden')) statusBar.innerText = "Chatting";
+                else statusBar.innerText = "Idle";
+            } else {
+                randomView.classList.add('hidden');
+                publicView.classList.remove('hidden');
+                chatTitle.innerText = "Public Lounge";
+                statusBar.innerText = "Broadcasting";
+                unreadPublic = 0; updateBadges();
+                publicBox.scrollTop = publicBox.scrollHeight;
+            }
+
+            // Note: Kita tidak kirim 'join_room' lagi di sini agar koneksi random tidak putus
+        }
+
+        // --- CHAT ACTIONS ---
+        function startRandomChat() {
+            if (!conn || conn.readyState !== WebSocket.OPEN) return;
+            conn.send(JSON.stringify({ action: 'find_partner' }));
+            btnStart.classList.add('hidden');
+        }
+
+        function nextPartner() {
+            randomBox.innerHTML = '';
+            showTyping(false);
+            endCall(); // Matikan telepon jika ganti partner
+            conn.send(JSON.stringify({ action: 'next' }));
+        }
+
+        function sendMessage(context) {
+            const input = context === 'random' ? randomInput : publicInput;
+            const text = input.value.trim();
+            if (text === "") return;
+
+            if (context === 'random') {
+                logMessage(randomBox, 'you', 'You', text);
+                conn.send(JSON.stringify({ action: 'message', content: text, context: 'random' }));
+            } else {
+                logMessage(publicBox, 'you', 'You', text);
+                conn.send(JSON.stringify({ action: 'message', content: text, context: 'public' }));
+            }
+
+            input.value = '';
+            input.focus();
+        }
+
+        function insertEmoji(emoji, context) {
+            const input = context === 'random' ? randomInput : publicInput;
+            input.value += emoji;
+            input.focus();
+        }
+
+        function handleInput(e, context) {
+            if (e.key === 'Enter') sendMessage(context);
+        }
+
+        function logMessage(container, type, name, msg) {
+            const isMe = type === 'you';
+            const align = isMe ? 'chat-end' : 'chat-start';
+            const bubbleColor = isMe ? 'chat-bubble-primary' : 'chat-bubble-secondary';
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const html = `
+            <div class="chat ${align}">
+                <div class="chat-header opacity-50 text-xs mb-1">
+                    ${name} <time class="text-[10px] opacity-70">${time}</time>
+                </div>
+                <div class="chat-bubble ${bubbleColor}">${msg}</div>
+            </div>`;
+            container.innerHTML += html;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function logSystem(container, msg) {
+            container.innerHTML += `<div class="divider text-xs opacity-50 my-4">${msg}</div>`;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function setRandomUI(state) {
+            btnNext.classList.add('hidden');
+            randomInputArea.classList.add('hidden');
+            btnStart.classList.add('hidden');
+            randomInputArea.classList.remove('flex');
+
+            if (state === 'waiting') {
+                statusBar.innerText = "Looking for someone...";
+            } else if (state === 'connected') {
+                btnNext.classList.remove('hidden');
+                randomInputArea.classList.remove('hidden');
+                randomInputArea.classList.add('flex');
+                if (currentMode === 'random') statusBar.innerText = "Connected";
+            } else if (state === 'disconnected_partner') {
+                btnNext.classList.remove('hidden');
+                if (currentMode === 'random') statusBar.innerText = "Stranger disconnected";
+                showTyping(false);
+            }
+        }
+
+        // Typing
+        let typingTimer;
+        let lastTypingTime = 0;
+        function sendTypingSignal() {
+            const now = new Date().getTime();
+            if (now - lastTypingTime > 2000 && conn.readyState === WebSocket.OPEN) {
+                conn.send(JSON.stringify({ action: 'typing' }));
+                lastTypingTime = now;
+            }
+        }
+        function showTyping(show) {
+            const ind = document.getElementById('typing-indicator');
+            if (show) {
+                ind.classList.remove('invisible');
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(() => ind.classList.add('invisible'), 3000);
+            } else {
+                ind.classList.add('invisible');
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.querySelector('html');
+            const current = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', current === 'night' ? 'winter' : 'night');
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === "Escape" && currentMode === 'random' && !randomInputArea.classList.contains('hidden')) {
+                nextPartner();
+            }
+        });
     </script>
+
 </body>
 
 </html>
