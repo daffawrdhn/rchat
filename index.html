@@ -132,7 +132,6 @@
 
 <body class="text-base-content h-[100dvh] flex flex-col overflow-hidden">
 
-    <!-- Video Container -->
     <div id="video-container">
         <div class="vid-wrapper">
             <video id="remote-video" autoplay playsinline></video>
@@ -145,7 +144,6 @@
         </div>
     </div>
 
-    <!-- Incoming Call Overlay -->
     <div id="incoming_call_overlay"
         class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center hidden">
         <div class="avatar placeholder mb-6">
@@ -173,12 +171,26 @@
         </div>
     </div>
 
+    <dialog id="img_modal" class="modal backdrop-blur-sm">
+        <div
+            class="modal-box p-0 max-w-5xl bg-transparent shadow-none border-none overflow-hidden flex justify-center items-center">
+            <form method="dialog">
+                <button
+                    class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 z-50 bg-black/50 text-white hover:bg-black/80">✕</button>
+            </form>
+            <img id="img_modal_src" src="" class="max-h-[85vh] max-w-full rounded-lg shadow-2xl object-contain"
+                alt="Preview">
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
     <input type="file" id="img-upload" hidden accept="image/*" onchange="handleImageUpload(this)">
 
     <div class="drawer lg:drawer-open h-full">
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col h-[100dvh]">
-            <!-- Header Mobile -->
             <div class="navbar bg-base-100/80 backdrop-blur-md border-b border-base-content/5 lg:hidden min-h-[60px]">
                 <div class="flex-none">
                     <label for="my-drawer-2" class="btn btn-square btn-ghost">
@@ -203,7 +215,8 @@
                         <div>
                             <h2 id="chat-title" class="text-2xl font-black tracking-tight text-white/90 drop-shadow-md">
                                 Random Chat</h2>
-                            <div class="flex items-center gap-2 mt-1">
+                            <div id="status-wrapper"
+                                class="flex items-center gap-2 mt-1 transition-opacity duration-300">
                                 <span id="status-dot" class="w-2 h-2 rounded-full bg-warning"></span>
                                 <span id="status-bar" class="text-xs font-medium opacity-70">Initializing...</span>
                             </div>
@@ -211,7 +224,6 @@
                     </div>
                 </div>
 
-                <!-- Random View -->
                 <div id="random-chat-view" class="flex flex-col h-full pt-20">
                     <div id="random-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 space-y-4 pb-4">
                         <div class="flex flex-col items-center justify-center h-full opacity-30 gap-2">
@@ -292,7 +304,6 @@
                     </div>
                 </div>
 
-                <!-- Public View -->
                 <div id="public-chat-view" class="flex flex-col h-full pt-20 hidden">
                     <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 space-y-4 pb-4">
                         <div class="divider opacity-50 text-xs">Public Lounge Started</div>
@@ -333,7 +344,6 @@
             </div>
         </div>
 
-        <!-- Sidebar -->
         <div class="drawer-side z-50">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
             <ul
@@ -412,8 +422,12 @@
         const randomBox = document.getElementById('random-chat-box');
         const publicBox = document.getElementById('public-chat-box');
         const chatTitle = document.getElementById('chat-title');
+
+        // Status Wrapper
+        const statusWrapper = document.getElementById('status-wrapper');
         const statusDot = document.getElementById('status-dot');
         const statusBar = document.getElementById('status-bar');
+
         const countVal = document.getElementById('count-val');
         const mobileCount = document.getElementById('mobile-count');
 
@@ -447,6 +461,15 @@
             conn.onopen = function () {
                 updateStatus("Connected", "success");
                 conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
+
+                // --- FIX: Force Reset UI on Connect ---
+                // This ensures the "Find Stranger" button appears after a reconnection
+                if (currentMode === 'random') {
+                    btnStart.classList.remove('hidden');
+                    btnNext.classList.add('hidden');
+                    randomInputArea.classList.add('hidden');
+                }
+                // --------------------------------------
             };
 
             conn.onclose = function () {
@@ -468,7 +491,6 @@
                     mobileCount.innerText = data.count;
                 }
                 else if (data.status === 'system') {
-                    // Anti-spam warning
                     logSystem(currentMode === 'random' ? randomBox : publicBox, `⚠️ ${data.msg}`);
                 }
                 else if (data.status === 'waiting') {
@@ -522,11 +544,13 @@
                 randomView.classList.remove('hidden');
                 publicView.classList.add('hidden');
                 chatTitle.innerText = "Random Chat";
+                statusWrapper.classList.remove('invisible');
                 unreadRandom = 0; updateBadges();
             } else {
                 randomView.classList.add('hidden');
                 publicView.classList.remove('hidden');
                 chatTitle.innerText = "Public Lounge";
+                statusWrapper.classList.add('invisible');
                 unreadPublic = 0; updateBadges();
                 setTimeout(() => publicBox.scrollTop = publicBox.scrollHeight, 100);
             }
@@ -550,6 +574,14 @@
             }
         }
 
+        // Image Modal
+        function openImageModal(src) {
+            const modal = document.getElementById('img_modal');
+            const modalImg = document.getElementById('img_modal_src');
+            modalImg.src = src;
+            modal.showModal();
+        }
+
         function logMessage(container, type, name, msg, msgType = 'text') {
             const isMe = type === 'you';
             const align = isMe ? 'chat-end' : 'chat-start';
@@ -558,7 +590,7 @@
 
             let contentHtml = '';
             if (msgType === 'image') {
-                contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-white/10 cursor-pointer" onclick="window.open(this.src)">`;
+                contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-white/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
             } else {
                 contentHtml = msg;
             }
