@@ -1,183 +1,339 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="night">
+<html lang="en" data-theme="black">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XOXO - Chat & Voice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XOXO - Stranger Chat</title>
 
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cinzel:wght@400;700&display=swap"
+        rel="stylesheet">
+
     <style>
-        #random-chat-box::-webkit-scrollbar,
-        #public-chat-box::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #random-chat-box::-webkit-scrollbar-thumb,
-        #public-chat-box::-webkit-scrollbar-thumb {
-            background-color: rgba(156, 163, 175, 0.5);
-            border-radius: 20px;
-        }
-
         body {
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            /* Zinc-950 */
+            height: 100dvh;
             overflow: hidden;
+            color: #e4e4e7;
         }
 
-        /* Animasi Ringing saat ada panggilan masuk/keluar */
-        .pulse-ring {
-            animation: pulse-ring 2s infinite;
+        h1,
+        h2,
+        h3,
+        .brand-font {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.05em;
         }
 
-        @keyframes pulse-ring {
+        /* Minimalist Scrollbar */
+        .chat-scroll::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background-color: #3f3f46;
+            border-radius: 10px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .msg-anim {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes subtlePulse {
             0% {
-                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+                box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4);
             }
 
             70% {
-                box-shadow: 0 0 0 10px rgba(56, 189, 248, 0);
+                box-shadow: 0 0 0 6px rgba(225, 29, 72, 0);
             }
 
             100% {
-                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+                box-shadow: 0 0 0 0 rgba(225, 29, 72, 0);
             }
+        }
+
+        .pulse-soft {
+            animation: subtlePulse 2s infinite;
+        }
+
+        .input-minimal:focus {
+            outline: none;
+            border-color: #e11d48;
+            box-shadow: 0 0 0 1px #e11d48;
+        }
+
+        /* Video Styles */
+        video {
+            transform: scaleX(-1);
+            /* Mirror effect */
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 
-<body class="bg-base-300 h-screen overflow-hidden">
+<body class="flex flex-col h-full antialiased selection:bg-rose-900 selection:text-white">
 
-    <audio id="remote-audio" autoplay></audio>
+    <dialog id="disclaimer_modal" class="modal modal-open bg-black/80">
+        <div class="modal-box bg-zinc-900 border border-zinc-800 rounded-sm shadow-2xl p-8 max-w-sm text-center">
+            <h3 class="text-3xl text-white mb-2 brand-font">XOXO</h3>
+            <div class="h-px w-12 bg-rose-600 mx-auto mb-6"></div>
 
-    <dialog id="disclaimer_modal" class="modal modal-open">
-        <div class="modal-box w-11/12 max-w-lg">
-            <h3 class="font-bold text-2xl text-warning">XOXO Disclaimer</h3>
-            <div class="py-4 space-y-2">
-                <p>Welcome to XOXO Chat V2 (Voice Edition):</p>
-                <ul class="list-disc list-inside space-y-1">
-                    <li>You must be **18 years or older**.</li>
-                    <li>We do not store your messages.</li>
-                    <li>Voice calls are **Peer-to-Peer** (Direct Connection).</li>
-                    <li>Be respectful.</li>
-                </ul>
-            </div>
-            <div class="modal-action">
-                <button class="btn btn-error" onclick="handleDisagree()">Exit</button>
-                <button class="btn btn-success" onclick="handleAgree()">Agree & Connect</button>
-            </div>
-        </div>
-        <div class="modal-backdrop backdrop-blur-sm bg-black/30"></div>
-    </dialog>
+            <p class="text-zinc-400 text-sm mb-8 leading-relaxed">
+                By entering, you confirm you are <strong>18+</strong>.<br>
+                Video chat enabled.<br>
+                Interactions are unmoderated.
+            </p>
 
-    <dialog id="incoming_call_modal" class="modal">
-        <div class="modal-box text-center">
-            <h3 class="font-bold text-lg text-primary">📞 Incoming Call!</h3>
-            <p class="py-4">Stranger wants to talk with you...</p>
-            <div class="modal-action justify-center">
-                <button class="btn btn-error" onclick="rejectCall()">Decline</button>
-                <button class="btn btn-success pulse-ring" onclick="acceptCall()">Accept</button>
+            <div class="flex flex-col gap-3">
+                <button
+                    class="btn bg-rose-700 hover:bg-rose-600 text-white border-none rounded-sm w-full uppercase tracking-widest text-xs h-12"
+                    onclick="handleAgree()">Enter</button>
+                <button class="btn btn-ghost text-zinc-600 hover:text-zinc-400 btn-sm uppercase text-xs"
+                    onclick="handleDisagree()">Leave</button>
             </div>
         </div>
     </dialog>
 
-    <div class="drawer lg:drawer-open">
+    <div id="incoming_call_overlay"
+        class="fixed inset-0 z-[60] bg-zinc-950 flex flex-col items-center justify-center hidden">
+        <div
+            class="w-32 h-32 rounded-full border border-rose-900/50 flex items-center justify-center mb-8 pulse-soft bg-zinc-900">
+            <span class="text-5xl">📹</span>
+        </div>
+        <h2 class="text-2xl text-white mb-2 brand-font tracking-widest">VIDEO CALL</h2>
+        <p class="text-rose-500 text-sm mb-16 uppercase tracking-wide">Stranger is calling...</p>
+
+        <div class="flex gap-12 items-center">
+            <button onclick="rejectCall()"
+                class="btn btn-circle btn-outline border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-white btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <button onclick="acceptCall()"
+                class="btn btn-circle bg-rose-700 hover:bg-rose-600 border-none text-white btn-lg shadow-lg shadow-rose-900/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="active_video_overlay" class="fixed inset-0 z-50 bg-black hidden">
+        <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+
+        <div
+            class="absolute top-4 right-4 w-32 h-48 bg-zinc-900 rounded-lg overflow-hidden shadow-2xl border border-zinc-800">
+            <video id="local-video" autoplay playsinline muted></video>
+        </div>
+
+        <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-6">
+            <button onclick="toggleMute()" id="btn-mute"
+                class="btn btn-circle bg-zinc-800/80 border-none text-white hover:bg-zinc-700 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            </button>
+            <button onclick="endCall()"
+                class="btn btn-circle bg-rose-600 border-none text-white hover:bg-rose-700 scale-110 shadow-lg shadow-rose-900/50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <button onclick="toggleVideo()" id="btn-video-off"
+                class="btn btn-circle bg-zinc-800/80 border-none text-white hover:bg-zinc-700 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="drawer lg:drawer-open h-full">
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 
-        <div class="drawer-content flex flex-col items-center justify-center p-0 sm:p-4 h-screen">
+        <div class="drawer-content flex flex-col h-[100dvh] bg-zinc-950">
 
-            <div class="w-full lg:hidden flex justify-between items-center mb-0 p-2 bg-base-100 shadow">
-                <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h7" />
-                    </svg>
-                </label>
-                <span class="font-bold">XOXO Voice</span>
-                <div class="badge badge-success badge-sm"><span id="mobile-count">0</span></div>
+            <div class="navbar bg-zinc-950 border-b border-zinc-900 lg:hidden min-h-[60px] z-20 px-4">
+                <div class="flex-none">
+                    <label for="my-drawer-2" class="btn btn-square btn-ghost btn-sm text-zinc-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            class="inline-block w-6 h-6 stroke-current">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </label>
+                </div>
+                <div class="flex-1 justify-center">
+                    <a class="text-lg brand-font text-white tracking-widest">XOXO</a>
+                </div>
+                <div class="flex-none w-10"></div>
             </div>
 
-            <div id="app"
-                class="card w-full max-w-2xl bg-base-100 shadow-2xl flex-grow lg:flex-grow-0 flex flex-col overflow-hidden lg:h-full lg:max-h-[85vh]">
+            <div class="flex-grow flex flex-col relative overflow-hidden">
 
-                <div class="card-body p-4 pb-2 border-b border-base-300 flex-none">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h2 id="chat-title" class="card-title text-xl font-bold">Random Chat</h2>
-                            <div class="text-xs opacity-60 mt-1" id="status-bar">Waiting...</div>
-                            <div class="text-[10px] text-primary">As: <span id="my-nickname"
-                                    class="font-bold">...</span></div>
-                        </div>
+                <div
+                    class="absolute top-0 w-full z-10 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-900/50 p-3 px-6">
+                    <div class="flex justify-between items-center max-w-4xl mx-auto">
                         <div class="flex items-center gap-3">
-                            <div id="call-status" class="badge badge-info hidden animate-pulse">On Call 🔊</div>
-                            <div class="badge badge-success gap-1 font-mono hidden lg:flex"><span
-                                    id="count-val">0</span> Online</div>
+                            <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                            <div>
+                                <h2 id="chat-title" class="text-sm font-semibold text-zinc-200 tracking-wide">Blind Date
+                                </h2>
+                                <p id="status-bar" class="text-[10px] text-zinc-500 uppercase tracking-wider">
+                                    Connecting...</p>
+                            </div>
+                        </div>
+
+                        <div id="call-status"
+                            class="hidden bg-rose-950/30 text-rose-500 border border-rose-900/50 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide flex items-center gap-2">
+                            <span class="animate-pulse">●</span> In Call
                         </div>
                     </div>
                 </div>
 
-                <div id="random-chat-view" class="flex flex-col flex-grow overflow-hidden h-full">
-                    <div id="random-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50"></div>
-
-                    <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
-                        <div id="typing-indicator"
-                            class="h-6 text-xs italic opacity-50 ml-2 flex items-center gap-1 invisible">
-                            <span class="loading loading-dots loading-xs"></span> Stranger is typing...
+                <div id="random-chat-view" class="flex flex-col h-full pt-[60px]">
+                    <div id="random-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 md:p-6 space-y-4">
+                        <div class="h-full flex flex-col items-center justify-center text-zinc-700 gap-4">
+                            <span class="text-4xl opacity-20">❖</span>
+                            <span class="text-xs uppercase tracking-widest opacity-50">Start a new connection</span>
                         </div>
+                    </div>
 
-                        <div id="controls" class="w-full">
-                            <button id="btn-start" onclick="startRandomChat()"
-                                class="btn btn-primary w-full shadow-lg">Find Stranger</button>
-                            <button id="btn-next" onclick="nextPartner()" class="btn btn-error w-full hidden">Next
-                                (Esc)</button>
-                        </div>
+                    <div id="typing-indicator"
+                        class="h-6 px-6 text-[10px] uppercase tracking-wide text-rose-600 font-medium opacity-0 transition-opacity">
+                        Typing...</div>
 
-                        <div id="random-input-area" class="join w-full hidden relative">
-                            <div class="dropdown dropdown-top join-item">
-                                <div tabindex="0" role="button"
-                                    class="btn btn-square btn-outline border-base-300 bg-base-100">😊</div>
-                                <div tabindex="0"
-                                    class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100 mb-2">
-                                    <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
-                                </div>
+                    <div class="p-4 bg-zinc-950 border-t border-zinc-900">
+                        <div class="max-w-4xl mx-auto space-y-3">
+
+                            <div id="controls" class="w-full">
+                                <button id="btn-start" onclick="startRandomChat()"
+                                    class="btn w-full bg-zinc-100 hover:bg-white text-black border-none rounded-sm uppercase tracking-widest font-bold text-xs h-12 shadow-lg">Find
+                                    Match</button>
+                                <button id="btn-next" onclick="nextPartner()"
+                                    class="btn btn-outline border-zinc-800 text-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-zinc-700 w-full rounded-sm uppercase tracking-widest text-xs h-12 hidden">Next
+                                    Partner</button>
                             </div>
 
-                            <input type="text" id="random-msg-input"
-                                class="input input-bordered join-item w-full focus:outline-none"
-                                placeholder="Say something..." onkeypress="handleInput(event, 'random')"
-                                onkeyup="sendTypingSignal()">
+                            <div id="random-input-area" class="flex gap-3 hidden items-center transition-all">
+                                <button id="btn-call" onclick="startCall()"
+                                    class="btn btn-circle btn-ghost btn-sm text-zinc-500 hover:text-rose-500 hover:bg-zinc-900"
+                                    title="Video Call">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
 
-                            <button id="btn-call" onclick="startCall()" class="btn btn-info join-item"
-                                title="Voice Call">📞</button>
-                            <button id="btn-hangup" onclick="endCall()" class="btn btn-error join-item hidden"
-                                title="Hangup">🔴</button>
+                                <div class="relative flex-grow">
+                                    <input type="text" id="random-msg-input"
+                                        class="input input-minimal w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder-zinc-600 text-sm rounded-sm focus:outline-none h-11 pl-4 pr-10"
+                                        placeholder="Type here..." onkeypress="handleInput(event, 'random')"
+                                        onkeyup="sendTypingSignal()" autocomplete="off">
 
-                            <button onclick="sendMessage('random')" class="btn btn-primary join-item">Send</button>
+                                    <div
+                                        class="dropdown dropdown-top dropdown-end absolute right-2 top-1/2 -translate-y-1/2">
+                                        <button tabindex="0"
+                                            class="text-zinc-500 hover:text-rose-500 transition-colors p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </button>
+                                        <div tabindex="0"
+                                            class="dropdown-content z-[1] p-2 shadow-xl bg-zinc-900 border border-zinc-800 mb-2 rounded-sm w-64">
+                                            <div class="grid grid-cols-6 gap-1" id="emoji-grid-random"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="sendMessage('random')"
+                                    class="btn btn-circle btn-sm bg-rose-700 hover:bg-rose-600 border-none text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform -rotate-45 ml-1"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="public-chat-view" class="flex flex-col flex-grow overflow-hidden h-full hidden">
-                    <div id="public-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50">
-                        <div class="divider text-xs opacity-50">Public Lounge</div>
+                <div id="public-chat-view" class="flex flex-col h-full pt-[60px] hidden">
+                    <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 md:p-6 space-y-4">
+                        <div class="text-center">
+                            <span
+                                class="text-[10px] uppercase tracking-widest text-zinc-700 border-b border-zinc-800 pb-2">Public
+                                Lounge</span>
+                        </div>
                     </div>
 
-                    <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
-                        <div class="join w-full mt-4 relative">
-                            <div class="dropdown dropdown-top join-item">
-                                <div tabindex="0" role="button"
-                                    class="btn btn-square btn-outline border-base-300 bg-base-100">😊</div>
-                                <div tabindex="0"
-                                    class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100 mb-2">
-                                    <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
+                    <div class="p-4 bg-zinc-950 border-t border-zinc-900">
+                        <div class="max-w-4xl mx-auto flex gap-3 items-center">
+                            <div class="relative flex-grow">
+                                <input type="text" id="public-msg-input"
+                                    class="input input-minimal w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder-zinc-600 text-sm rounded-sm focus:outline-none h-11 pl-4 pr-10"
+                                    placeholder="Broadcast message..." onkeypress="handleInput(event, 'public')"
+                                    autocomplete="off">
+
+                                <div
+                                    class="dropdown dropdown-top dropdown-end absolute right-2 top-1/2 -translate-y-1/2">
+                                    <button tabindex="0"
+                                        class="text-zinc-500 hover:text-purple-500 transition-colors p-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </button>
+                                    <div tabindex="0"
+                                        class="dropdown-content z-[1] p-2 shadow-xl bg-zinc-900 border border-zinc-800 mb-2 rounded-sm w-64">
+                                        <div class="grid grid-cols-6 gap-1" id="emoji-grid-public"></div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <input type="text" id="public-msg-input" class="input input-bordered join-item w-full"
-                                placeholder="Message everyone..." onkeypress="handleInput(event, 'public')">
-                            <button onclick="sendMessage('public')" class="btn btn-secondary join-item">Send</button>
+                            <button onclick="sendMessage('public')"
+                                class="btn btn-circle btn-sm bg-purple-700 hover:bg-purple-600 border-none text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform -rotate-45 ml-1"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -185,46 +341,66 @@
             </div>
         </div>
 
-        <div class="drawer-side">
+        <div class="drawer-side z-50">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-            <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content flex flex-col justify-between">
-                <div>
-                    <div class="text-2xl font-bold mb-6 px-4 text-primary">XOXO <span
-                            class="text-xs text-content opacity-50">Voice</span></div>
+            <ul class="menu p-0 w-80 min-h-full bg-zinc-900 border-r border-zinc-800 text-zinc-300 flex flex-col">
+                <div class="p-8 border-b border-zinc-800">
+                    <h1 class="text-4xl brand-font text-white mb-2">XOXO</h1>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] text-zinc-500 uppercase tracking-widest">STRANGER CHAT</span>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                            <span class="text-[10px] font-mono text-zinc-400"><span id="mobile-count">0</span>
+                                Online</span>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="flex-grow p-4 space-y-2">
                     <li>
-                        <a onclick="switchMode('random')" id="nav-random" class="active justify-between">
-                            Random Chat
-                            <span id="badge-random" class="badge badge-error badge-sm hidden">0</span>
+                        <a onclick="switchMode('random')" id="nav-random"
+                            class="active group rounded-sm hover:bg-zinc-800 active:bg-zinc-800 focus:bg-zinc-800 border-l-2 border-transparent hover:border-rose-600">
+                            <div class="flex items-center gap-4 py-2">
+                                <span
+                                    class="text-lg opacity-50 group-hover:opacity-100 group-hover:text-rose-500 transition-all">❖</span>
+                                <div>
+                                    <span class="block text-sm font-medium text-white">Blind Date</span>
+                                    <span class="block text-[10px] text-zinc-500 uppercase tracking-wide">1-on-1
+                                        Video/Text</span>
+                                </div>
+                                <span id="badge-random"
+                                    class="ml-auto w-2 h-2 rounded-full bg-rose-600 scale-0 transition-transform"></span>
+                            </div>
                         </a>
                     </li>
                     <li>
-                        <a onclick="switchMode('public')" id="nav-public" class="justify-between">
-                            Public Lounge
-                            <span id="badge-public" class="badge badge-error badge-sm hidden">0</span>
+                        <a onclick="switchMode('public')" id="nav-public"
+                            class="group rounded-sm hover:bg-zinc-800 active:bg-zinc-800 focus:bg-zinc-800 border-l-2 border-transparent hover:border-purple-600">
+                            <div class="flex items-center gap-4 py-2">
+                                <span
+                                    class="text-lg opacity-50 group-hover:opacity-100 group-hover:text-purple-500 transition-all">◈</span>
+                                <div>
+                                    <span class="block text-sm font-medium text-white">Public Lounge</span>
+                                    <span class="block text-[10px] text-zinc-500 uppercase tracking-wide">Global
+                                        Chat</span>
+                                </div>
+                                <span id="badge-public"
+                                    class="ml-auto w-2 h-2 rounded-full bg-purple-600 scale-0 transition-transform"></span>
+                            </div>
                         </a>
                     </li>
                 </div>
 
-                <div>
-                    <div class="flex justify-center items-center p-2 gap-2 text-sm">
-                        <span>Theme:</span>
-                        <label class="swap swap-rotate text-base-content">
-                            <input type="checkbox" onclick="toggleTheme()" />
-                            <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24">
-                                <path
-                                    d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
-                            </svg>
-                            <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24">
-                                <path
-                                    d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
-                            </svg>
-                        </label>
-                    </div>
-                    <div class="text-xs opacity-50 text-center">
-                        Playing as <br> <strong class="text-accent" id="sidebar-nickname">...</strong>
+                <div class="p-6 border-t border-zinc-800">
+                    <div class="flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity">
+                        <div
+                            class="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-xs text-white font-bold border border-zinc-700">
+                            YOU
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase text-zinc-500 tracking-wider">Alias</p>
+                            <p class="text-sm font-medium text-zinc-200" id="sidebar-nickname">Guest</p>
+                        </div>
                     </div>
                 </div>
             </ul>
@@ -232,24 +408,22 @@
     </div>
 
     <script>
-        // --- GLOBAL VARIABLES ---
+        // --- CONFIG & STATE ---
         let conn;
         let currentMode = 'random';
         let myNickname = '';
         let unreadRandom = 0;
         let unreadPublic = 0;
 
-        // UI References
+        // UI Refs
         const randomView = document.getElementById('random-chat-view');
         const publicView = document.getElementById('public-chat-view');
         const randomBox = document.getElementById('random-chat-box');
         const publicBox = document.getElementById('public-chat-box');
         const chatTitle = document.getElementById('chat-title');
+        const statusDot = document.getElementById('status-dot');
         const statusBar = document.getElementById('status-bar');
-        const countVal = document.getElementById('count-val');
         const mobileCount = document.getElementById('mobile-count');
-        const badgeRandom = document.getElementById('badge-random');
-        const badgePublic = document.getElementById('badge-public');
 
         const btnStart = document.getElementById('btn-start');
         const btnNext = document.getElementById('btn-next');
@@ -257,26 +431,22 @@
         const randomInput = document.getElementById('random-msg-input');
         const publicInput = document.getElementById('public-msg-input');
 
-        // --- WEBRTC VARIABLES ---
+        // WebRTC Config
         let localStream;
         let peerConnection;
-        const remoteAudio = document.getElementById('remote-audio');
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
         const btnCall = document.getElementById('btn-call');
-        const btnHangup = document.getElementById('btn-hangup');
         const callStatus = document.getElementById('call-status');
-        const incomingModal = document.getElementById('incoming_call_modal');
-        const rtcConfig = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' } // Google STUN Server
-            ]
-        };
+        const incomingOverlay = document.getElementById('incoming_call_overlay');
+        const activeVideoOverlay = document.getElementById('active_video_overlay');
+        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        // --- INIT EMOJI ---
-        const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
-        const renderEmojis = (id, context) => {
-            const container = document.getElementById(id);
-            container.innerHTML = emojis.map(e =>
-                `<button class="btn btn-ghost btn-xs text-lg" onclick="insertEmoji('${e}', '${context}')">${e}</button>`
+        // Flirty Emojis
+        const emojis = ['🫦', '🔥', '🥂', '👀', '💋', '😈', '🍷', '✨', '🥵', '💅', '🌹', '💔'];
+        const renderEmojis = (id, ctx) => {
+            document.getElementById(id).innerHTML = emojis.map(e =>
+                `<button class="btn btn-ghost btn-xs text-lg hover:text-white" onclick="insertEmoji('${e}', '${ctx}')">${e}</button>`
             ).join('');
         };
         renderEmojis('emoji-grid-random', 'random');
@@ -284,33 +454,26 @@
 
         function handleAgree() {
             document.getElementById('disclaimer_modal').classList.remove('modal-open');
-            document.getElementById('disclaimer_modal').classList.add('hidden');
             initSocket();
         }
         function handleDisagree() { window.location.href = 'https://google.com'; }
 
-        // --- WEBSOCKET CONNECTION ---
+        // --- WEBSOCKET ---
         function initSocket() {
-            // Ubah URL ini jika sudah dihosting di VPS (misal: wss://domain.com/ws)
-            // Untuk local: ws://localhost:8080
+            // CHANGE THIS TO YOUR WS URL
             const socketUrl = 'wss://chat.1year.site/ws';
-            console.log("Connecting to:", socketUrl);
 
             conn = new WebSocket(socketUrl);
 
-            conn.onopen = function (e) {
-                statusBar.innerText = "Connected";
-                statusBar.className = "text-xs font-bold text-success mt-1";
-                // Join Random room by default
+            conn.onopen = function () {
                 conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
             };
 
-            conn.onclose = function (e) {
-                statusBar.innerText = "Reconnecting...";
-                statusBar.className = "text-xs font-bold text-error mt-1";
+            conn.onclose = function () {
+                updateStatus("Disconnected", "error");
                 setTimeout(initSocket, 3000);
                 setRandomUI('disconnected');
-                endCall(true); // Putus call jika WS putus
+                endCall(true);
             };
 
             conn.onmessage = function (e) {
@@ -318,286 +481,77 @@
 
                 if (data.status === 'identity') {
                     myNickname = data.nickname;
-                    document.getElementById('my-nickname').innerText = myNickname;
                     document.getElementById('sidebar-nickname').innerText = myNickname;
                 }
                 else if (data.status === 'stats') {
-                    countVal.innerText = data.count;
                     mobileCount.innerText = data.count;
                 }
-
-                // RANDOM CHAT EVENTS
+                // Random
                 else if (data.status === 'waiting') {
-                    logSystem(randomBox, data.msg);
                     setRandomUI('waiting');
                 }
                 else if (data.status === 'connected') {
-                    logSystem(randomBox, data.msg);
                     setRandomUI('connected');
                 }
                 else if (data.status === 'disconnected') {
-                    logSystem(randomBox, data.msg);
                     setRandomUI('disconnected_partner');
-                    endCall(true); // Putus call jika partner disconnect
+                    logSystem(randomBox, "Connection ended.");
+                    endCall(true);
                 }
                 else if (data.status === 'message') {
                     if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
                     showTyping(false);
                     logMessage(randomBox, 'stranger', 'Stranger', data.msg);
                 }
-                else if (data.status === 'typing') {
-                    showTyping(true);
-                }
+                else if (data.status === 'typing') showTyping(true);
 
-                // PUBLIC CHAT EVENTS
+                // Public
                 else if (data.status === 'public_msg') {
                     if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
                     logMessage(publicBox, 'other', data.name, data.msg);
                 }
-
-                // WEBRTC SIGNALING EVENTS (BARU)
-                else if (data.status === 'call_signal') {
-                    handleSignalMessage(data.signal);
-                }
+                // Call
+                else if (data.status === 'call_signal') handleSignalMessage(data.signal);
             };
         }
 
-        // --- WEBRTC FUNCTIONS (VOICE CALL) ---
-
-        async function startCall() {
-            btnCall.classList.add('hidden');
-            btnHangup.classList.remove('hidden');
-
-            try {
-                // 1. Minta akses Mikrofon
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                createPeerConnection();
-
-                // 2. Masukkan stream audio ke koneksi
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                // 3. Buat penawaran (Offer)
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-
-                // 4. Kirim Offer ke Partner via Server
-                conn.send(JSON.stringify({
-                    action: 'call_signal',
-                    data: { type: 'offer', sdp: offer }
-                }));
-
-                logSystem(randomBox, "📞 Calling stranger...");
-            } catch (err) {
-                console.error("Error accessing mic:", err);
-                alert("Microphone access is required.");
-                endCall();
-            }
+        // --- UI HELPER ---
+        function updateStatus(text, type) {
+            statusBar.innerText = text;
+            statusDot.className = `w-1.5 h-1.5 rounded-full ${type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-yellow-500')}`;
         }
-
-        async function handleSignalMessage(signal) {
-            if (!peerConnection) createPeerConnection();
-
-            if (signal.type === 'offer') {
-                // Seseorang menelepon kita
-                incomingModal.classList.add('modal-open');
-                window.pendingOffer = signal.sdp; // Simpan dulu sampai user klik Accept
-            }
-            else if (signal.type === 'answer') {
-                // Partner menerima panggilan kita
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                callStatus.classList.remove('hidden'); // Tampilkan status 'On Call'
-                logSystem(randomBox, "📞 Call Connected.");
-            }
-            else if (signal.type === 'candidate') {
-                // Pertukaran jalur jaringan (ICE Candidate)
-                if (signal.candidate) {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-                }
-            }
-            else if (signal.type === 'hangup') {
-                // Partner menutup telepon
-                logSystem(randomBox, "📞 Call ended by stranger.");
-                endCall(true);
-            }
-        }
-
-        async function acceptCall() {
-            incomingModal.classList.remove('modal-open');
-            btnCall.classList.add('hidden');
-            btnHangup.classList.remove('hidden');
-
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-
-                // Tambahkan track audio kita agar partner bisa mendengar
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(window.pendingOffer));
-
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-
-                // Kirim Jawaban (Answer) ke Penelepon
-                conn.send(JSON.stringify({
-                    action: 'call_signal',
-                    data: { type: 'answer', sdp: answer }
-                }));
-
-                callStatus.classList.remove('hidden');
-                logSystem(randomBox, "📞 Call Connected.");
-            } catch (e) {
-                console.error(e);
-                endCall();
-            }
-        }
-
-        function rejectCall() {
-            incomingModal.classList.remove('modal-open');
-            conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
-        }
-
-        function createPeerConnection() {
-            if (peerConnection) return;
-
-            peerConnection = new RTCPeerConnection(rtcConfig);
-
-            // Saat menemukan kandidat jaringan (STUN), kirim ke partner
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    conn.send(JSON.stringify({
-                        action: 'call_signal',
-                        data: { type: 'candidate', candidate: event.candidate }
-                    }));
-                }
-            };
-
-            // Saat stream audio partner masuk, putar di elemen <audio>
-            peerConnection.ontrack = (event) => {
-                remoteAudio.srcObject = event.streams[0];
-            };
-        }
-
-        function endCall(isRemote = false) {
-            // Jika kita yang mematikan, kirim sinyal hangup
-            if (!isRemote && conn && conn.readyState === WebSocket.OPEN) {
-                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
-            }
-
-            // Bersihkan resource WebRTC
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-
-            remoteAudio.srcObject = null;
-            btnCall.classList.remove('hidden');
-            btnHangup.classList.add('hidden');
-            callStatus.classList.add('hidden');
-        }
-
-        // --- HELPER UI ---
 
         function updateBadges() {
-            if (unreadRandom > 0) { badgeRandom.innerText = unreadRandom; badgeRandom.classList.remove('hidden'); }
-            else badgeRandom.classList.add('hidden');
-
-            if (unreadPublic > 0) { badgePublic.innerText = unreadPublic; badgePublic.classList.remove('hidden'); }
-            else badgePublic.classList.add('hidden');
+            const bRandom = document.getElementById('badge-random');
+            const bPublic = document.getElementById('badge-public');
+            bRandom.classList.toggle('scale-0', unreadRandom === 0);
+            bPublic.classList.toggle('scale-0', unreadPublic === 0);
         }
 
         function switchMode(mode) {
             currentMode = mode;
-            document.getElementById('my-drawer-2').checked = false; // Close mobile drawer
+            document.getElementById('my-drawer-2').checked = false;
 
-            document.getElementById('nav-random').classList.remove('active');
-            document.getElementById('nav-public').classList.remove('active');
-            document.getElementById(`nav-${mode}`).classList.add('active');
+            document.getElementById('nav-random').classList.remove('bg-zinc-800', 'border-rose-600');
+            document.getElementById('nav-public').classList.remove('bg-zinc-800', 'border-purple-600');
 
             if (mode === 'random') {
+                document.getElementById('nav-random').classList.add('bg-zinc-800', 'border-rose-600');
                 randomView.classList.remove('hidden');
                 publicView.classList.add('hidden');
-                chatTitle.innerText = "Random Chat";
+                chatTitle.innerText = "Blind Date";
+                statusDot.className = "w-1.5 h-1.5 rounded-full bg-rose-600";
                 unreadRandom = 0; updateBadges();
-
-                if (!btnNext.classList.contains('hidden')) statusBar.innerText = "Chatting";
-                else statusBar.innerText = "Idle";
             } else {
+                document.getElementById('nav-public').classList.add('bg-zinc-800', 'border-purple-600');
                 randomView.classList.add('hidden');
                 publicView.classList.remove('hidden');
                 chatTitle.innerText = "Public Lounge";
-                statusBar.innerText = "Broadcasting";
+                statusDot.className = "w-1.5 h-1.5 rounded-full bg-purple-600";
+                statusBar.innerText = "Live Broadcast";
                 unreadPublic = 0; updateBadges();
-                publicBox.scrollTop = publicBox.scrollHeight;
+                setTimeout(() => publicBox.scrollTop = publicBox.scrollHeight, 100);
             }
-
-            // Note: Kita tidak kirim 'join_room' lagi di sini agar koneksi random tidak putus
-        }
-
-        // --- CHAT ACTIONS ---
-        function startRandomChat() {
-            if (!conn || conn.readyState !== WebSocket.OPEN) return;
-            conn.send(JSON.stringify({ action: 'find_partner' }));
-            btnStart.classList.add('hidden');
-        }
-
-        function nextPartner() {
-            randomBox.innerHTML = '';
-            showTyping(false);
-            endCall(); // Matikan telepon jika ganti partner
-            conn.send(JSON.stringify({ action: 'next' }));
-        }
-
-        function sendMessage(context) {
-            const input = context === 'random' ? randomInput : publicInput;
-            const text = input.value.trim();
-            if (text === "") return;
-
-            if (context === 'random') {
-                logMessage(randomBox, 'you', 'You', text);
-                conn.send(JSON.stringify({ action: 'message', content: text, context: 'random' }));
-            } else {
-                logMessage(publicBox, 'you', 'You', text);
-                conn.send(JSON.stringify({ action: 'message', content: text, context: 'public' }));
-            }
-
-            input.value = '';
-            input.focus();
-        }
-
-        function insertEmoji(emoji, context) {
-            const input = context === 'random' ? randomInput : publicInput;
-            input.value += emoji;
-            input.focus();
-        }
-
-        function handleInput(e, context) {
-            if (e.key === 'Enter') sendMessage(context);
-        }
-
-        function logMessage(container, type, name, msg) {
-            const isMe = type === 'you';
-            const align = isMe ? 'chat-end' : 'chat-start';
-            const bubbleColor = isMe ? 'chat-bubble-primary' : 'chat-bubble-secondary';
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            const html = `
-            <div class="chat ${align}">
-                <div class="chat-header opacity-50 text-xs mb-1">
-                    ${name} <time class="text-[10px] opacity-70">${time}</time>
-                </div>
-                <div class="chat-bubble ${bubbleColor}">${msg}</div>
-            </div>`;
-            container.innerHTML += html;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function logSystem(container, msg) {
-            container.innerHTML += `<div class="divider text-xs opacity-50 my-4">${msg}</div>`;
-            container.scrollTop = container.scrollHeight;
         }
 
         function setRandomUI(state) {
@@ -607,24 +561,84 @@
             randomInputArea.classList.remove('flex');
 
             if (state === 'waiting') {
-                statusBar.innerText = "Looking for someone...";
+                updateStatus("Searching...", "warning");
             } else if (state === 'connected') {
                 btnNext.classList.remove('hidden');
                 randomInputArea.classList.remove('hidden');
                 randomInputArea.classList.add('flex');
-                if (currentMode === 'random') statusBar.innerText = "Connected";
+                if (currentMode === 'random') updateStatus("Online", "success");
             } else if (state === 'disconnected_partner') {
                 btnNext.classList.remove('hidden');
-                if (currentMode === 'random') statusBar.innerText = "Stranger disconnected";
+                if (currentMode === 'random') updateStatus("Offline", "error");
                 showTyping(false);
             }
         }
 
-        // Typing
+        function logMessage(container, type, name, msg) {
+            const isMe = type === 'you';
+            const align = isMe ? 'items-end' : 'items-start';
+            const bubbleColor = isMe ? 'bg-rose-700 text-white' : 'bg-zinc-800 text-zinc-300';
+            const rounded = isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm';
+
+            const html = `
+            <div class="flex flex-col ${align} msg-anim mb-1">
+                <div class="${bubbleColor} ${rounded} px-4 py-2 text-sm max-w-[85%] shadow-sm">
+                    ${msg}
+                </div>
+                <span class="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">${name}</span>
+            </div>`;
+
+            container.innerHTML += html;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function logSystem(container, msg) {
+            container.innerHTML += `
+                <div class="flex items-center justify-center my-4 msg-anim">
+                    <span class="text-[10px] text-zinc-500 border-b border-zinc-800 pb-1 uppercase tracking-widest">${msg}</span>
+                </div>`;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // --- ACTIONS ---
+        function startRandomChat() {
+            if (conn.readyState !== WebSocket.OPEN) return;
+            conn.send(JSON.stringify({ action: 'find_partner' }));
+            btnStart.classList.add('hidden');
+        }
+
+        function nextPartner() {
+            randomBox.innerHTML = '';
+            showTyping(false);
+            endCall();
+            conn.send(JSON.stringify({ action: 'next' }));
+        }
+
+        function sendMessage(context) {
+            const input = context === 'random' ? randomInput : publicInput;
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (context === 'random') {
+                logMessage(randomBox, 'you', 'You', text);
+                conn.send(JSON.stringify({ action: 'message', content: text, context: 'random' }));
+            } else {
+                logMessage(publicBox, 'you', 'You', text);
+                conn.send(JSON.stringify({ action: 'message', content: text, context: 'public' }));
+            }
+            input.value = ''; input.focus();
+        }
+
+        function handleInput(e, ctx) { if (e.key === 'Enter') sendMessage(ctx); }
+        function insertEmoji(e, ctx) {
+            const el = ctx === 'random' ? randomInput : publicInput;
+            el.value += e; el.focus();
+        }
+
         let typingTimer;
         let lastTypingTime = 0;
         function sendTypingSignal() {
-            const now = new Date().getTime();
+            const now = Date.now();
             if (now - lastTypingTime > 2000 && conn.readyState === WebSocket.OPEN) {
                 conn.send(JSON.stringify({ action: 'typing' }));
                 lastTypingTime = now;
@@ -632,28 +646,134 @@
         }
         function showTyping(show) {
             const ind = document.getElementById('typing-indicator');
+            ind.style.opacity = show ? '1' : '0';
             if (show) {
-                ind.classList.remove('invisible');
                 clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => ind.classList.add('invisible'), 3000);
-            } else {
-                ind.classList.add('invisible');
+                typingTimer = setTimeout(() => ind.style.opacity = '0', 3000);
             }
+        }
+
+        // --- VIDEO CALL LOGIC ---
+        async function startCall() {
+            btnCall.classList.add('hidden');
+            try {
+                // Request Video & Audio
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                localVideo.srcObject = localStream;
+
+                createPeerConnection();
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'offer', sdp: offer } }));
+                logSystem(randomBox, "Video call requested...");
+            } catch (err) {
+                console.error(err);
+                alert("Camera access required for video calls.");
+                endCall();
+            }
+        }
+
+        async function handleSignalMessage(signal) {
+            if (!peerConnection) createPeerConnection();
+
+            if (signal.type === 'offer') {
+                incomingOverlay.classList.remove('hidden');
+                window.pendingOffer = signal.sdp;
+            }
+            else if (signal.type === 'answer') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+                showVideoUI();
+            }
+            else if (signal.type === 'candidate' && signal.candidate) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+            }
+            else if (signal.type === 'hangup') {
+                endCall(true);
+            }
+        }
+
+        async function acceptCall() {
+            incomingOverlay.classList.add('hidden');
+            btnCall.classList.add('hidden');
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                localVideo.srcObject = localStream;
+
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(window.pendingOffer));
+
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'answer', sdp: answer } }));
+                showVideoUI();
+            } catch (e) { endCall(); }
+        }
+
+        function rejectCall() {
+            incomingOverlay.classList.add('hidden');
+            conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+        }
+
+        function createPeerConnection() {
+            if (peerConnection) return;
+            peerConnection = new RTCPeerConnection(rtcConfig);
+
+            peerConnection.onicecandidate = (e) => {
+                if (e.candidate) conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'candidate', candidate: e.candidate } }));
+            };
+
+            peerConnection.ontrack = (e) => {
+                remoteVideo.srcObject = e.streams[0];
+            };
+        }
+
+        function showVideoUI() {
+            activeVideoOverlay.classList.remove('hidden');
+            callStatus.classList.remove('hidden');
+        }
+
+        function endCall(isRemote = false) {
+            if (!isRemote && conn && conn.readyState === WebSocket.OPEN) {
+                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+            }
+
+            if (peerConnection) { peerConnection.close(); peerConnection = null; }
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+
+            remoteVideo.srcObject = null;
+            localVideo.srcObject = null;
+
+            btnCall.classList.remove('hidden');
+            callStatus.classList.add('hidden');
+            incomingOverlay.classList.add('hidden');
+            activeVideoOverlay.classList.add('hidden');
+        }
+
+        // Toggles
+        function toggleMute() {
+            const track = localStream.getAudioTracks()[0];
+            track.enabled = !track.enabled;
+            document.getElementById('btn-mute').classList.toggle('bg-red-600');
+        }
+
+        function toggleVideo() {
+            const track = localStream.getVideoTracks()[0];
+            track.enabled = !track.enabled;
+            document.getElementById('btn-video-off').classList.toggle('bg-red-600');
         }
 
         function toggleTheme() {
-            const html = document.querySelector('html');
-            const current = html.getAttribute('data-theme');
-            html.setAttribute('data-theme', current === 'night' ? 'winter' : 'night');
+            const html = document.documentElement;
+            html.setAttribute('data-theme', html.getAttribute('data-theme') === 'night' ? 'cupcake' : 'night');
         }
-
-        document.addEventListener('keydown', function (e) {
-            if (e.key === "Escape" && currentMode === 'random' && !randomInputArea.classList.contains('hidden')) {
-                nextPartner();
-            }
-        });
     </script>
-
 </body>
 
 </html>
