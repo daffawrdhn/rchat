@@ -7,8 +7,8 @@ use Ratchet\ConnectionInterface;
 class Chat implements MessageComponentInterface
 {
     protected $clients;
-    protected $waitingClient; // Antrean user random chat
-    protected $pairs;         // Pasangan user random chat
+    protected $waitingClient;
+    protected $pairs;
 
     public function __construct()
     {
@@ -19,13 +19,13 @@ class Chat implements MessageComponentInterface
 
     public function onOpen(ConnectionInterface $conn)
     {
-        // Generate Nickname Unik
+        // Initialize Anti-Spam Timer
+        $conn->lastMsgTime = 0;
+
         $conn->nickname = $this->generateNickname();
-
         $this->clients->attach($conn);
-        echo "New connection! ({$conn->resourceId}) assigned name: {$conn->nickname}\n";
+        echo "New connection! ({$conn->resourceId})\n";
 
-        // Kirim identitas ke user
         $conn->send(json_encode([
             'status' => 'identity',
             'nickname' => $conn->nickname
@@ -36,19 +36,22 @@ class Chat implements MessageComponentInterface
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
+        // --- ANTI SPAM CHECK (0.5s Delay) ---
+        $currentTime = microtime(true);
+        if (($currentTime - $from->lastMsgTime) < 0.5) {
+            $from->send(json_encode(['status' => 'system', 'msg' => '⚠️ You are typing too fast!']));
+            return;
+        }
+        $from->lastMsgTime = $currentTime;
+        // ------------------------------------
+
         $data = json_decode($msg, true);
         if (!isset($data['action']))
             return;
 
         switch ($data['action']) {
             case 'join_room':
-                // User pindah tab (Random <-> Public). 
-                // Kita TIDAK memutus koneksi random chat agar voice call tetap jalan.
-                // Hanya kirim konfirmasi ke client.
-                $from->send(json_encode([
-                    'status' => 'room_joined',
-                    'room' => $data['room']
-                ]));
+                $from->send(json_encode(['status' => 'room_joined', 'room' => $data['room']]));
                 break;
 
             case 'find_partner':
@@ -56,9 +59,7 @@ class Chat implements MessageComponentInterface
                 break;
 
             case 'message':
-                // Cek konteks pesan: apakah untuk Random (Private) atau Public
                 $context = $data['context'] ?? 'public';
-
                 if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
                     $this->handlePrivateMessage($from, $data['content'] ?? '');
                 } else {
@@ -66,10 +67,8 @@ class Chat implements MessageComponentInterface
                 }
                 break;
 
-            // --- LOGIKA VOICE CALL (WEBRTC) ---
             case 'call_signal':
-                // Server hanya bertugas meneruskan data signal (Offer/Answer/ICE)
-                // dari pengirim ke pasangannya.
+                // Forward WebRTC signals (Video/Audio)
                 if (isset($this->pairs[$from->resourceId])) {
                     $partner = $this->pairs[$from->resourceId];
                     $partner->send(json_encode([
@@ -78,7 +77,6 @@ class Chat implements MessageComponentInterface
                     ]));
                 }
                 break;
-            // ----------------------------------
 
             case 'typing':
                 $this->handleTyping($from);
@@ -100,8 +98,6 @@ class Chat implements MessageComponentInterface
         ]);
 
         foreach ($this->clients as $client) {
-            // Broadcast ke SEMUA user (kecuali pengirim)
-            // Agar user di tab 'Random' tetap dapat notifikasi badge public
             if ($client !== $from) {
                 $client->send($payload);
             }
@@ -110,23 +106,27 @@ class Chat implements MessageComponentInterface
 
     private function handleFindPartner($conn)
     {
-        // Jika sudah punya pasangan atau sedang menunggu, abaikan
         if (isset($this->pairs[$conn->resourceId]) || $this->waitingClient === $conn) {
             return;
         }
 
         if ($this->waitingClient !== null && $this->waitingClient !== $conn) {
-            // Match found!
             $partner = $this->waitingClient;
+
+            // Validate if partner is still connected
+            if (!$this->clients->contains($partner)) {
+                $this->waitingClient = null;
+                $this->handleFindPartner($conn); // Retry
+                return;
+            }
 
             $this->pairs[$conn->resourceId] = $partner;
             $this->pairs[$partner->resourceId] = $conn;
             $this->waitingClient = null;
 
-            $conn->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
-            $partner->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
+            $conn->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found!']));
+            $partner->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found!']));
         } else {
-            // Masuk antrean
             $this->waitingClient = $conn;
             $conn->send(json_encode(['status' => 'waiting', 'msg' => 'Looking for a stranger...']));
         }
@@ -156,7 +156,6 @@ class Chat implements MessageComponentInterface
 
     private function cleanupRandomChat($conn)
     {
-        // Putuskan hubungan dengan pasangan saat ini
         if (isset($this->pairs[$conn->resourceId])) {
             $partner = $this->pairs[$conn->resourceId];
             unset($this->pairs[$conn->resourceId]);
@@ -181,13 +180,12 @@ class Chat implements MessageComponentInterface
     {
         $this->cleanupRandomChat($conn);
         $this->clients->detach($conn);
-        echo "Connection {$conn->resourceId} has disconnected\n";
+        echo "Connection {$conn->resourceId} disconnected\n";
         $this->broadcastUserCount();
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
-        echo "An error has occurred: {$e->getMessage()}\n";
         $conn->close();
     }
 

@@ -20,5 +20,4 @@ $server = IoServer::factory(
 );
 
 echo "Server started on port 8080...\n";
-echo "Support Features: Random Chat, Public Chat, Voice Call (WebRTC)\n";
 $server->run();
