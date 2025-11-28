@@ -9,7 +9,7 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use MyApp\Chat;
 
-// Menjalankan server di port 8080
+// Running on port 8080
 $server = IoServer::factory(
     new HttpServer(
         new WsServer(
@@ -20,4 +20,10 @@ $server = IoServer::factory(
 );
 
 echo "Server started on port 8080...\n";
+echo "Features Active:\n";
+echo "- Anti-Spam (0.5s limit)\n";
+echo "- Video Call Support (Signaling)\n";
+echo "- Compressed Image Support (Base64)\n";
+echo "- Live User Counter\n";
+
 $server->run();

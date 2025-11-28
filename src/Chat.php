@@ -19,12 +19,13 @@ class Chat implements MessageComponentInterface
 
     public function onOpen(ConnectionInterface $conn)
     {
-        // Initialize Anti-Spam Timer
-        $conn->lastMsgTime = 0;
-
+        // Initialize Anti-Spam & User Data
         $conn->nickname = $this->generateNickname();
+        $conn->lastMsgTime = 0;
+        $conn->spamWarnings = 0;
+
         $this->clients->attach($conn);
-        echo "New connection! ({$conn->resourceId})\n";
+        echo "New connection! ({$conn->resourceId}) - {$conn->nickname}\n";
 
         $conn->send(json_encode([
             'status' => 'identity',
@@ -36,18 +37,28 @@ class Chat implements MessageComponentInterface
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
-        // --- ANTI SPAM CHECK (0.5s Delay) ---
-        $currentTime = microtime(true);
-        if (($currentTime - $from->lastMsgTime) < 0.5) {
-            $from->send(json_encode(['status' => 'system', 'msg' => '⚠️ You are typing too fast!']));
-            return;
-        }
-        $from->lastMsgTime = $currentTime;
-        // ------------------------------------
-
         $data = json_decode($msg, true);
         if (!isset($data['action']))
             return;
+
+        // --- ANTI SPAM CHECK ---
+        if ($data['action'] === 'message') {
+            $currentTime = microtime(true);
+            $timeDiff = $currentTime - $from->lastMsgTime;
+
+            // Limit: 1 message every 0.5 seconds
+            if ($timeDiff < 0.5) {
+                $from->spamWarnings++;
+                if ($from->spamWarnings > 3) {
+                    $from->send(json_encode(['status' => 'system', 'msg' => 'You are typing too fast! Slow down.']));
+                }
+                return;
+            }
+
+            $from->lastMsgTime = $currentTime;
+            $from->spamWarnings = 0; // Reset warnings on successful message
+        }
+        // -----------------------
 
         switch ($data['action']) {
             case 'join_room':
@@ -60,15 +71,17 @@ class Chat implements MessageComponentInterface
 
             case 'message':
                 $context = $data['context'] ?? 'public';
+                $type = $data['type'] ?? 'text'; // 'text' or 'image'
+                $content = $data['content'] ?? '';
+
                 if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
-                    $this->handlePrivateMessage($from, $data['content'] ?? '');
+                    $this->handlePrivateMessage($from, $content, $type);
                 } else {
-                    $this->handlePublicMessage($from, $data['content'] ?? '');
+                    $this->handlePublicMessage($from, $content, $type);
                 }
                 break;
 
             case 'call_signal':
-                // Forward WebRTC signals (Video/Audio)
                 if (isset($this->pairs[$from->resourceId])) {
                     $partner = $this->pairs[$from->resourceId];
                     $partner->send(json_encode([
@@ -88,12 +101,18 @@ class Chat implements MessageComponentInterface
         }
     }
 
-    private function handlePublicMessage($from, $msg)
+    private function handlePublicMessage($from, $msg, $type)
     {
+        // Basic validation for image size server-side (optional, but good practice)
+        if ($type === 'image' && strlen($msg) > 150000) { // Limit ~150kb raw string
+            return;
+        }
+
         $payload = json_encode([
             'status' => 'public_msg',
             'name' => $from->nickname,
             'msg' => $msg,
+            'type' => $type,
             'is_me' => false
         ]);
 
@@ -101,6 +120,18 @@ class Chat implements MessageComponentInterface
             if ($client !== $from) {
                 $client->send($payload);
             }
+        }
+    }
+
+    private function handlePrivateMessage($from, $msg, $type)
+    {
+        if (isset($this->pairs[$from->resourceId])) {
+            $partner = $this->pairs[$from->resourceId];
+            $partner->send(json_encode([
+                'status' => 'message',
+                'msg' => $msg,
+                'type' => $type
+            ]));
         }
     }
 
@@ -113,30 +144,15 @@ class Chat implements MessageComponentInterface
         if ($this->waitingClient !== null && $this->waitingClient !== $conn) {
             $partner = $this->waitingClient;
 
-            // Validate if partner is still connected
-            if (!$this->clients->contains($partner)) {
-                $this->waitingClient = null;
-                $this->handleFindPartner($conn); // Retry
-                return;
-            }
-
             $this->pairs[$conn->resourceId] = $partner;
             $this->pairs[$partner->resourceId] = $conn;
             $this->waitingClient = null;
 
-            $conn->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found!']));
-            $partner->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found!']));
+            $conn->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
+            $partner->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
         } else {
             $this->waitingClient = $conn;
             $conn->send(json_encode(['status' => 'waiting', 'msg' => 'Looking for a stranger...']));
-        }
-    }
-
-    private function handlePrivateMessage($from, $msg)
-    {
-        if (isset($this->pairs[$from->resourceId])) {
-            $partner = $this->pairs[$from->resourceId];
-            $partner->send(json_encode(['status' => 'message', 'msg' => $msg]));
         }
     }
 
@@ -180,12 +196,13 @@ class Chat implements MessageComponentInterface
     {
         $this->cleanupRandomChat($conn);
         $this->clients->detach($conn);
-        echo "Connection {$conn->resourceId} disconnected\n";
+        echo "Connection {$conn->resourceId} has disconnected\n";
         $this->broadcastUserCount();
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
+        echo "An error has occurred: {$e->getMessage()}\n";
         $conn->close();
     }
 
