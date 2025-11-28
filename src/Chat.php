@@ -4,28 +4,28 @@ namespace MyApp;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 
-class Chat implements MessageComponentInterface {
+class Chat implements MessageComponentInterface
+{
     protected $clients;
     protected $waitingClient; // For Random Chat
     protected $pairs;         // For Random Chat
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->clients = new \SplObjectStorage;
         $this->waitingClient = null;
         $this->pairs = [];
     }
 
-    public function onOpen(ConnectionInterface $conn) {
-        // Initialize default properties
-        $conn->chatMode = 'menu'; // 'menu', 'random', or 'public'
-        
-        // --- CHANGE: Generate Nickname on Server ---
+    public function onOpen(ConnectionInterface $conn)
+    {
+        // Generate Nickname
         $conn->nickname = $this->generateNickname();
-        
+
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId}) assigned name: {$conn->nickname}\n";
-        
-        // Send the generated identity back to the user
+
+        // Send identity
         $conn->send(json_encode([
             'status' => 'identity',
             'nickname' => $conn->nickname
@@ -34,28 +34,36 @@ class Chat implements MessageComponentInterface {
         $this->broadcastUserCount();
     }
 
-    public function onMessage(ConnectionInterface $from, $msg) {
+    public function onMessage(ConnectionInterface $from, $msg)
+    {
         $data = json_decode($msg, true);
-        if (!isset($data['action'])) return;
+        if (!isset($data['action']))
+            return;
 
         switch ($data['action']) {
-            // 'set_nickname' case removed (handled in onOpen now)
-
             case 'join_room':
-                $this->handleJoinRoom($from, $data['room']);
+                // Kita HAPUS cleanupRandomChat disini agar koneksi tidak putus saat pindah tab
+                // Kita hanya mengirim konfirmasi visual
+                $from->send(json_encode([
+                    'status' => 'room_joined',
+                    'room' => $data['room']
+                ]));
                 break;
 
             case 'find_partner':
-                // Ensure they are in random mode
-                $from->chatMode = 'random';
                 $this->handleFindPartner($from);
                 break;
 
             case 'message':
-                if ($from->chatMode === 'random') {
+                // Cek apakah pesan ini untuk random chat (punya pasangan) atau public
+                // Kita bedakan berdasarkan parameter 'target' atau logika fallback
+                if (isset($this->pairs[$from->resourceId]) && ($data['context'] ?? '') === 'random') {
                     $this->handlePrivateMessage($from, $data['content'] ?? '');
-                } elseif ($from->chatMode === 'public') {
-                    $this->handlePublicMessage($from, $data['content'] ?? '');
+                } else {
+                    // Default ke public jika konteksnya public
+                    if (($data['context'] ?? '') === 'public') {
+                        $this->handlePublicMessage($from, $data['content'] ?? '');
+                    }
                 }
                 break;
 
@@ -69,23 +77,8 @@ class Chat implements MessageComponentInterface {
         }
     }
 
-    private function handleJoinRoom($conn, $room) {
-        // If leaving Random chat, clean up previous state
-        if ($conn->chatMode === 'random') {
-            $this->cleanupRandomChat($conn);
-        }
-
-        $conn->chatMode = $room;
-
-        // Confirm join
-        $conn->send(json_encode([
-            'status' => 'room_joined', 
-            'room' => $room,
-            'msg' => $room === 'public' ? "Joined Public Chat" : "Joined Random Chat"
-        ]));
-    }
-
-    private function handlePublicMessage($from, $msg) {
+    private function handlePublicMessage($from, $msg)
+    {
         $payload = json_encode([
             'status' => 'public_msg',
             'name' => $from->nickname,
@@ -94,23 +87,23 @@ class Chat implements MessageComponentInterface {
         ]);
 
         foreach ($this->clients as $client) {
-            // Only send to people in public room
-            if (isset($client->chatMode) && $client->chatMode === 'public') {
-                if ($client !== $from) {
-                    $client->send($payload);
-                }
+            // MODIFIKASI: Kirim ke SEMUA client (kecuali pengirim)
+            // Agar client yang sedang di tab 'Random' tetap dapat notifikasi
+            if ($client !== $from) {
+                $client->send($payload);
             }
         }
     }
 
-    private function handleFindPartner($conn) {
+    private function handleFindPartner($conn)
+    {
         if (isset($this->pairs[$conn->resourceId]) || $this->waitingClient === $conn) {
             return;
         }
 
         if ($this->waitingClient !== null && $this->waitingClient !== $conn) {
             $partner = $this->waitingClient;
-            
+
             $this->pairs[$conn->resourceId] = $partner;
             $this->pairs[$partner->resourceId] = $conn;
             $this->waitingClient = null;
@@ -123,33 +116,37 @@ class Chat implements MessageComponentInterface {
         }
     }
 
-    private function handlePrivateMessage($from, $msg) {
+    private function handlePrivateMessage($from, $msg)
+    {
         if (isset($this->pairs[$from->resourceId])) {
             $partner = $this->pairs[$from->resourceId];
             $partner->send(json_encode(['status' => 'message', 'msg' => $msg]));
         }
     }
 
-    private function handleTyping($from) {
+    private function handleTyping($from)
+    {
         if (isset($this->pairs[$from->resourceId])) {
             $partner = $this->pairs[$from->resourceId];
             $partner->send(json_encode(['status' => 'typing']));
         }
     }
 
-    private function handleNext($conn) {
+    private function handleNext($conn)
+    {
         $this->cleanupRandomChat($conn);
         // Immediately look for new
         $this->handleFindPartner($conn);
     }
 
-    private function cleanupRandomChat($conn) {
+    private function cleanupRandomChat($conn)
+    {
         // Disconnect current partner if exists
         if (isset($this->pairs[$conn->resourceId])) {
             $partner = $this->pairs[$conn->resourceId];
             unset($this->pairs[$conn->resourceId]);
             unset($this->pairs[$partner->resourceId]);
-            
+
             $partner->send(json_encode(['status' => 'disconnected', 'msg' => 'Stranger disconnected.']));
         }
 
@@ -159,31 +156,34 @@ class Chat implements MessageComponentInterface {
         }
     }
 
-    // --- NEW: Nickname Generator ---
-    private function generateNickname() {
+    private function generateNickname()
+    {
         $adjs = ['Cool', 'Super', 'Lazy', 'Hyper', 'Happy', 'Sad', 'Wild', 'Neon', 'Dark', 'Fast'];
         $nouns = ['Panda', 'Tiger', 'Fox', 'Wolf', 'Cat', 'Dog', 'Bear', 'Eagle', 'Shark', 'Hawk'];
-        
+
         $randAdj = $adjs[array_rand($adjs)];
         $randNoun = $nouns[array_rand($nouns)];
         $num = rand(100, 999);
-        
+
         return $randAdj . $randNoun . $num;
     }
 
-    public function onClose(ConnectionInterface $conn) {
+    public function onClose(ConnectionInterface $conn)
+    {
         $this->cleanupRandomChat($conn);
         $this->clients->detach($conn);
         echo "Connection {$conn->resourceId} has disconnected\n";
         $this->broadcastUserCount();
     }
 
-    public function onError(ConnectionInterface $conn, \Exception $e) {
+    public function onError(ConnectionInterface $conn, \Exception $e)
+    {
         echo "An error has occurred: {$e->getMessage()}\n";
         $conn->close();
     }
 
-    private function broadcastUserCount() {
+    private function broadcastUserCount()
+    {
         $count = count($this->clients);
         $data = json_encode(['status' => 'stats', 'count' => $count]);
         foreach ($this->clients as $client) {

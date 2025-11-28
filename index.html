@@ -10,7 +10,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Custom scrollbar styles */
         #random-chat-box::-webkit-scrollbar,
         #public-chat-box::-webkit-scrollbar {
             width: 6px;
@@ -22,7 +21,6 @@
             border-radius: 20px;
         }
 
-        /* Ensure the body takes full height and doesn't scroll */
         body {
             height: 100vh;
             overflow: hidden;
@@ -32,7 +30,6 @@
 
 <body class="bg-base-300 h-screen overflow-hidden">
 
-    <!-- Disclaimer Modal -->
     <dialog id="disclaimer_modal" class="modal modal-open">
         <div class="modal-box w-11/12 max-w-lg">
             <h3 class="font-bold text-2xl text-warning">XOXO Disclaimer & Rules</h3>
@@ -57,21 +54,8 @@
     <div class="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 
-        <!-- 
-          Page Content
-          MODIFICATION: 
-          - Changed `h-full` to `h-screen` to ensure it uses the full viewport height.
-          - Removed `justify-center` to allow content to flow from the top.
-          - Changed `p-2` to `p-0` for mobile edge-to-edge, keeping `sm:p-4` for larger screens.
-        -->
         <div class="drawer-content flex flex-col items-center justify-center p-0 sm:p-4 h-screen">
 
-            <!-- 
-              Mobile Header
-              MODIFICATION: 
-              - Removed `mb-2` and `rounded-box` for mobile (added `mb-0`, `rounded-none`).
-              - Kept `sm:rounded-box` and `sm:mb-2` for slightly larger screens.
-            -->
             <div
                 class="w-full lg:hidden flex justify-between items-center mb-0 p-2 bg-base-100 rounded-none sm:rounded-box sm:mb-2 shadow">
                 <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
@@ -85,18 +69,9 @@
                 <div class="badge badge-success badge-sm"><span id="mobile-count">0</span></div>
             </div>
 
-            <!-- 
-              Main Chat App Card
-              MODIFICATION: 
-              - Replaced `h-full max-h-[85vh]` with `flex-grow overflow-hidden`.
-              - Added `lg:h-full lg:max-h-[85vh]` to restore desktop-like constraints only on large screens.
-              - This makes the card fill the remaining vertical space on mobile (`flex-grow`).
-              - `overflow-hidden` ensures the card itself doesn't scroll, but its children will.
-            -->
             <div id="app"
                 class="card w-full max-w-2xl bg-base-100 shadow-2xl flex-grow lg:flex-grow-0 flex flex-col overflow-hidden lg:h-full lg:max-h-[85vh]">
 
-                <!-- Card Header -->
                 <div class="card-body p-4 pb-2 border-b border-base-300 flex-none">
                     <div class="flex justify-between items-center">
                         <div>
@@ -110,25 +85,13 @@
                             <div class="badge badge-success gap-1 font-mono hidden lg:flex">
                                 <span id="count-val">0</span> Online
                             </div>
-                            <!-- 
-                              MODIFICATION: 
-                              - Removed the dark mode toggle from here. It is now in the sidebar.
-                            -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Random Chat View -->
                 <div id="random-chat-view" class="flex flex-col flex-grow overflow-hidden h-full">
-                    <!-- 
-                      Chat Box
-                      MODIFICATION: No changes needed. 
-                      `flex-grow overflow-y-auto` is correct. The parent layout changes
-                      will make this scroll properly.
-                    -->
                     <div id="random-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50"></div>
 
-                    <!-- Input Area -->
                     <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
                         <div id="typing-indicator"
                             class="h-6 text-xs italic opacity-50 ml-2 flex items-center gap-1 invisible">
@@ -150,38 +113,7 @@
                                     class="btn btn-square btn-outline border-base-300 bg-base-100">😊</div>
                                 <div tabindex="0"
                                     class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100 mb-2">
-                                    <div class="grid grid-cols-5 gap-1">
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😀', 'random')">😀</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😂', 'random')">😂</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😍', 'random')">😍</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😭', 'random')">😭</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😎', 'random')">😎</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😡', 'random')">😡</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('💀', 'random')">💀</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👻', 'random')">👻</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👍', 'random')">👍</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👎', 'random')">👎</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👋', 'random')">👋</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('🔥', 'random')">🔥</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('❤️', 'random')">❤️</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('💔', 'random')">💔</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('💩', 'random')">💩</button>
-                                    </div>
+                                    <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
                                 </div>
                             </div>
 
@@ -194,18 +126,11 @@
                     </div>
                 </div>
 
-                <!-- Public Chat View -->
                 <div id="public-chat-view" class="flex flex-col flex-grow overflow-hidden h-full hidden">
-                    <!-- 
-                      Chat Box
-                      MODIFICATION: No changes needed. 
-                      `flex-grow overflow-y-auto` is correct.
-                    -->
                     <div id="public-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50">
                         <div class="divider text-xs opacity-50">Welcome to Public Lounge</div>
                     </div>
 
-                    <!-- Input Area -->
                     <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
                         <div class="join w-full mt-4 relative">
                             <div class="dropdown dropdown-top join-item">
@@ -213,38 +138,7 @@
                                     class="btn btn-square btn-outline border-base-300 bg-base-100">😊</div>
                                 <div tabindex="0"
                                     class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100 mb-2">
-                                    <div class="grid grid-cols-5 gap-1">
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😀', 'public')">😀</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😂', 'public')">😂</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😍', 'public')">😍</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😭', 'public')">😭</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😎', 'public')">😎</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('😡', 'public')">😡</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('💀', 'public')">💀</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👻', 'public')">👻</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👍', 'public')">👍</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👎', 'public')">👎</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('👋', 'public')">👋</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('🔥', 'public')">🔥</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('❤️', 'public')">❤️</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('💔', 'public')">💔</button>
-                                        <button class="btn btn-ghost btn-xs text-lg"
-                                            onclick="insertEmoji('💩', 'public')">💩</button>
-                                    </div>
+                                    <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
                                 </div>
                             </div>
 
@@ -259,33 +153,41 @@
             </div>
         </div>
 
-        <!-- Sidebar -->
         <div class="drawer-side">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
             <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content flex flex-col justify-between">
-                <!-- Top Nav Section -->
                 <div>
                     <div class="text-2xl font-bold mb-6 px-4 text-primary">XOXO <span
                             class="text-xs text-content opacity-50">v2.0</span></div>
-                    <li><a onclick="switchMode('random')" id="nav-random" class="active"><svg class="w-5 h-5"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg> Random Chat</a></li>
-                    <li><a onclick="switchMode('public')" id="nav-public"><svg class="w-5 h-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                            </svg> Public Lounge</a></li>
+
+                    <li>
+                        <a onclick="switchMode('random')" id="nav-random" class="active justify-between">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                Random Chat
+                            </div>
+                            <span id="badge-random" class="badge badge-error badge-sm hidden">0</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a onclick="switchMode('public')" id="nav-public" class="justify-between">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                </svg>
+                                Public Lounge
+                            </div>
+                            <span id="badge-public" class="badge badge-error badge-sm hidden">0</span>
+                        </a>
+                    </li>
                 </div>
 
-                <!-- Bottom Nickname & Theme Section -->
                 <div>
-                    <!-- 
-                      MODIFICATION: 
-                      - Added the dark mode toggle here, just above the nickname.
-                      - Wrapped in a div for centering.
-                    -->
                     <div class="flex justify-center items-center p-2 gap-2 text-sm">
                         <span>Theme:</span>
                         <label class="swap swap-rotate text-base-content">
@@ -316,6 +218,10 @@
         let currentMode = 'random'; // 'random' or 'public'
         let myNickname = '';
 
+        // --- Counters ---
+        let unreadRandom = 0;
+        let unreadPublic = 0;
+
         // Elements
         const randomView = document.getElementById('random-chat-view');
         const publicView = document.getElementById('public-chat-view');
@@ -325,6 +231,8 @@
         const statusBar = document.getElementById('status-bar');
         const countVal = document.getElementById('count-val');
         const mobileCount = document.getElementById('mobile-count');
+        const badgeRandom = document.getElementById('badge-random');
+        const badgePublic = document.getElementById('badge-public');
 
         // Random Chat UI
         const btnStart = document.getElementById('btn-start');
@@ -336,23 +244,28 @@
         // Public Chat UI
         const publicInput = document.getElementById('public-msg-input');
 
+        // --- INIT EMOJIS ---
+        const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
+        const renderEmojis = (id, context) => {
+            const container = document.getElementById(id);
+            container.innerHTML = emojis.map(e =>
+                `<button class="btn btn-ghost btn-xs text-lg" onclick="insertEmoji('${e}', '${context}')">${e}</button>`
+            ).join('');
+        };
+        renderEmojis('emoji-grid-random', 'random');
+        renderEmojis('emoji-grid-public', 'public');
+
 
         // --- DISCLAIMER LOGIC ---
         function handleAgree() {
-            // Hide the modal and its backdrop
-            const modal = document.getElementById('disclaimer_modal');
-            modal.classList.remove('modal-open');
-            modal.classList.add('hidden'); // Fully hide it
-
-            // Now, start the connection
+            document.getElementById('disclaimer_modal').classList.remove('modal-open');
+            document.getElementById('disclaimer_modal').classList.add('hidden');
             initSocket();
         }
 
         function handleDisagree() {
-            // Redirect to Google
             window.location.href = 'https://google.com';
         }
-
 
         // --- EMOJI LOGIC ---
         function insertEmoji(emoji, context) {
@@ -361,52 +274,78 @@
             input.focus();
         }
 
+        // --- UI BADGE LOGIC ---
+        function updateBadges() {
+            if (unreadRandom > 0) {
+                badgeRandom.innerText = unreadRandom;
+                badgeRandom.classList.remove('hidden');
+            } else {
+                badgeRandom.classList.add('hidden');
+            }
+
+            if (unreadPublic > 0) {
+                badgePublic.innerText = unreadPublic;
+                badgePublic.classList.remove('hidden');
+            } else {
+                badgePublic.classList.add('hidden');
+            }
+        }
+
         // --- MODE SWITCHING ---
         function switchMode(mode) {
             currentMode = mode;
 
-            // Close Sidebar on mobile (if open)
+            // Close Sidebar on mobile
             document.getElementById('my-drawer-2').checked = false;
 
-            // UI Toggles
+            // Navbar Active State
             document.getElementById('nav-random').classList.remove('active');
             document.getElementById('nav-public').classList.remove('active');
             document.getElementById(`nav-${mode}`).classList.add('active');
+
+            // Reset Counter for entered mode
+            if (mode === 'random') unreadRandom = 0;
+            if (mode === 'public') unreadPublic = 0;
+            updateBadges();
 
             if (mode === 'random') {
                 randomView.classList.remove('hidden');
                 publicView.classList.add('hidden');
                 chatTitle.innerText = "Random Chat";
+                randomBox.scrollTop = randomBox.scrollHeight;
+
+                // Set status bar based on connection state (simplified)
+                if (!btnNext.classList.contains('hidden')) {
+                    statusBar.innerText = "Chatting with Stranger";
+                } else if (!btnStart.classList.contains('hidden')) {
+                    statusBar.innerText = "Idle";
+                }
             } else {
                 randomView.classList.add('hidden');
                 publicView.classList.remove('hidden');
                 chatTitle.innerText = "Public Lounge";
-                // Auto scroll to bottom
+                statusBar.innerText = "Broadcasting to everyone";
                 publicBox.scrollTop = publicBox.scrollHeight;
             }
 
-            // Tell Server we changed room
-            if (conn && conn.readyState === WebSocket.OPEN) {
-                conn.send(JSON.stringify({ action: 'join_room', room: mode }));
-            }
+            // NOTE: We do NOT send 'join_room' anymore to avoid disconnecting the random partner
         }
 
         // --- WEBSOCKET ---
         function initSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-            const host = '127.0.0.1';
             const socketUrl = 'wss://chat.1year.site/ws';
-            console.log("Connecting to WebSocket:", socketUrl);
+            // const socketUrl = 'ws://127.0.0.1:8080'; // Local testing
 
+            console.log("Connecting to:", socketUrl);
             statusBar.innerText = "Connecting...";
             conn = new WebSocket(socketUrl);
 
             conn.onopen = function (e) {
                 statusBar.innerText = "Connected";
                 statusBar.className = "text-xs font-bold text-success mt-1";
-
-                // 1. Join default room (we wait for identity msg to set nickname)
-                conn.send(JSON.stringify({ action: 'join_room', room: currentMode }));
+                // Initial Join
+                conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
             };
 
             conn.onclose = function (e) {
@@ -428,7 +367,8 @@
                     countVal.innerText = data.count;
                     mobileCount.innerText = data.count;
                 }
-                // --- RANDOM CHAT EVENTS ---
+
+                // --- RANDOM CHAT LOGIC ---
                 else if (data.status === 'waiting') {
                     logSystem(randomBox, data.msg);
                     setRandomUI('waiting');
@@ -442,17 +382,29 @@
                     setRandomUI('disconnected_partner');
                 }
                 else if (data.status === 'message') {
+                    // Logic: If in Public mode, count as unread random message
+                    if (currentMode !== 'random') {
+                        unreadRandom++;
+                        updateBadges();
+                    }
                     showTyping(false);
                     logMessage(randomBox, 'stranger', 'Stranger', data.msg);
                 }
                 else if (data.status === 'typing') {
                     showTyping(true);
                 }
-                // --- PUBLIC CHAT EVENTS ---
+
+                // --- PUBLIC CHAT LOGIC ---
                 else if (data.status === 'public_msg') {
-                    const type = data.is_me ? 'you' : 'other';
-                    const name = data.is_me ? 'You' : data.name;
-                    logMessage(publicBox, type, name, data.msg);
+                    const isMe = false; // Server only sends others' messages now
+
+                    // Logic: If in Random mode, count as unread public message
+                    if (currentMode !== 'public') {
+                        unreadPublic++;
+                        updateBadges();
+                    }
+
+                    logMessage(publicBox, 'other', data.name, data.msg);
                 }
             };
         }
@@ -477,12 +429,10 @@
 
             if (context === 'random') {
                 logMessage(randomBox, 'you', 'You', text);
-                conn.send(JSON.stringify({ action: 'message', content: text }));
+                conn.send(JSON.stringify({ action: 'message', content: text, context: 'random' }));
             } else {
-                // For public, we log immediately for UX, or wait for server echo. 
-                // Let's log immediately.
                 logMessage(publicBox, 'you', 'You', text);
-                conn.send(JSON.stringify({ action: 'message', content: text }));
+                conn.send(JSON.stringify({ action: 'message', content: text, context: 'public' }));
             }
 
             input.value = '';
@@ -494,7 +444,6 @@
         }
 
         // --- UTILS ---
-
         function logMessage(container, type, name, msg) {
             const isMe = type === 'you';
             const align = isMe ? 'chat-end' : 'chat-start';
@@ -502,21 +451,19 @@
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             const html = `
-        <div class="chat ${align}">
-            <div class="chat-header opacity-50 text-xs mb-1">
-                ${name} <time class="text-[10px] opacity-70">${time}</time>
-            </div>
-            <div class="chat-bubble ${bubbleColor}">${msg}</div>
-        </div>
-        `;
+            <div class="chat ${align}">
+                <div class="chat-header opacity-50 text-xs mb-1">
+                    ${name} <time class="text-[10px] opacity-70">${time}</time>
+                </div>
+                <div class="chat-bubble ${bubbleColor}">${msg}</div>
+            </div>`;
+
             container.innerHTML += html;
-            // This line handles the auto-scroll for new messages
             container.scrollTop = container.scrollHeight;
         }
 
         function logSystem(container, msg) {
             container.innerHTML += `<div class="divider text-xs opacity-50 my-4">${msg}</div>`;
-            // This line handles the auto-scroll for system messages
             container.scrollTop = container.scrollHeight;
         }
 
@@ -532,15 +479,15 @@
                 btnNext.classList.remove('hidden');
                 randomInputArea.classList.remove('hidden');
                 randomInputArea.classList.add('flex');
-                statusBar.innerText = "Chatting with Stranger";
+                if (currentMode === 'random') statusBar.innerText = "Chatting with Stranger";
             } else if (state === 'disconnected_partner') {
                 btnNext.classList.remove('hidden');
-                statusBar.innerText = "Stranger disconnected";
+                if (currentMode === 'random') statusBar.innerText = "Stranger disconnected";
                 showTyping(false);
             }
         }
 
-        // Typing Logic (Random Only)
+        // Typing Logic
         let typingTimer;
         let lastTypingTime = 0;
         function sendTypingSignal() {
@@ -566,15 +513,11 @@
             html.setAttribute('data-theme', current === 'night' ? 'winter' : 'night');
         }
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', function (e) {
             if (e.key === "Escape" && currentMode === 'random' && !randomInputArea.classList.contains('hidden')) {
                 nextPartner();
             }
         });
-
-        // DO NOT CONNECT ON LOAD
-        // initSocket(); 
     </script>
 
 </body>
