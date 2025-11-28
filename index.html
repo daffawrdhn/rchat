@@ -1,778 +1,592 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="black">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XOXO - Stranger Chat</title>
+    <title>XOXO - Talk to Strangers</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cinzel:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
+        /* DEFINISI WARNA PANTONE (Approximation Hex) */
+        :root {
+            --pantone-218: #CE4E80;
+            /* Vibrant Pink/Magenta */
+            --pantone-256: #D1A7C6;
+            /* Soft Lavender */
+            --pantone-196: #F1C8C8;
+            /* Soft Peach/Pink */
+            --msg-you: #CE4E80;
+            --msg-stranger: #4A4A4A;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #09090b;
-            /* Zinc-950 */
-            height: 100dvh;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--pantone-196);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-            color: #e4e4e7;
         }
 
-        h1,
-        h2,
-        h3,
-        .brand-font {
-            font-family: 'Cinzel', serif;
-            letter-spacing: 0.05em;
+        /* Header Styles */
+        header {
+            background-color: white;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 50;
         }
 
-        /* Minimalist Scrollbar */
-        .chat-scroll::-webkit-scrollbar {
-            width: 3px;
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--pantone-218);
+            letter-spacing: -1px;
+            text-transform: uppercase;
         }
 
-        .chat-scroll::-webkit-scrollbar-thumb {
-            background-color: #3f3f46;
-            border-radius: 10px;
+        .online-count {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Start Screen */
+        #start-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            background-color: var(--pantone-196);
         }
 
-        .msg-anim {
-            animation: fadeIn 0.3s ease-out forwards;
+        .big-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4a4a4a;
+            margin-bottom: 2rem;
         }
 
-        @keyframes subtlePulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4);
-            }
-
-            70% {
-                box-shadow: 0 0 0 6px rgba(225, 29, 72, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(225, 29, 72, 0);
-            }
+        .mode-btn {
+            background-color: var(--pantone-218);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0.5rem;
+            min-width: 200px;
         }
 
-        .pulse-soft {
-            animation: subtlePulse 2s infinite;
+        .mode-btn:hover {
+            transform: scale(1.02);
         }
 
-        .input-minimal:focus {
+        .mode-btn:active {
+            transform: scale(0.98);
+        }
+
+        .mode-btn.secondary {
+            background-color: #6b7280;
+        }
+
+        /* Chat Layout */
+        #chat-interface {
+            display: none;
+            /* Hidden by default */
+            flex: 1;
+            flex-direction: column;
+            height: 100%;
+            background-color: white;
+        }
+
+        /* Layout untuk Video Mode (Split Screen) */
+        .video-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Layout untuk Text Only Mode */
+        .text-layout #video-area {
+            display: none;
+        }
+
+        .text-layout #chat-log-area {
+            width: 100%;
+        }
+
+        #video-area {
+            flex: 1;
+            background: black;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #ccc;
+        }
+
+        #chat-log-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            min-width: 320px;
+        }
+
+        #chat-log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Messages */
+        .sys-msg {
+            color: #888;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        .msg-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 4px;
+        }
+
+        .msg-label {
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+        }
+
+        .msg-label.you {
+            color: var(--pantone-218);
+        }
+
+        .msg-label.stranger {
+            color: blue;
+        }
+
+        .msg-text {
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        /* Control Bar (Omegle Style) */
+        .control-bar {
+            background-color: var(--pantone-256);
+            /* Lavender */
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tombol STOP / NEW */
+        #btn-action {
+            background-color: white;
+            color: #333;
+            font-weight: 700;
+            border: 2px solid #999;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            min-width: 100px;
+            text-transform: uppercase;
+        }
+
+        #btn-action.stop {
+            color: red;
+            border-color: red;
+        }
+
+        #btn-action.new {
+            color: var(--pantone-218);
+            border-color: var(--pantone-218);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
             outline: none;
-            border-color: #e11d48;
-            box-shadow: 0 0 0 1px #e11d48;
         }
 
-        /* Video Styles */
-        video {
-            transform: scaleX(-1);
-            /* Mirror effect */
-            object-fit: cover;
+        .chat-input:focus {
+            border-color: var(--pantone-218);
+        }
+
+        .btn-send {
+            background-color: var(--pantone-218);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Video Elements */
+        #remote-video {
             width: 100%;
             height: 100%;
+            object-fit: cover;
+        }
+
+        #local-video {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 120px;
+            height: 90px;
+            background: #333;
+            border: 2px solid white;
+            object-fit: cover;
+            border-radius: 4px;
+            transform: scaleX(-1);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .video-layout {
+                flex-direction: column;
+            }
+
+            #video-area {
+                height: 40vh;
+                flex: none;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #chat-log-area {
+                height: 60vh;
+            }
+
+            .mode-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
-<body class="flex flex-col h-full antialiased selection:bg-rose-900 selection:text-white">
+<body>
 
-    <dialog id="disclaimer_modal" class="modal modal-open bg-black/80">
-        <div class="modal-box bg-zinc-900 border border-zinc-800 rounded-sm shadow-2xl p-8 max-w-sm text-center">
-            <h3 class="text-3xl text-white mb-2 brand-font">XOXO</h3>
-            <div class="h-px w-12 bg-rose-600 mx-auto mb-6"></div>
-
-            <p class="text-zinc-400 text-sm mb-8 leading-relaxed">
-                By entering, you confirm you are <strong>18+</strong>.<br>
-                Video chat enabled.<br>
-                Interactions are unmoderated.
-            </p>
-
-            <div class="flex flex-col gap-3">
-                <button
-                    class="btn bg-rose-700 hover:bg-rose-600 text-white border-none rounded-sm w-full uppercase tracking-widest text-xs h-12"
-                    onclick="handleAgree()">Enter</button>
-                <button class="btn btn-ghost text-zinc-600 hover:text-zinc-400 btn-sm uppercase text-xs"
-                    onclick="handleDisagree()">Leave</button>
-            </div>
+    <header>
+        <div class="logo">XOXO <span style="font-size:0.8em; color:#888; font-weight:400;">Talk to Strangers</span>
         </div>
-    </dialog>
+        <div class="online-count"><span id="count-val">0</span>+ online</div>
+    </header>
 
-    <div id="incoming_call_overlay"
-        class="fixed inset-0 z-[60] bg-zinc-950 flex flex-col items-center justify-center hidden">
-        <div
-            class="w-32 h-32 rounded-full border border-rose-900/50 flex items-center justify-center mb-8 pulse-soft bg-zinc-900">
-            <span class="text-5xl">📹</span>
-        </div>
-        <h2 class="text-2xl text-white mb-2 brand-font tracking-widest">VIDEO CALL</h2>
-        <p class="text-rose-500 text-sm mb-16 uppercase tracking-wide">Stranger is calling...</p>
+    <div id="start-screen">
+        <div class="big-text">Start chatting:</div>
+        <button class="mode-btn" onclick="enterMode('text')">Text only</button>
+        <button class="mode-btn secondary" onclick="enterMode('video')">Video</button>
 
-        <div class="flex gap-12 items-center">
-            <button onclick="rejectCall()"
-                class="btn btn-circle btn-outline border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-white btn-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            <button onclick="acceptCall()"
-                class="btn btn-circle bg-rose-700 hover:bg-rose-600 border-none text-white btn-lg shadow-lg shadow-rose-900/20">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-            </button>
+        <div class="mt-8 text-sm text-gray-500 max-w-md">
+            Use XOXO to meet strangers. Video is monitored. Keep it clean.<br>
+            <strong>18+ Only.</strong>
         </div>
     </div>
 
-    <div id="active_video_overlay" class="fixed inset-0 z-50 bg-black hidden">
-        <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
-
-        <div
-            class="absolute top-4 right-4 w-32 h-48 bg-zinc-900 rounded-lg overflow-hidden shadow-2xl border border-zinc-800">
-            <video id="local-video" autoplay playsinline muted></video>
-        </div>
-
-        <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-6">
-            <button onclick="toggleMute()" id="btn-mute"
-                class="btn btn-circle bg-zinc-800/80 border-none text-white hover:bg-zinc-700 backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-            </button>
-            <button onclick="endCall()"
-                class="btn btn-circle bg-rose-600 border-none text-white hover:bg-rose-700 scale-110 shadow-lg shadow-rose-900/50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            <button onclick="toggleVideo()" id="btn-video-off"
-                class="btn btn-circle bg-zinc-800/80 border-none text-white hover:bg-zinc-700 backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <div class="drawer lg:drawer-open h-full">
-        <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-
-        <div class="drawer-content flex flex-col h-[100dvh] bg-zinc-950">
-
-            <div class="navbar bg-zinc-950 border-b border-zinc-900 lg:hidden min-h-[60px] z-20 px-4">
-                <div class="flex-none">
-                    <label for="my-drawer-2" class="btn btn-square btn-ghost btn-sm text-zinc-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            class="inline-block w-6 h-6 stroke-current">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </label>
-                </div>
-                <div class="flex-1 justify-center">
-                    <a class="text-lg brand-font text-white tracking-widest">XOXO</a>
-                </div>
-                <div class="flex-none w-10"></div>
+    <div id="chat-interface">
+        <div id="main-layout" class="text-layout">
+            <div id="video-area">
+                <video id="remote-video" autoplay playsinline></video>
+                <video id="local-video" autoplay playsinline muted></video>
+                <div class="absolute top-2 left-2 bg-black/50 text-white px-2 py-1 text-xs rounded">Stranger</div>
+                <div class="absolute bottom-24 right-2 bg-black/50 text-white px-2 py-1 text-xs rounded">You</div>
             </div>
 
-            <div class="flex-grow flex flex-col relative overflow-hidden">
-
-                <div
-                    class="absolute top-0 w-full z-10 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-900/50 p-3 px-6">
-                    <div class="flex justify-between items-center max-w-4xl mx-auto">
-                        <div class="flex items-center gap-3">
-                            <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
-                            <div>
-                                <h2 id="chat-title" class="text-sm font-semibold text-zinc-200 tracking-wide">Blind Date
-                                </h2>
-                                <p id="status-bar" class="text-[10px] text-zinc-500 uppercase tracking-wider">
-                                    Connecting...</p>
-                            </div>
-                        </div>
-
-                        <div id="call-status"
-                            class="hidden bg-rose-950/30 text-rose-500 border border-rose-900/50 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide flex items-center gap-2">
-                            <span class="animate-pulse">●</span> In Call
-                        </div>
-                    </div>
+            <div id="chat-log-area">
+                <div id="chat-log">
+                    <div class="sys-msg">Welcome to XOXO! Click 'Start' to find a stranger.</div>
                 </div>
 
-                <div id="random-chat-view" class="flex flex-col h-full pt-[60px]">
-                    <div id="random-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 md:p-6 space-y-4">
-                        <div class="h-full flex flex-col items-center justify-center text-zinc-700 gap-4">
-                            <span class="text-4xl opacity-20">❖</span>
-                            <span class="text-xs uppercase tracking-widest opacity-50">Start a new connection</span>
-                        </div>
-                    </div>
+                <div class="control-bar">
+                    <button id="btn-action" class="new" onclick="handleActionBtn()">Start</button>
 
-                    <div id="typing-indicator"
-                        class="h-6 px-6 text-[10px] uppercase tracking-wide text-rose-600 font-medium opacity-0 transition-opacity">
-                        Typing...</div>
-
-                    <div class="p-4 bg-zinc-950 border-t border-zinc-900">
-                        <div class="max-w-4xl mx-auto space-y-3">
-
-                            <div id="controls" class="w-full">
-                                <button id="btn-start" onclick="startRandomChat()"
-                                    class="btn w-full bg-zinc-100 hover:bg-white text-black border-none rounded-sm uppercase tracking-widest font-bold text-xs h-12 shadow-lg">Find
-                                    Match</button>
-                                <button id="btn-next" onclick="nextPartner()"
-                                    class="btn btn-outline border-zinc-800 text-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-zinc-700 w-full rounded-sm uppercase tracking-widest text-xs h-12 hidden">Next
-                                    Partner</button>
-                            </div>
-
-                            <div id="random-input-area" class="flex gap-3 hidden items-center transition-all">
-                                <button id="btn-call" onclick="startCall()"
-                                    class="btn btn-circle btn-ghost btn-sm text-zinc-500 hover:text-rose-500 hover:bg-zinc-900"
-                                    title="Video Call">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                </button>
-
-                                <div class="relative flex-grow">
-                                    <input type="text" id="random-msg-input"
-                                        class="input input-minimal w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder-zinc-600 text-sm rounded-sm focus:outline-none h-11 pl-4 pr-10"
-                                        placeholder="Type here..." onkeypress="handleInput(event, 'random')"
-                                        onkeyup="sendTypingSignal()" autocomplete="off">
-
-                                    <div
-                                        class="dropdown dropdown-top dropdown-end absolute right-2 top-1/2 -translate-y-1/2">
-                                        <button tabindex="0"
-                                            class="text-zinc-500 hover:text-rose-500 transition-colors p-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                        </button>
-                                        <div tabindex="0"
-                                            class="dropdown-content z-[1] p-2 shadow-xl bg-zinc-900 border border-zinc-800 mb-2 rounded-sm w-64">
-                                            <div class="grid grid-cols-6 gap-1" id="emoji-grid-random"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button onclick="sendMessage('random')"
-                                    class="btn btn-circle btn-sm bg-rose-700 hover:bg-rose-600 border-none text-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform -rotate-45 ml-1"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <input type="text" id="msg-input" class="chat-input" placeholder="Type your message..." disabled>
+                    <button class="btn-send" onclick="sendMessage()" id="btn-send" disabled>Send</button>
                 </div>
-
-                <div id="public-chat-view" class="flex flex-col h-full pt-[60px] hidden">
-                    <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 md:p-6 space-y-4">
-                        <div class="text-center">
-                            <span
-                                class="text-[10px] uppercase tracking-widest text-zinc-700 border-b border-zinc-800 pb-2">Public
-                                Lounge</span>
-                        </div>
-                    </div>
-
-                    <div class="p-4 bg-zinc-950 border-t border-zinc-900">
-                        <div class="max-w-4xl mx-auto flex gap-3 items-center">
-                            <div class="relative flex-grow">
-                                <input type="text" id="public-msg-input"
-                                    class="input input-minimal w-full bg-zinc-900 border border-zinc-800 text-zinc-200 placeholder-zinc-600 text-sm rounded-sm focus:outline-none h-11 pl-4 pr-10"
-                                    placeholder="Broadcast message..." onkeypress="handleInput(event, 'public')"
-                                    autocomplete="off">
-
-                                <div
-                                    class="dropdown dropdown-top dropdown-end absolute right-2 top-1/2 -translate-y-1/2">
-                                    <button tabindex="0"
-                                        class="text-zinc-500 hover:text-purple-500 transition-colors p-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </button>
-                                    <div tabindex="0"
-                                        class="dropdown-content z-[1] p-2 shadow-xl bg-zinc-900 border border-zinc-800 mb-2 rounded-sm w-64">
-                                        <div class="grid grid-cols-6 gap-1" id="emoji-grid-public"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button onclick="sendMessage('public')"
-                                class="btn btn-circle btn-sm bg-purple-700 hover:bg-purple-600 border-none text-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform -rotate-45 ml-1"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </div>
-
-        <div class="drawer-side z-50">
-            <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-            <ul class="menu p-0 w-80 min-h-full bg-zinc-900 border-r border-zinc-800 text-zinc-300 flex flex-col">
-                <div class="p-8 border-b border-zinc-800">
-                    <h1 class="text-4xl brand-font text-white mb-2">XOXO</h1>
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] text-zinc-500 uppercase tracking-widest">STRANGER CHAT</span>
-                        <div class="flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                            <span class="text-[10px] font-mono text-zinc-400"><span id="mobile-count">0</span>
-                                Online</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex-grow p-4 space-y-2">
-                    <li>
-                        <a onclick="switchMode('random')" id="nav-random"
-                            class="active group rounded-sm hover:bg-zinc-800 active:bg-zinc-800 focus:bg-zinc-800 border-l-2 border-transparent hover:border-rose-600">
-                            <div class="flex items-center gap-4 py-2">
-                                <span
-                                    class="text-lg opacity-50 group-hover:opacity-100 group-hover:text-rose-500 transition-all">❖</span>
-                                <div>
-                                    <span class="block text-sm font-medium text-white">Blind Date</span>
-                                    <span class="block text-[10px] text-zinc-500 uppercase tracking-wide">1-on-1
-                                        Video/Text</span>
-                                </div>
-                                <span id="badge-random"
-                                    class="ml-auto w-2 h-2 rounded-full bg-rose-600 scale-0 transition-transform"></span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a onclick="switchMode('public')" id="nav-public"
-                            class="group rounded-sm hover:bg-zinc-800 active:bg-zinc-800 focus:bg-zinc-800 border-l-2 border-transparent hover:border-purple-600">
-                            <div class="flex items-center gap-4 py-2">
-                                <span
-                                    class="text-lg opacity-50 group-hover:opacity-100 group-hover:text-purple-500 transition-all">◈</span>
-                                <div>
-                                    <span class="block text-sm font-medium text-white">Public Lounge</span>
-                                    <span class="block text-[10px] text-zinc-500 uppercase tracking-wide">Global
-                                        Chat</span>
-                                </div>
-                                <span id="badge-public"
-                                    class="ml-auto w-2 h-2 rounded-full bg-purple-600 scale-0 transition-transform"></span>
-                            </div>
-                        </a>
-                    </li>
-                </div>
-
-                <div class="p-6 border-t border-zinc-800">
-                    <div class="flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity">
-                        <div
-                            class="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-xs text-white font-bold border border-zinc-700">
-                            YOU
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase text-zinc-500 tracking-wider">Alias</p>
-                            <p class="text-sm font-medium text-zinc-200" id="sidebar-nickname">Guest</p>
-                        </div>
-                    </div>
-                </div>
-            </ul>
         </div>
     </div>
 
     <script>
-        // --- CONFIG & STATE ---
+        // --- Variables ---
         let conn;
-        let currentMode = 'random';
-        let myNickname = '';
-        let unreadRandom = 0;
-        let unreadPublic = 0;
+        let isConnected = false;
+        let isSearching = false;
+        let mode = 'text'; // 'text' or 'video'
+        let chatState = 'idle'; // 'idle', 'searching', 'chatting'
 
-        // UI Refs
-        const randomView = document.getElementById('random-chat-view');
-        const publicView = document.getElementById('public-chat-view');
-        const randomBox = document.getElementById('random-chat-box');
-        const publicBox = document.getElementById('public-chat-box');
-        const chatTitle = document.getElementById('chat-title');
-        const statusDot = document.getElementById('status-dot');
-        const statusBar = document.getElementById('status-bar');
-        const mobileCount = document.getElementById('mobile-count');
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const chatInterface = document.getElementById('chat-interface');
+        const mainLayout = document.getElementById('main-layout');
+        const chatLog = document.getElementById('chat-log');
+        const msgInput = document.getElementById('msg-input');
+        const btnAction = document.getElementById('btn-action');
+        const btnSend = document.getElementById('btn-send');
+        const countVal = document.getElementById('count-val');
 
-        const btnStart = document.getElementById('btn-start');
-        const btnNext = document.getElementById('btn-next');
-        const randomInputArea = document.getElementById('random-input-area');
-        const randomInput = document.getElementById('random-msg-input');
-        const publicInput = document.getElementById('public-msg-input');
-
-        // WebRTC Config
+        // WebRTC
         let localStream;
         let peerConnection;
         const localVideo = document.getElementById('local-video');
         const remoteVideo = document.getElementById('remote-video');
-        const btnCall = document.getElementById('btn-call');
-        const callStatus = document.getElementById('call-status');
-        const incomingOverlay = document.getElementById('incoming_call_overlay');
-        const activeVideoOverlay = document.getElementById('active_video_overlay');
         const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        // Flirty Emojis
-        const emojis = ['🫦', '🔥', '🥂', '👀', '💋', '😈', '🍷', '✨', '🥵', '💅', '🌹', '💔'];
-        const renderEmojis = (id, ctx) => {
-            document.getElementById(id).innerHTML = emojis.map(e =>
-                `<button class="btn btn-ghost btn-xs text-lg hover:text-white" onclick="insertEmoji('${e}', '${ctx}')">${e}</button>`
-            ).join('');
-        };
-        renderEmojis('emoji-grid-random', 'random');
-        renderEmojis('emoji-grid-public', 'public');
+        // --- Core Functions ---
 
-        function handleAgree() {
-            document.getElementById('disclaimer_modal').classList.remove('modal-open');
+        function enterMode(selectedMode) {
+            mode = selectedMode;
+            startScreen.style.display = 'none';
+            chatInterface.style.display = 'flex';
+
+            if (mode === 'video') {
+                mainLayout.className = 'video-layout';
+                initCamera();
+            } else {
+                mainLayout.className = 'text-layout';
+            }
+
             initSocket();
         }
-        function handleDisagree() { window.location.href = 'https://google.com'; }
 
-        // --- WEBSOCKET ---
+        async function initCamera() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+            } catch (e) {
+                alert("Camera access denied or missing.");
+                enterMode('text'); // Fallback
+            }
+        }
+
         function initSocket() {
-            // CHANGE THIS TO YOUR WS URL
-            const socketUrl = 'wss://chat.1year.site/ws';
+            conn = new WebSocket('wss://chat.1year.site/ws'); // Ganti URL WebSocket Anda
 
-            conn = new WebSocket(socketUrl);
-
-            conn.onopen = function () {
-                conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
+            conn.onopen = () => {
+                console.log("Connected to Server");
+                // Auto start searching immediately like Omegle
+                handleActionBtn();
             };
 
-            conn.onclose = function () {
-                updateStatus("Disconnected", "error");
+            conn.onclose = () => {
+                logSystem("Connection lost. Reconnecting...");
                 setTimeout(initSocket, 3000);
-                setRandomUI('disconnected');
-                endCall(true);
             };
 
-            conn.onmessage = function (e) {
+            conn.onmessage = (e) => {
                 const data = JSON.parse(e.data);
 
-                if (data.status === 'identity') {
-                    myNickname = data.nickname;
-                    document.getElementById('sidebar-nickname').innerText = myNickname;
+                if (data.status === 'stats') {
+                    countVal.innerText = data.count;
                 }
-                else if (data.status === 'stats') {
-                    mobileCount.innerText = data.count;
-                }
-                // Random
                 else if (data.status === 'waiting') {
-                    setRandomUI('waiting');
+                    chatState = 'searching';
+                    updateUIState();
+                    logSystem("Looking for someone you can chat with...");
                 }
                 else if (data.status === 'connected') {
-                    setRandomUI('connected');
+                    chatState = 'chatting';
+                    isConnected = true;
+                    updateUIState();
+                    logSystem("You're now chatting with a random stranger. Say hi!");
+
+                    if (mode === 'video') startCall(); // Auto call logic
                 }
                 else if (data.status === 'disconnected') {
-                    setRandomUI('disconnected_partner');
-                    logSystem(randomBox, "Connection ended.");
-                    endCall(true);
+                    chatState = 'idle';
+                    isConnected = false;
+                    endCall();
+                    updateUIState();
+                    logSystem("Stranger has disconnected.");
                 }
                 else if (data.status === 'message') {
-                    if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
-                    showTyping(false);
-                    logMessage(randomBox, 'stranger', 'Stranger', data.msg);
+                    appendMessage("Stranger", data.msg, 'stranger');
                 }
-                else if (data.status === 'typing') showTyping(true);
-
-                // Public
-                else if (data.status === 'public_msg') {
-                    if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
-                    logMessage(publicBox, 'other', data.name, data.msg);
+                else if (data.status === 'call_signal') {
+                    handleSignal(data.signal);
                 }
-                // Call
-                else if (data.status === 'call_signal') handleSignalMessage(data.signal);
+                else if (data.status === 'typing') {
+                    // Optional: Show "Stranger is typing..."
+                }
             };
         }
 
-        // --- UI HELPER ---
-        function updateStatus(text, type) {
-            statusBar.innerText = text;
-            statusDot.className = `w-1.5 h-1.5 rounded-full ${type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-yellow-500')}`;
-        }
+        // --- Action Button Logic (Stop / New) ---
+        function handleActionBtn() {
+            if (chatState === 'idle') {
+                // Logic: Start New
+                chatLog.innerHTML = ''; // Clear chat
+                conn.send(JSON.stringify({ action: 'find_partner' }));
+            } else if (chatState === 'searching') {
+                // Logic: Cancel Search (not implemented in server but UI can show idle)
+                // For simplified Omegle logic, we treat "Stop" as "Next" if not connected
+                // But server handles 'next' by cleaning up and finding new.
+                // Let's make button act as disconnect/new toggle.
+                // Actually server 'next' command works for both waiting and connected states to cycle.
+                // To truly "Stop" (Idle), we need a disconnect action.
 
-        function updateBadges() {
-            const bRandom = document.getElementById('badge-random');
-            const bPublic = document.getElementById('badge-public');
-            bRandom.classList.toggle('scale-0', unreadRandom === 0);
-            bPublic.classList.toggle('scale-0', unreadPublic === 0);
-        }
+                // For simplicity: Button cycles "New" -> "Stop" (Disconnect) -> "New"
+                // But user wants ease. Omegle button usually is "Stop" -> "Really?" -> "New".
 
-        function switchMode(mode) {
-            currentMode = mode;
-            document.getElementById('my-drawer-2').checked = false;
+                // Let's implement: Click -> Next
+                conn.send(JSON.stringify({ action: 'next' }));
+            } else if (chatState === 'chatting') {
+                // Logic: Disconnect
+                conn.send(JSON.stringify({ action: 'disconnect' }));
+                // Note: Server needs 'disconnect' action or we use 'next' to immediately skip.
+                // Let's use 'disconnect' logic which I added to Chat.php or reuse 'next'
+                // Reusing 'next' immediately finds a new one. 
+                // To implement true "Stop" we just send 'next' to clear current, then wait.
 
-            document.getElementById('nav-random').classList.remove('bg-zinc-800', 'border-rose-600');
-            document.getElementById('nav-public').classList.remove('bg-zinc-800', 'border-purple-600');
-
-            if (mode === 'random') {
-                document.getElementById('nav-random').classList.add('bg-zinc-800', 'border-rose-600');
-                randomView.classList.remove('hidden');
-                publicView.classList.add('hidden');
-                chatTitle.innerText = "Blind Date";
-                statusDot.className = "w-1.5 h-1.5 rounded-full bg-rose-600";
-                unreadRandom = 0; updateBadges();
-            } else {
-                document.getElementById('nav-public').classList.add('bg-zinc-800', 'border-purple-600');
-                randomView.classList.add('hidden');
-                publicView.classList.remove('hidden');
-                chatTitle.innerText = "Public Lounge";
-                statusDot.className = "w-1.5 h-1.5 rounded-full bg-purple-600";
-                statusBar.innerText = "Live Broadcast";
-                unreadPublic = 0; updateBadges();
-                setTimeout(() => publicBox.scrollTop = publicBox.scrollHeight, 100);
-            }
-        }
-
-        function setRandomUI(state) {
-            btnNext.classList.add('hidden');
-            randomInputArea.classList.add('hidden');
-            btnStart.classList.add('hidden');
-            randomInputArea.classList.remove('flex');
-
-            if (state === 'waiting') {
-                updateStatus("Searching...", "warning");
-            } else if (state === 'connected') {
-                btnNext.classList.remove('hidden');
-                randomInputArea.classList.remove('hidden');
-                randomInputArea.classList.add('flex');
-                if (currentMode === 'random') updateStatus("Online", "success");
-            } else if (state === 'disconnected_partner') {
-                btnNext.classList.remove('hidden');
-                if (currentMode === 'random') updateStatus("Offline", "error");
-                showTyping(false);
-            }
-        }
-
-        function logMessage(container, type, name, msg) {
-            const isMe = type === 'you';
-            const align = isMe ? 'items-end' : 'items-start';
-            const bubbleColor = isMe ? 'bg-rose-700 text-white' : 'bg-zinc-800 text-zinc-300';
-            const rounded = isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm';
-
-            const html = `
-            <div class="flex flex-col ${align} msg-anim mb-1">
-                <div class="${bubbleColor} ${rounded} px-4 py-2 text-sm max-w-[85%] shadow-sm">
-                    ${msg}
-                </div>
-                <span class="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">${name}</span>
-            </div>`;
-
-            container.innerHTML += html;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function logSystem(container, msg) {
-            container.innerHTML += `
-                <div class="flex items-center justify-center my-4 msg-anim">
-                    <span class="text-[10px] text-zinc-500 border-b border-zinc-800 pb-1 uppercase tracking-widest">${msg}</span>
-                </div>`;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // --- ACTIONS ---
-        function startRandomChat() {
-            if (conn.readyState !== WebSocket.OPEN) return;
-            conn.send(JSON.stringify({ action: 'find_partner' }));
-            btnStart.classList.add('hidden');
-        }
-
-        function nextPartner() {
-            randomBox.innerHTML = '';
-            showTyping(false);
-            endCall();
-            conn.send(JSON.stringify({ action: 'next' }));
-        }
-
-        function sendMessage(context) {
-            const input = context === 'random' ? randomInput : publicInput;
-            const text = input.value.trim();
-            if (!text) return;
-
-            if (context === 'random') {
-                logMessage(randomBox, 'you', 'You', text);
-                conn.send(JSON.stringify({ action: 'message', content: text, context: 'random' }));
-            } else {
-                logMessage(publicBox, 'you', 'You', text);
-                conn.send(JSON.stringify({ action: 'message', content: text, context: 'public' }));
-            }
-            input.value = ''; input.focus();
-        }
-
-        function handleInput(e, ctx) { if (e.key === 'Enter') sendMessage(ctx); }
-        function insertEmoji(e, ctx) {
-            const el = ctx === 'random' ? randomInput : publicInput;
-            el.value += e; el.focus();
-        }
-
-        let typingTimer;
-        let lastTypingTime = 0;
-        function sendTypingSignal() {
-            const now = Date.now();
-            if (now - lastTypingTime > 2000 && conn.readyState === WebSocket.OPEN) {
-                conn.send(JSON.stringify({ action: 'typing' }));
-                lastTypingTime = now;
-            }
-        }
-        function showTyping(show) {
-            const ind = document.getElementById('typing-indicator');
-            ind.style.opacity = show ? '1' : '0';
-            if (show) {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => ind.style.opacity = '0', 3000);
-            }
-        }
-
-        // --- VIDEO CALL LOGIC ---
-        async function startCall() {
-            btnCall.classList.add('hidden');
-            try {
-                // Request Video & Audio
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-                localVideo.srcObject = localStream;
-
-                createPeerConnection();
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-
-                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'offer', sdp: offer } }));
-                logSystem(randomBox, "Video call requested...");
-            } catch (err) {
-                console.error(err);
-                alert("Camera access required for video calls.");
+                // Let's strictly follow Omegle: Button is "Stop" (Disconnects) -> becomes "New"
+                conn.send(JSON.stringify({ action: 'disconnect' }));
+                chatState = 'idle';
+                isConnected = false;
                 endCall();
+                updateUIState();
+                logSystem("You have disconnected.");
             }
         }
 
-        async function handleSignalMessage(signal) {
-            if (!peerConnection) createPeerConnection();
+        function updateUIState() {
+            // Enable/Disable inputs
+            if (chatState === 'chatting') {
+                msgInput.disabled = false;
+                btnSend.disabled = false;
+                msgInput.focus();
 
-            if (signal.type === 'offer') {
-                incomingOverlay.classList.remove('hidden');
-                window.pendingOffer = signal.sdp;
-            }
-            else if (signal.type === 'answer') {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                showVideoUI();
-            }
-            else if (signal.type === 'candidate' && signal.candidate) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
-            }
-            else if (signal.type === 'hangup') {
-                endCall(true);
+                btnAction.innerText = "Stop";
+                btnAction.className = "stop"; // Red color
+            } else if (chatState === 'searching') {
+                msgInput.disabled = true;
+                btnSend.disabled = true;
+
+                btnAction.innerText = "Stop"; // Can cancel search
+                btnAction.className = "stop";
+            } else { // Idle
+                msgInput.disabled = true;
+                btnSend.disabled = true;
+
+                btnAction.innerText = "New Chat";
+                btnAction.className = "new"; // Pink color
             }
         }
 
-        async function acceptCall() {
-            incomingOverlay.classList.add('hidden');
-            btnCall.classList.add('hidden');
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-                localVideo.srcObject = localStream;
+        // --- Chat Functions ---
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (!text || !isConnected) return;
 
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(window.pendingOffer));
-
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-
-                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'answer', sdp: answer } }));
-                showVideoUI();
-            } catch (e) { endCall(); }
+            appendMessage("You", text, 'you');
+            conn.send(JSON.stringify({ action: 'message', content: text }));
+            msgInput.value = '';
         }
 
-        function rejectCall() {
-            incomingOverlay.classList.add('hidden');
-            conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function appendMessage(name, text, type) {
+            const div = document.createElement('div');
+            div.className = 'msg-row';
+            div.innerHTML = `
+                <span class="msg-label ${type}">${name}:</span>
+                <span class="msg-text">${text}</span>
+            `;
+            chatLog.appendChild(div);
+            chatLog.scrollTop = chatLog.scrollHeight;
         }
 
-        function createPeerConnection() {
-            if (peerConnection) return;
+        function logSystem(text) {
+            const div = document.createElement('div');
+            div.className = 'sys-msg';
+            div.innerText = text;
+            chatLog.appendChild(div);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        // --- WebRTC Logic ---
+        async function startCall() {
+            if (peerConnection) peerConnection.close();
             peerConnection = new RTCPeerConnection(rtcConfig);
 
+            // Add Tracks
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            // Handle Remote Stream
+            peerConnection.ontrack = (e) => {
+                remoteVideo.srcObject = e.streams[0];
+            };
+
+            // ICE Candidates
             peerConnection.onicecandidate = (e) => {
                 if (e.candidate) conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'candidate', candidate: e.candidate } }));
             };
 
-            peerConnection.ontrack = (e) => {
-                remoteVideo.srcObject = e.streams[0];
-            };
+            // Create Offer
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'offer', sdp: offer } }));
         }
 
-        function showVideoUI() {
-            activeVideoOverlay.classList.remove('hidden');
-            callStatus.classList.remove('hidden');
+        async function handleSignal(signal) {
+            if (!peerConnection) {
+                // Initialize if answering
+                peerConnection = new RTCPeerConnection(rtcConfig);
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+                peerConnection.ontrack = (e) => remoteVideo.srcObject = e.streams[0];
+                peerConnection.onicecandidate = (e) => {
+                    if (e.candidate) conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'candidate', candidate: e.candidate } }));
+                };
+            }
+
+            if (signal.type === 'offer') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'answer', sdp: answer } }));
+            }
+            else if (signal.type === 'answer') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+            }
+            else if (signal.type === 'candidate') {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+            }
         }
 
-        function endCall(isRemote = false) {
-            if (!isRemote && conn && conn.readyState === WebSocket.OPEN) {
-                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+        function endCall() {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
             }
-
-            if (peerConnection) { peerConnection.close(); peerConnection = null; }
-            if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
-                localStream = null;
-            }
-
             remoteVideo.srcObject = null;
-            localVideo.srcObject = null;
-
-            btnCall.classList.remove('hidden');
-            callStatus.classList.add('hidden');
-            incomingOverlay.classList.add('hidden');
-            activeVideoOverlay.classList.add('hidden');
         }
 
-        // Toggles
-        function toggleMute() {
-            const track = localStream.getAudioTracks()[0];
-            track.enabled = !track.enabled;
-            document.getElementById('btn-mute').classList.toggle('bg-red-600');
-        }
-
-        function toggleVideo() {
-            const track = localStream.getVideoTracks()[0];
-            track.enabled = !track.enabled;
-            document.getElementById('btn-video-off').classList.toggle('bg-red-600');
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            html.setAttribute('data-theme', html.getAttribute('data-theme') === 'night' ? 'cupcake' : 'night');
-        }
     </script>
 </body>
 

@@ -9,7 +9,6 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use MyApp\Chat;
 
-// Running server on port 8080
 $server = IoServer::factory(
     new HttpServer(
         new WsServer(
@@ -20,5 +19,5 @@ $server = IoServer::factory(
 );
 
 echo "Server started on port 8080...\n";
-echo "Support Features: Random Chat, Public Chat, Video Call (WebRTC)\n";
+echo "XOXO Omegle-Style Server Running...\n";
 $server->run();
