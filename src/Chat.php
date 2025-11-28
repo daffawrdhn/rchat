@@ -7,8 +7,8 @@ use Ratchet\ConnectionInterface;
 class Chat implements MessageComponentInterface
 {
     protected $clients;
-    protected $waitingClient; // For Random Chat
-    protected $pairs;         // For Random Chat
+    protected $waitingClient; // Antrean user random chat
+    protected $pairs;         // Pasangan user random chat
 
     public function __construct()
     {
@@ -19,13 +19,13 @@ class Chat implements MessageComponentInterface
 
     public function onOpen(ConnectionInterface $conn)
     {
-        // Generate Nickname
+        // Generate Nickname Unik
         $conn->nickname = $this->generateNickname();
 
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId}) assigned name: {$conn->nickname}\n";
 
-        // Send identity
+        // Kirim identitas ke user
         $conn->send(json_encode([
             'status' => 'identity',
             'nickname' => $conn->nickname
@@ -42,8 +42,9 @@ class Chat implements MessageComponentInterface
 
         switch ($data['action']) {
             case 'join_room':
-                // Kita HAPUS cleanupRandomChat disini agar koneksi tidak putus saat pindah tab
-                // Kita hanya mengirim konfirmasi visual
+                // User pindah tab (Random <-> Public). 
+                // Kita TIDAK memutus koneksi random chat agar voice call tetap jalan.
+                // Hanya kirim konfirmasi ke client.
                 $from->send(json_encode([
                     'status' => 'room_joined',
                     'room' => $data['room']
@@ -55,17 +56,29 @@ class Chat implements MessageComponentInterface
                 break;
 
             case 'message':
-                // Cek apakah pesan ini untuk random chat (punya pasangan) atau public
-                // Kita bedakan berdasarkan parameter 'target' atau logika fallback
-                if (isset($this->pairs[$from->resourceId]) && ($data['context'] ?? '') === 'random') {
+                // Cek konteks pesan: apakah untuk Random (Private) atau Public
+                $context = $data['context'] ?? 'public';
+
+                if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
                     $this->handlePrivateMessage($from, $data['content'] ?? '');
                 } else {
-                    // Default ke public jika konteksnya public
-                    if (($data['context'] ?? '') === 'public') {
-                        $this->handlePublicMessage($from, $data['content'] ?? '');
-                    }
+                    $this->handlePublicMessage($from, $data['content'] ?? '');
                 }
                 break;
+
+            // --- LOGIKA VOICE CALL (WEBRTC) ---
+            case 'call_signal':
+                // Server hanya bertugas meneruskan data signal (Offer/Answer/ICE)
+                // dari pengirim ke pasangannya.
+                if (isset($this->pairs[$from->resourceId])) {
+                    $partner = $this->pairs[$from->resourceId];
+                    $partner->send(json_encode([
+                        'status' => 'call_signal',
+                        'signal' => $data['data']
+                    ]));
+                }
+                break;
+            // ----------------------------------
 
             case 'typing':
                 $this->handleTyping($from);
@@ -87,8 +100,8 @@ class Chat implements MessageComponentInterface
         ]);
 
         foreach ($this->clients as $client) {
-            // MODIFIKASI: Kirim ke SEMUA client (kecuali pengirim)
-            // Agar client yang sedang di tab 'Random' tetap dapat notifikasi
+            // Broadcast ke SEMUA user (kecuali pengirim)
+            // Agar user di tab 'Random' tetap dapat notifikasi badge public
             if ($client !== $from) {
                 $client->send($payload);
             }
@@ -97,11 +110,13 @@ class Chat implements MessageComponentInterface
 
     private function handleFindPartner($conn)
     {
+        // Jika sudah punya pasangan atau sedang menunggu, abaikan
         if (isset($this->pairs[$conn->resourceId]) || $this->waitingClient === $conn) {
             return;
         }
 
         if ($this->waitingClient !== null && $this->waitingClient !== $conn) {
+            // Match found!
             $partner = $this->waitingClient;
 
             $this->pairs[$conn->resourceId] = $partner;
@@ -111,6 +126,7 @@ class Chat implements MessageComponentInterface
             $conn->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
             $partner->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
         } else {
+            // Masuk antrean
             $this->waitingClient = $conn;
             $conn->send(json_encode(['status' => 'waiting', 'msg' => 'Looking for a stranger...']));
         }
@@ -135,13 +151,12 @@ class Chat implements MessageComponentInterface
     private function handleNext($conn)
     {
         $this->cleanupRandomChat($conn);
-        // Immediately look for new
         $this->handleFindPartner($conn);
     }
 
     private function cleanupRandomChat($conn)
     {
-        // Disconnect current partner if exists
+        // Putuskan hubungan dengan pasangan saat ini
         if (isset($this->pairs[$conn->resourceId])) {
             $partner = $this->pairs[$conn->resourceId];
             unset($this->pairs[$conn->resourceId]);
@@ -150,7 +165,6 @@ class Chat implements MessageComponentInterface
             $partner->send(json_encode(['status' => 'disconnected', 'msg' => 'Stranger disconnected.']));
         }
 
-        // Remove self from waiting list
         if ($this->waitingClient === $conn) {
             $this->waitingClient = null;
         }
@@ -160,12 +174,7 @@ class Chat implements MessageComponentInterface
     {
         $adjs = ['Cool', 'Super', 'Lazy', 'Hyper', 'Happy', 'Sad', 'Wild', 'Neon', 'Dark', 'Fast'];
         $nouns = ['Panda', 'Tiger', 'Fox', 'Wolf', 'Cat', 'Dog', 'Bear', 'Eagle', 'Shark', 'Hawk'];
-
-        $randAdj = $adjs[array_rand($adjs)];
-        $randNoun = $nouns[array_rand($nouns)];
-        $num = rand(100, 999);
-
-        return $randAdj . $randNoun . $num;
+        return $adjs[array_rand($adjs)] . $nouns[array_rand($nouns)] . rand(100, 999);
     }
 
     public function onClose(ConnectionInterface $conn)

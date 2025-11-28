@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XOXO - Chat App</title>
+    <title>XOXO - Chat & Voice</title>
 
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,39 +25,69 @@
             height: 100vh;
             overflow: hidden;
         }
+
+        /* Animasi Ringing saat ada panggilan masuk/keluar */
+        .pulse-ring {
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(56, 189, 248, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+            }
+        }
     </style>
 </head>
 
 <body class="bg-base-300 h-screen overflow-hidden">
 
+    <audio id="remote-audio" autoplay></audio>
+
     <dialog id="disclaimer_modal" class="modal modal-open">
         <div class="modal-box w-11/12 max-w-lg">
-            <h3 class="font-bold text-2xl text-warning">XOXO Disclaimer & Rules</h3>
+            <h3 class="font-bold text-2xl text-warning">XOXO Disclaimer</h3>
             <div class="py-4 space-y-2">
-                <p>By entering this chat, you agree to the following terms:</p>
+                <p>Welcome to XOXO Chat V2 (Voice Edition):</p>
                 <ul class="list-disc list-inside space-y-1">
-                    <li>You must be **18 years or older** to use this service.</li>
-                    <li>This app **does not log or collect** any messages you send.</li>
-                    <li>We are **not responsible** for any user-generated content or interactions.</li>
-                    <li>Please be wise, respectful, and do not share personal information.</li>
+                    <li>You must be **18 years or older**.</li>
+                    <li>We do not store your messages.</li>
+                    <li>Voice calls are **Peer-to-Peer** (Direct Connection).</li>
+                    <li>Be respectful.</li>
                 </ul>
             </div>
             <div class="modal-action">
-                <button class="btn btn-error" onclick="handleDisagree()">Disagree & Leave</button>
+                <button class="btn btn-error" onclick="handleDisagree()">Exit</button>
                 <button class="btn btn-success" onclick="handleAgree()">Agree & Connect</button>
             </div>
         </div>
         <div class="modal-backdrop backdrop-blur-sm bg-black/30"></div>
     </dialog>
 
+    <dialog id="incoming_call_modal" class="modal">
+        <div class="modal-box text-center">
+            <h3 class="font-bold text-lg text-primary">📞 Incoming Call!</h3>
+            <p class="py-4">Stranger wants to talk with you...</p>
+            <div class="modal-action justify-center">
+                <button class="btn btn-error" onclick="rejectCall()">Decline</button>
+                <button class="btn btn-success pulse-ring" onclick="acceptCall()">Accept</button>
+            </div>
+        </div>
+    </dialog>
 
     <div class="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 
         <div class="drawer-content flex flex-col items-center justify-center p-0 sm:p-4 h-screen">
 
-            <div
-                class="w-full lg:hidden flex justify-between items-center mb-0 p-2 bg-base-100 rounded-none sm:rounded-box sm:mb-2 shadow">
+            <div class="w-full lg:hidden flex justify-between items-center mb-0 p-2 bg-base-100 shadow">
                 <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -65,7 +95,7 @@
                             d="M4 6h16M4 12h16M4 18h7" />
                     </svg>
                 </label>
-                <span class="font-bold">XOXO Chat</span>
+                <span class="font-bold">XOXO Voice</span>
                 <div class="badge badge-success badge-sm"><span id="mobile-count">0</span></div>
             </div>
 
@@ -76,15 +106,14 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <h2 id="chat-title" class="card-title text-xl font-bold">Random Chat</h2>
-                            <div class="text-xs opacity-60 mt-1" id="status-bar">Waiting for agreement...</div>
-                            <div class="text-[10px] text-primary">Playing as: <span id="my-nickname"
+                            <div class="text-xs opacity-60 mt-1" id="status-bar">Waiting...</div>
+                            <div class="text-[10px] text-primary">As: <span id="my-nickname"
                                     class="font-bold">...</span></div>
                         </div>
-
                         <div class="flex items-center gap-3">
-                            <div class="badge badge-success gap-1 font-mono hidden lg:flex">
-                                <span id="count-val">0</span> Online
-                            </div>
+                            <div id="call-status" class="badge badge-info hidden animate-pulse">On Call 🔊</div>
+                            <div class="badge badge-success gap-1 font-mono hidden lg:flex"><span
+                                    id="count-val">0</span> Online</div>
                         </div>
                     </div>
                 </div>
@@ -99,12 +128,10 @@
                         </div>
 
                         <div id="controls" class="w-full">
-                            <button id="btn-start" onclick="startRandomChat()" class="btn btn-primary w-full shadow-lg">
-                                Find Stranger
-                            </button>
-                            <button id="btn-next" onclick="nextPartner()" class="btn btn-error w-full hidden">
-                                Next (Esc)
-                            </button>
+                            <button id="btn-start" onclick="startRandomChat()"
+                                class="btn btn-primary w-full shadow-lg">Find Stranger</button>
+                            <button id="btn-next" onclick="nextPartner()" class="btn btn-error w-full hidden">Next
+                                (Esc)</button>
                         </div>
 
                         <div id="random-input-area" class="join w-full hidden relative">
@@ -121,6 +148,12 @@
                                 class="input input-bordered join-item w-full focus:outline-none"
                                 placeholder="Say something..." onkeypress="handleInput(event, 'random')"
                                 onkeyup="sendTypingSignal()">
+
+                            <button id="btn-call" onclick="startCall()" class="btn btn-info join-item"
+                                title="Voice Call">📞</button>
+                            <button id="btn-hangup" onclick="endCall()" class="btn btn-error join-item hidden"
+                                title="Hangup">🔴</button>
+
                             <button onclick="sendMessage('random')" class="btn btn-primary join-item">Send</button>
                         </div>
                     </div>
@@ -128,7 +161,7 @@
 
                 <div id="public-chat-view" class="flex flex-col flex-grow overflow-hidden h-full hidden">
                     <div id="public-chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-base-200/50">
-                        <div class="divider text-xs opacity-50">Welcome to Public Lounge</div>
+                        <div class="divider text-xs opacity-50">Public Lounge</div>
                     </div>
 
                     <div class="card-body p-4 pt-2 flex-none border-t border-base-300">
@@ -142,8 +175,7 @@
                                 </div>
                             </div>
 
-                            <input type="text" id="public-msg-input"
-                                class="input input-bordered join-item w-full focus:outline-none"
+                            <input type="text" id="public-msg-input" class="input input-bordered join-item w-full"
                                 placeholder="Message everyone..." onkeypress="handleInput(event, 'public')">
                             <button onclick="sendMessage('public')" class="btn btn-secondary join-item">Send</button>
                         </div>
@@ -158,30 +190,17 @@
             <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content flex flex-col justify-between">
                 <div>
                     <div class="text-2xl font-bold mb-6 px-4 text-primary">XOXO <span
-                            class="text-xs text-content opacity-50">v2.0</span></div>
+                            class="text-xs text-content opacity-50">Voice</span></div>
 
                     <li>
                         <a onclick="switchMode('random')" id="nav-random" class="active justify-between">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                Random Chat
-                            </div>
+                            Random Chat
                             <span id="badge-random" class="badge badge-error badge-sm hidden">0</span>
                         </a>
                     </li>
-
                     <li>
                         <a onclick="switchMode('public')" id="nav-public" class="justify-between">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                                </svg>
-                                Public Lounge
-                            </div>
+                            Public Lounge
                             <span id="badge-public" class="badge badge-error badge-sm hidden">0</span>
                         </a>
                     </li>
@@ -204,9 +223,8 @@
                             </svg>
                         </label>
                     </div>
-
                     <div class="text-xs opacity-50 text-center">
-                        Connected as <br> <strong class="text-accent" id="sidebar-nickname">...</strong>
+                        Playing as <br> <strong class="text-accent" id="sidebar-nickname">...</strong>
                     </div>
                 </div>
             </ul>
@@ -214,15 +232,14 @@
     </div>
 
     <script>
+        // --- GLOBAL VARIABLES ---
         let conn;
-        let currentMode = 'random'; // 'random' or 'public'
+        let currentMode = 'random';
         let myNickname = '';
-
-        // --- Counters ---
         let unreadRandom = 0;
         let unreadPublic = 0;
 
-        // Elements
+        // UI References
         const randomView = document.getElementById('random-chat-view');
         const publicView = document.getElementById('public-chat-view');
         const randomBox = document.getElementById('random-chat-box');
@@ -234,17 +251,27 @@
         const badgeRandom = document.getElementById('badge-random');
         const badgePublic = document.getElementById('badge-public');
 
-        // Random Chat UI
         const btnStart = document.getElementById('btn-start');
         const btnNext = document.getElementById('btn-next');
         const randomInputArea = document.getElementById('random-input-area');
         const randomInput = document.getElementById('random-msg-input');
-        const typingInd = document.getElementById('typing-indicator');
-
-        // Public Chat UI
         const publicInput = document.getElementById('public-msg-input');
 
-        // --- INIT EMOJIS ---
+        // --- WEBRTC VARIABLES ---
+        let localStream;
+        let peerConnection;
+        const remoteAudio = document.getElementById('remote-audio');
+        const btnCall = document.getElementById('btn-call');
+        const btnHangup = document.getElementById('btn-hangup');
+        const callStatus = document.getElementById('call-status');
+        const incomingModal = document.getElementById('incoming_call_modal');
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' } // Google STUN Server
+            ]
+        };
+
+        // --- INIT EMOJI ---
         const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
         const renderEmojis = (id, context) => {
             const container = document.getElementById(id);
@@ -255,96 +282,26 @@
         renderEmojis('emoji-grid-random', 'random');
         renderEmojis('emoji-grid-public', 'public');
 
-
-        // --- DISCLAIMER LOGIC ---
         function handleAgree() {
             document.getElementById('disclaimer_modal').classList.remove('modal-open');
             document.getElementById('disclaimer_modal').classList.add('hidden');
             initSocket();
         }
+        function handleDisagree() { window.location.href = 'https://google.com'; }
 
-        function handleDisagree() {
-            window.location.href = 'https://google.com';
-        }
-
-        // --- EMOJI LOGIC ---
-        function insertEmoji(emoji, context) {
-            const input = context === 'random' ? randomInput : publicInput;
-            input.value += emoji;
-            input.focus();
-        }
-
-        // --- UI BADGE LOGIC ---
-        function updateBadges() {
-            if (unreadRandom > 0) {
-                badgeRandom.innerText = unreadRandom;
-                badgeRandom.classList.remove('hidden');
-            } else {
-                badgeRandom.classList.add('hidden');
-            }
-
-            if (unreadPublic > 0) {
-                badgePublic.innerText = unreadPublic;
-                badgePublic.classList.remove('hidden');
-            } else {
-                badgePublic.classList.add('hidden');
-            }
-        }
-
-        // --- MODE SWITCHING ---
-        function switchMode(mode) {
-            currentMode = mode;
-
-            // Close Sidebar on mobile
-            document.getElementById('my-drawer-2').checked = false;
-
-            // Navbar Active State
-            document.getElementById('nav-random').classList.remove('active');
-            document.getElementById('nav-public').classList.remove('active');
-            document.getElementById(`nav-${mode}`).classList.add('active');
-
-            // Reset Counter for entered mode
-            if (mode === 'random') unreadRandom = 0;
-            if (mode === 'public') unreadPublic = 0;
-            updateBadges();
-
-            if (mode === 'random') {
-                randomView.classList.remove('hidden');
-                publicView.classList.add('hidden');
-                chatTitle.innerText = "Random Chat";
-                randomBox.scrollTop = randomBox.scrollHeight;
-
-                // Set status bar based on connection state (simplified)
-                if (!btnNext.classList.contains('hidden')) {
-                    statusBar.innerText = "Chatting with Stranger";
-                } else if (!btnStart.classList.contains('hidden')) {
-                    statusBar.innerText = "Idle";
-                }
-            } else {
-                randomView.classList.add('hidden');
-                publicView.classList.remove('hidden');
-                chatTitle.innerText = "Public Lounge";
-                statusBar.innerText = "Broadcasting to everyone";
-                publicBox.scrollTop = publicBox.scrollHeight;
-            }
-
-            // NOTE: We do NOT send 'join_room' anymore to avoid disconnecting the random partner
-        }
-
-        // --- WEBSOCKET ---
+        // --- WEBSOCKET CONNECTION ---
         function initSocket() {
-            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            // Ubah URL ini jika sudah dihosting di VPS (misal: wss://domain.com/ws)
+            // Untuk local: ws://localhost:8080
             const socketUrl = 'wss://chat.1year.site/ws';
-            // const socketUrl = 'ws://127.0.0.1:8080'; // Local testing
-
             console.log("Connecting to:", socketUrl);
-            statusBar.innerText = "Connecting...";
+
             conn = new WebSocket(socketUrl);
 
             conn.onopen = function (e) {
                 statusBar.innerText = "Connected";
                 statusBar.className = "text-xs font-bold text-success mt-1";
-                // Initial Join
+                // Join Random room by default
                 conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
             };
 
@@ -353,6 +310,7 @@
                 statusBar.className = "text-xs font-bold text-error mt-1";
                 setTimeout(initSocket, 3000);
                 setRandomUI('disconnected');
+                endCall(true); // Putus call jika WS putus
             };
 
             conn.onmessage = function (e) {
@@ -368,7 +326,7 @@
                     mobileCount.innerText = data.count;
                 }
 
-                // --- RANDOM CHAT LOGIC ---
+                // RANDOM CHAT EVENTS
                 else if (data.status === 'waiting') {
                     logSystem(randomBox, data.msg);
                     setRandomUI('waiting');
@@ -380,13 +338,10 @@
                 else if (data.status === 'disconnected') {
                     logSystem(randomBox, data.msg);
                     setRandomUI('disconnected_partner');
+                    endCall(true); // Putus call jika partner disconnect
                 }
                 else if (data.status === 'message') {
-                    // Logic: If in Public mode, count as unread random message
-                    if (currentMode !== 'random') {
-                        unreadRandom++;
-                        updateBadges();
-                    }
+                    if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
                     showTyping(false);
                     logMessage(randomBox, 'stranger', 'Stranger', data.msg);
                 }
@@ -394,22 +349,195 @@
                     showTyping(true);
                 }
 
-                // --- PUBLIC CHAT LOGIC ---
+                // PUBLIC CHAT EVENTS
                 else if (data.status === 'public_msg') {
-                    const isMe = false; // Server only sends others' messages now
-
-                    // Logic: If in Random mode, count as unread public message
-                    if (currentMode !== 'public') {
-                        unreadPublic++;
-                        updateBadges();
-                    }
-
+                    if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
                     logMessage(publicBox, 'other', data.name, data.msg);
+                }
+
+                // WEBRTC SIGNALING EVENTS (BARU)
+                else if (data.status === 'call_signal') {
+                    handleSignalMessage(data.signal);
                 }
             };
         }
 
-        // --- ACTIONS ---
+        // --- WEBRTC FUNCTIONS (VOICE CALL) ---
+
+        async function startCall() {
+            btnCall.classList.add('hidden');
+            btnHangup.classList.remove('hidden');
+
+            try {
+                // 1. Minta akses Mikrofon
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                createPeerConnection();
+
+                // 2. Masukkan stream audio ke koneksi
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                // 3. Buat penawaran (Offer)
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                // 4. Kirim Offer ke Partner via Server
+                conn.send(JSON.stringify({
+                    action: 'call_signal',
+                    data: { type: 'offer', sdp: offer }
+                }));
+
+                logSystem(randomBox, "📞 Calling stranger...");
+            } catch (err) {
+                console.error("Error accessing mic:", err);
+                alert("Microphone access is required.");
+                endCall();
+            }
+        }
+
+        async function handleSignalMessage(signal) {
+            if (!peerConnection) createPeerConnection();
+
+            if (signal.type === 'offer') {
+                // Seseorang menelepon kita
+                incomingModal.classList.add('modal-open');
+                window.pendingOffer = signal.sdp; // Simpan dulu sampai user klik Accept
+            }
+            else if (signal.type === 'answer') {
+                // Partner menerima panggilan kita
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+                callStatus.classList.remove('hidden'); // Tampilkan status 'On Call'
+                logSystem(randomBox, "📞 Call Connected.");
+            }
+            else if (signal.type === 'candidate') {
+                // Pertukaran jalur jaringan (ICE Candidate)
+                if (signal.candidate) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate));
+                }
+            }
+            else if (signal.type === 'hangup') {
+                // Partner menutup telepon
+                logSystem(randomBox, "📞 Call ended by stranger.");
+                endCall(true);
+            }
+        }
+
+        async function acceptCall() {
+            incomingModal.classList.remove('modal-open');
+            btnCall.classList.add('hidden');
+            btnHangup.classList.remove('hidden');
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+                // Tambahkan track audio kita agar partner bisa mendengar
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(window.pendingOffer));
+
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                // Kirim Jawaban (Answer) ke Penelepon
+                conn.send(JSON.stringify({
+                    action: 'call_signal',
+                    data: { type: 'answer', sdp: answer }
+                }));
+
+                callStatus.classList.remove('hidden');
+                logSystem(randomBox, "📞 Call Connected.");
+            } catch (e) {
+                console.error(e);
+                endCall();
+            }
+        }
+
+        function rejectCall() {
+            incomingModal.classList.remove('modal-open');
+            conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+        }
+
+        function createPeerConnection() {
+            if (peerConnection) return;
+
+            peerConnection = new RTCPeerConnection(rtcConfig);
+
+            // Saat menemukan kandidat jaringan (STUN), kirim ke partner
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    conn.send(JSON.stringify({
+                        action: 'call_signal',
+                        data: { type: 'candidate', candidate: event.candidate }
+                    }));
+                }
+            };
+
+            // Saat stream audio partner masuk, putar di elemen <audio>
+            peerConnection.ontrack = (event) => {
+                remoteAudio.srcObject = event.streams[0];
+            };
+        }
+
+        function endCall(isRemote = false) {
+            // Jika kita yang mematikan, kirim sinyal hangup
+            if (!isRemote && conn && conn.readyState === WebSocket.OPEN) {
+                conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'hangup' } }));
+            }
+
+            // Bersihkan resource WebRTC
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            remoteAudio.srcObject = null;
+            btnCall.classList.remove('hidden');
+            btnHangup.classList.add('hidden');
+            callStatus.classList.add('hidden');
+        }
+
+        // --- HELPER UI ---
+
+        function updateBadges() {
+            if (unreadRandom > 0) { badgeRandom.innerText = unreadRandom; badgeRandom.classList.remove('hidden'); }
+            else badgeRandom.classList.add('hidden');
+
+            if (unreadPublic > 0) { badgePublic.innerText = unreadPublic; badgePublic.classList.remove('hidden'); }
+            else badgePublic.classList.add('hidden');
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('my-drawer-2').checked = false; // Close mobile drawer
+
+            document.getElementById('nav-random').classList.remove('active');
+            document.getElementById('nav-public').classList.remove('active');
+            document.getElementById(`nav-${mode}`).classList.add('active');
+
+            if (mode === 'random') {
+                randomView.classList.remove('hidden');
+                publicView.classList.add('hidden');
+                chatTitle.innerText = "Random Chat";
+                unreadRandom = 0; updateBadges();
+
+                if (!btnNext.classList.contains('hidden')) statusBar.innerText = "Chatting";
+                else statusBar.innerText = "Idle";
+            } else {
+                randomView.classList.add('hidden');
+                publicView.classList.remove('hidden');
+                chatTitle.innerText = "Public Lounge";
+                statusBar.innerText = "Broadcasting";
+                unreadPublic = 0; updateBadges();
+                publicBox.scrollTop = publicBox.scrollHeight;
+            }
+
+            // Note: Kita tidak kirim 'join_room' lagi di sini agar koneksi random tidak putus
+        }
+
+        // --- CHAT ACTIONS ---
         function startRandomChat() {
             if (!conn || conn.readyState !== WebSocket.OPEN) return;
             conn.send(JSON.stringify({ action: 'find_partner' }));
@@ -419,6 +547,7 @@
         function nextPartner() {
             randomBox.innerHTML = '';
             showTyping(false);
+            endCall(); // Matikan telepon jika ganti partner
             conn.send(JSON.stringify({ action: 'next' }));
         }
 
@@ -439,11 +568,16 @@
             input.focus();
         }
 
+        function insertEmoji(emoji, context) {
+            const input = context === 'random' ? randomInput : publicInput;
+            input.value += emoji;
+            input.focus();
+        }
+
         function handleInput(e, context) {
             if (e.key === 'Enter') sendMessage(context);
         }
 
-        // --- UTILS ---
         function logMessage(container, type, name, msg) {
             const isMe = type === 'you';
             const align = isMe ? 'chat-end' : 'chat-start';
@@ -457,7 +591,6 @@
                 </div>
                 <div class="chat-bubble ${bubbleColor}">${msg}</div>
             </div>`;
-
             container.innerHTML += html;
             container.scrollTop = container.scrollHeight;
         }
@@ -479,7 +612,7 @@
                 btnNext.classList.remove('hidden');
                 randomInputArea.classList.remove('hidden');
                 randomInputArea.classList.add('flex');
-                if (currentMode === 'random') statusBar.innerText = "Chatting with Stranger";
+                if (currentMode === 'random') statusBar.innerText = "Connected";
             } else if (state === 'disconnected_partner') {
                 btnNext.classList.remove('hidden');
                 if (currentMode === 'random') statusBar.innerText = "Stranger disconnected";
@@ -487,7 +620,7 @@
             }
         }
 
-        // Typing Logic
+        // Typing
         let typingTimer;
         let lastTypingTime = 0;
         function sendTypingSignal() {
@@ -498,12 +631,13 @@
             }
         }
         function showTyping(show) {
+            const ind = document.getElementById('typing-indicator');
             if (show) {
-                typingInd.classList.remove('invisible');
+                ind.classList.remove('invisible');
                 clearTimeout(typingTimer);
-                typingTimer = setTimeout(() => typingInd.classList.add('invisible'), 3000);
+                typingTimer = setTimeout(() => ind.classList.add('invisible'), 3000);
             } else {
-                typingInd.classList.add('invisible');
+                ind.classList.add('invisible');
             }
         }
 
