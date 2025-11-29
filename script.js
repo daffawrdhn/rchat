@@ -38,7 +38,19 @@ const videoContainer = document.getElementById('video-container');
 const btnCall = document.getElementById('btn-call');
 const btnHangup = document.getElementById('btn-hangup');
 const incomingOverlay = document.getElementById('incoming_call_overlay');
-const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+const rtcConfig = {
+    iceServers: [
+        // Google's Public STUN (Keep this as backup/first attempt)
+        { urls: 'stun:stun.l.google.com:19302' },
+
+        // YOUR NEW TURN SERVER
+        {
+            urls: 'turn:YOUR_PUBLIC_IP:3478',
+            username: 'johndoe',
+            credential: 'johndoe-password'
+        }
+    ]
+};
 
 // Emojis
 const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
