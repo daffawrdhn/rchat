@@ -4,6 +4,8 @@ let currentMode = 'random';
 let myNickname = '';
 let unreadRandom = 0;
 let unreadPublic = 0;
+// Flag to track if we are actively searching
+let isSearching = false;
 
 // UI Refs
 const randomView = document.getElementById('random-chat-view');
@@ -21,6 +23,7 @@ const countVal = document.getElementById('count-val');
 const mobileCount = document.getElementById('mobile-count');
 
 const btnStart = document.getElementById('btn-start');
+const btnStop = document.getElementById('btn-stop'); // New Cancel Button
 const btnNext = document.getElementById('btn-next');
 const randomInputArea = document.getElementById('random-input-area');
 const randomInput = document.getElementById('random-msg-input');
@@ -55,6 +58,24 @@ const rtcConfig = {
     ]
 };
 
+// --- SOUND EFFECTS ---
+const sounds = {
+    msg: new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3'),
+    connect: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),
+    disconnect: new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3')
+};
+
+// Preload sounds
+Object.values(sounds).forEach(s => s.load());
+
+function playAudio(type) {
+    if (sounds[type]) {
+        // Reset time to allow rapid playback
+        sounds[type].currentTime = 0;
+        sounds[type].play().catch(e => console.log("Audio play failed (user interaction needed):", e));
+    }
+}
+
 // Emojis
 const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
 const renderEmojis = (id, ctx) => document.getElementById(id).innerHTML = emojis.map(e => `<button class="btn btn-ghost btn-sm text-xl hover:bg-white/10" onclick="insertEmoji('${e}', '${ctx}')">${e}</button>`).join('');
@@ -72,6 +93,7 @@ function initSocket() {
 
         if (currentMode === 'random') {
             btnStart.classList.remove('hidden');
+            btnStop.classList.add('hidden');
             btnNext.classList.add('hidden');
             randomInputArea.classList.add('hidden');
         }
@@ -99,25 +121,38 @@ function initSocket() {
             logSystem(currentMode === 'random' ? randomBox : publicBox, `⚠️ ${data.msg}`);
         }
         else if (data.status === 'waiting') {
-            setRandomUI('waiting');
-            logSystem(randomBox, data.msg);
+            // Only show waiting UI if we initiated a search
+            if (isSearching) {
+                setRandomUI('waiting');
+                logSystem(randomBox, data.msg);
+            }
         }
         else if (data.status === 'connected') {
+            // If we canceled, ignore late connection attempts
+            if (!isSearching && currentMode === 'random') {
+                console.log("Ignored connection because search was canceled.");
+                return;
+            }
+            playAudio('connect');
             setRandomUI('connected');
             logSystem(randomBox, "You are connected with a Stranger.");
         }
         else if (data.status === 'disconnected') {
+            playAudio('disconnect');
             setRandomUI('disconnected_partner');
             logSystem(randomBox, "Stranger left.");
             endCall(true);
         }
         else if (data.status === 'message') {
             if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
+            playAudio('msg');
             showTyping(false);
             logMessage(randomBox, 'stranger', 'Stranger', data.msg, data.type);
         }
         else if (data.status === 'public_msg') {
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
+            // Optional: Play sound for public messages too?
+            // playAudio('msg'); 
             logMessage(publicBox, 'other', data.name, data.msg, data.type);
         }
         else if (data.status === 'typing') showTyping(true);
@@ -164,9 +199,13 @@ function setRandomUI(state) {
     btnNext.classList.add('hidden');
     randomInputArea.classList.add('hidden');
     btnStart.classList.add('hidden');
+    btnStop.classList.add('hidden'); // Hide cancel by default
     randomInputArea.classList.remove('flex');
 
-    if (state === 'waiting') updateStatus("Searching...", "warning");
+    if (state === 'waiting') {
+        updateStatus("Searching...", "warning");
+        btnStop.classList.remove('hidden'); // Show cancel button
+    }
     else if (state === 'connected') {
         btnNext.classList.remove('hidden');
         randomInputArea.classList.remove('hidden');
@@ -176,6 +215,9 @@ function setRandomUI(state) {
         btnNext.classList.remove('hidden');
         if (currentMode === 'random') updateStatus("Partner Left", "error");
         showTyping(false);
+    } else if (state === 'disconnected') {
+        // Full reset
+        btnStart.classList.remove('hidden');
     }
 }
 
@@ -218,15 +260,40 @@ function logSystem(container, msg) {
 // --- ACTIONS ---
 function startRandomChat() {
     if (conn.readyState !== WebSocket.OPEN) return;
+    isSearching = true; // Set flag
     conn.send(JSON.stringify({ action: 'find_partner' }));
+
+    // Immediate UI update
     btnStart.classList.add('hidden');
+    btnStop.classList.remove('hidden');
+    updateStatus("Searching...", "warning");
 }
+
+function stopRandomChat() {
+    isSearching = false; // Clear flag
+
+    // We can't strictly "cancel" the queue on some servers without leaving,
+    // so we send a 'next' or re-join logic, or simply reset UI and ignore connection.
+    // Ideally, send {action: 'leave'} if supported, otherwise just UI reset.
+    // Here we will assume a soft reset.
+
+    btnStop.classList.add('hidden');
+    btnStart.classList.remove('hidden');
+    updateStatus("Idle", "warning");
+    logSystem(randomBox, "Search canceled.");
+
+    // Optional: Re-send join to ensure clean state
+    conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
+}
+
 function nextPartner() {
     randomBox.innerHTML = '';
     showTyping(false);
     endCall();
+    isSearching = true; // We are searching again
     conn.send(JSON.stringify({ action: 'next' }));
 }
+
 function sendMessage(context, type = 'text', content = null) {
     const input = context === 'random' ? randomInput : publicInput;
     const text = content || input.value.trim();
