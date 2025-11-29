@@ -47,7 +47,7 @@ const rtcConfig = {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         {
-            urls: 'turn:YOUR_PUBLIC_IP:3478',
+            urls: 'turn:20.2.138.225:3478',
             username: 'johndoe',
             credential: 'johndoe-password'
         }
