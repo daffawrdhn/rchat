@@ -298,7 +298,7 @@ function showTyping(show) {
     if (show) { clearTimeout(typingTimer); typingTimer = setTimeout(() => ind.style.opacity = '0', 3000); }
 }
 
-// --- VIDEO CALLS (REFACTORED WITH SIDE-BY-SIDE & CONTROLS) ---
+// --- VIDEO CALLS (PICTURE-IN-PICTURE OVERLAY) ---
 
 function toggleMic() {
     if (localStream) {
@@ -344,9 +344,9 @@ async function startCall() {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
         localVideo.srcObject = localStream;
 
-        // Show Video Container
+        // SHOW CONTAINER (BLOCK FOR RELATIVE)
+        videoContainer.style.display = 'block';
         videoContainer.classList.remove('hidden');
-        videoContainer.classList.add('flex');
 
         createPeerConnection();
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
@@ -392,9 +392,9 @@ async function acceptCall() {
     btnCall.classList.add('hidden');
     btnHangup.classList.remove('hidden');
 
-    // Show Video Container
+    // SHOW CONTAINER
+    videoContainer.style.display = 'block';
     videoContainer.classList.remove('hidden');
-    videoContainer.classList.add('flex');
 
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
@@ -452,9 +452,9 @@ function endCall(isRemote = false) {
     remoteVideo.srcObject = null;
     localVideo.srcObject = null;
 
-    // Hide Video Container
+    // HIDE CONTAINER
+    videoContainer.style.display = 'none';
     videoContainer.classList.add('hidden');
-    videoContainer.classList.remove('flex');
 
     btnCall.classList.remove('hidden');
     btnHangup.classList.add('hidden');

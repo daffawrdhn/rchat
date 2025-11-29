@@ -168,47 +168,51 @@
                 <div id="random-chat-view" class="flex flex-col h-full pt-20">
 
                     <div id="video-container"
-                        class="w-full hidden shrink-0 flex-col gap-2 p-2 bg-black/40 border-b border-white/5 transition-all">
-                        <div class="grid grid-cols-2 gap-2 h-[200px] md:h-[300px]">
-                            <div class="vid-wrapper relative w-full h-full">
-                                <video id="local-video" autoplay playsinline muted
-                                    class="w-full h-full object-cover"></video>
-                                <div
-                                    class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-white font-bold">
-                                    You</div>
+                        class="hidden shadow-2xl transition-all relative w-full bg-black border-b border-white/10">
 
-                                <div class="absolute bottom-2 right-2 flex gap-1">
-                                    <button onclick="toggleMic()" id="btn-mic"
-                                        class="btn btn-xs btn-circle btn-ghost bg-black/50 text-white hover:bg-white/20">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
-                                            fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                    <button onclick="toggleCam()" id="btn-cam"
-                                        class="btn btn-xs btn-circle btn-ghost bg-black/50 text-white hover:bg-white/20">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
-                                            fill="currentColor">
-                                            <path
-                                                d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                                        </svg>
-                                    </button>
+                        <div class="remote-wrapper relative w-full h-full flex items-center justify-center bg-black">
+                            <video id="remote-video" autoplay playsinline class="w-full h-full object-contain"></video>
+
+                            <div class="absolute top-4 left-4 flex gap-2 pointer-events-none">
+                                <div
+                                    class="badge badge-error gap-1 animate-pulse border-none text-white font-bold text-xs shadow-lg">
+                                    <div class="w-2 h-2 rounded-full bg-white"></div> LIVE
                                 </div>
                             </div>
+                            <div
+                                class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-white font-bold pointer-events-none">
+                                Stranger</div>
+                        </div>
 
-                            <div class="vid-wrapper relative w-full h-full">
-                                <video id="remote-video" autoplay playsinline
-                                    class="w-full h-full object-cover"></video>
-                                <div
-                                    class="absolute top-2 left-2 bg-red-600 px-2 py-1 rounded text-[10px] text-white font-mono animate-pulse">
-                                    LIVE</div>
-                                <div
-                                    class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-white font-bold">
-                                    Stranger</div>
+                        <div
+                            class="local-wrapper absolute top-4 right-4 z-20 rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-gray-900 transition-all">
+                            <video id="local-video" autoplay playsinline muted
+                                class="w-full h-auto block transform -scale-x-100 bg-gray-800"></video>
+                            <div
+                                class="absolute bottom-1 left-2 text-[10px] text-white font-bold drop-shadow-md pointer-events-none">
+                                You</div>
+
+                            <div class="absolute bottom-1 right-1 flex gap-1 z-30">
+                                <button onclick="toggleMic()" id="btn-mic"
+                                    class="btn btn-xs btn-circle btn-ghost bg-black/50 text-white hover:bg-white/20 border-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <button onclick="toggleCam()" id="btn-cam"
+                                    class="btn btn-xs btn-circle btn-ghost bg-black/50 text-white hover:bg-white/20 border-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path
+                                            d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
+
                     </div>
 
                     <div id="random-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 space-y-4 pb-4">

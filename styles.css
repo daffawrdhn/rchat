@@ -30,25 +30,58 @@ body {
     animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Video Call Wrappers */
-.vid-wrapper {
-    position: relative;
-    border-radius: 12px;
+/* --- VIDEO CALL LAYOUT (Picture-in-Picture / Overlay) --- */
+#video-container {
+    width: 100%;
+    /* Mobile Height: Leaves room for chat */
+    height: 55vh;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: none;
+    /* Default hidden */
+}
+
+/* Desktop Height: Cap it so it doesn't take up the whole monitor */
+@media (min-width: 1024px) {
+    #video-container {
+        height: 450px;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+}
+
+/* STRANGER VIDEO (Background) */
+.remote-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: #000;
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #remote-video {
-    /* No flip for remote video - see stranger normally */
-    background: #111;
+    /* CONTAIN: Shows full video (with black bars if needed), NO CROP */
+    object-fit: contain;
 }
 
-#local-video {
-    /* Flip local video so it acts like a mirror */
-    transform: scaleX(-1);
-    background: #222;
+/* LOCAL VIDEO (Overlay) */
+.local-wrapper {
+    /* Dimensions */
+    width: 30%;
+    /* Take 30% of container width */
+    max-width: 160px;
+    /* Don't get too big on tablets */
+    min-width: 100px;
+    /* Don't get too small on tiny phones */
+
+    /* Height is AUTO so it adjusts to aspect ratio (Vertical/Horizontal) automatically */
+    height: auto;
+
+    /* Styling */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #111;
+    transition: all 0.3s ease;
 }
 
 .pulse-ring {
