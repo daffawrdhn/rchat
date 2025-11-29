@@ -301,6 +301,7 @@ function toggleVideoSize() {
 }
 
 async function startCall() {
+    showVideoTip();
     btnCall.classList.add('hidden');
     btnHangup.classList.remove('hidden');
     try {
@@ -431,6 +432,38 @@ function endCall(isRemote = false) {
 function toggleTheme() {
     const html = document.documentElement;
     html.setAttribute('data-theme', html.getAttribute('data-theme') === 'night' ? 'cupcake' : 'night');
+}
+
+// --- NEW: USER AGREEMENT LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('agreement_modal');
+
+    // Check if already agreed in this session
+    if (!sessionStorage.getItem('terms_accepted')) {
+        modal.showModal();
+
+        // Prevent closing with ESC key
+        modal.addEventListener('cancel', (event) => {
+            event.preventDefault();
+        });
+    }
+});
+
+function acceptTerms() {
+    sessionStorage.setItem('terms_accepted', 'true');
+    document.getElementById('agreement_modal').close();
+
+    // Play a subtle sound or animation if you like
+    console.log("Terms accepted.");
+}
+
+// --- NEW: VIDEO TIP LOGIC ---
+function showVideoTip() {
+    // Only show this once per session to avoid annoying the user
+    if (!sessionStorage.getItem('video_tip_shown')) {
+        document.getElementById('video_tip_modal').showModal();
+        sessionStorage.setItem('video_tip_shown', 'true');
+    }
 }
 
 // Start

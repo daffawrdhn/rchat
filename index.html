@@ -184,6 +184,54 @@
         </form>
     </dialog>
 
+    <dialog id="agreement_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
+        <div class="modal-box border border-error/20 shadow-[0_0_50px_rgba(255,0,0,0.1)]">
+            <h3 class="font-bold text-lg text-error flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Age Verification & Terms
+            </h3>
+            <div class="py-4 space-y-4 text-sm opacity-80">
+                <p>Welcome to XOXO.</p>
+                <p>By entering this site, you legally confirm that:</p>
+                <ul class="list-disc list-inside space-y-1 font-semibold">
+                    <li>You are at least 18 years of age.</li>
+                    <li>You will not upload illegal content.</li>
+                    <li>You will be respectful to other strangers.</li>
+                </ul>
+                <p class="text-xs opacity-50 mt-4">Violators will be banned immediately.</p>
+            </div>
+            <div class="modal-action flex-col gap-2">
+                <button onclick="acceptTerms()" class="btn btn-error w-full text-white">I am 18+ and I Agree</button>
+                <button onclick="window.location.href='https://google.com'" class="btn btn-ghost w-full">Exit</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="video_tip_modal" class="modal">
+        <div class="modal-box border border-info/20">
+            <h3 class="font-bold text-lg text-info">💡 Connectivity Tip</h3>
+            <p class="py-4 text-base-content/80">
+                If the video call is black or fails to connect:
+                <br><br>
+                <span class="font-bold text-warning">Try switching from Mobile Data (4G/5G) to WiFi.</span>
+                <br><br>
+                Some mobile networks block video connections for security.
+            </p>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-primary">Got it</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
     <input type="file" id="img-upload" hidden accept="image/*" onchange="handleImageUpload(this)">
 
     <div class="drawer lg:drawer-open h-full">
