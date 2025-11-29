@@ -2,6 +2,7 @@ const CACHE_NAME = 'xoxo-v1';
 const urlsToCache = [
     './',
     './index.html',
+    './styles.css',
     './script.js',
     './manifest.json',
     'https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css',
