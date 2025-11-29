@@ -466,5 +466,42 @@ function showVideoTip() {
     }
 }
 
+function checkIOSInstall() {
+    // 1. Detect if device is iOS (iPhone, iPad, iPod)
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    // 2. Detect if already running in "App Mode" (Standalone)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    // 3. If it is iOS AND NOT installed yet -> Show a custom instruction
+    if (isIOS && !isStandalone) {
+        // Create a simple toast/popup
+        const toast = document.createElement('div');
+        toast.className = "fixed bottom-4 left-4 right-4 bg-base-100 p-4 rounded-xl border border-white/10 shadow-2xl z-50 flex flex-col gap-2 msg-anim";
+        toast.innerHTML = `
+          <div class="flex justify-between items-start">
+              <div>
+                  <h3 class="font-bold text-sm">Install XOXO App 📲</h3>
+                  <p class="text-xs opacity-70 mt-1">For the best experience, add this to your home screen.</p>
+              </div>
+              <button onclick="this.parentElement.parentElement.remove()" class="btn btn-xs btn-circle btn-ghost">✕</button>
+          </div>
+          <div class="text-xs flex items-center gap-2 mt-2 bg-base-200 p-2 rounded">
+              <span>1. Tap</span> 
+              <span class="text-xl leading-none">📤</span> 
+              <span>(Share) in Safari bar</span>
+          </div>
+          <div class="text-xs flex items-center gap-2">
+              <span>2. Scroll down & tap</span>
+              <span class="font-bold">"Add to Home Screen" ➕</span>
+          </div>
+      `;
+        document.body.appendChild(toast);
+    }
+}
+
+// Run this check 2 seconds after load
+setTimeout(checkIOSInstall, 2000);
+
 // Start
 initSocket();

@@ -1,0 +1,54 @@
+# ----------------------------------------------------------------------
+# SECURITY HEADERS (CRITICAL FOR VIDEO CHAT)
+# ----------------------------------------------------------------------
+<IfModule mod_headers.c>
+    # 1. HSTS: Tell browser to ALWAYS use HTTPS for the next year
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # 2. PERMISSIONS POLICY:
+    # Explicitly allow Camera and Microphone for your own site (self).
+    Header set Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
+
+    # 3. CLICKJACKING PROTECTION:
+    # Prevents other sites from putting your chat in a hidden iframe
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # 4. MIME SNIFFING PROTECTION:
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# ----------------------------------------------------------------------
+# HTTPS REDIRECT (BACKUP)
+# ----------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ----------------------------------------------------------------------
+# PWA & CACHING
+# ----------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # CRITICAL: Service Worker must NEVER be cached!
+    <Files "sw.js">
+        ExpiresDefault A0
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    </Files>
+
+    # Cache Images, CSS, and JS for 1 Month
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+</IfModule>
+
+# ----------------------------------------------------------------------
+# DIRECTORY LISTING
+# ----------------------------------------------------------------------
+Options -Indexes
