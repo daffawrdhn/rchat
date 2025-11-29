@@ -29,9 +29,12 @@ const publicInput = document.getElementById('public-msg-input');
 // Video & WebRTC
 let localStream;
 let peerConnection;
-// --- FIX: Queue for storing candidates that arrive before the connection is ready ---
+let isMuted = false;
+let isCameraOff = false;
+
+// Queue for storing candidates that arrive before the connection is ready
 let iceCandidateQueue = [];
-// ----------------------------------------------------------------------------------
+
 const remoteVideo = document.getElementById('remote-video');
 const localVideo = document.getElementById('local-video');
 const videoContainer = document.getElementById('video-container');
@@ -295,10 +298,43 @@ function showTyping(show) {
     if (show) { clearTimeout(typingTimer); typingTimer = setTimeout(() => ind.style.opacity = '0', 3000); }
 }
 
-// --- VIDEO CALLS (REFACTORED WITH FIX) ---
-function toggleVideoSize() {
-    videoContainer.classList.toggle('expanded');
+// --- VIDEO CALLS (REFACTORED WITH SIDE-BY-SIDE & CONTROLS) ---
+
+function toggleMic() {
+    if (localStream) {
+        isMuted = !isMuted;
+        localStream.getAudioTracks()[0].enabled = !isMuted;
+        const btn = document.getElementById('btn-mic');
+        // Update Icon
+        if (isMuted) {
+            btn.classList.add('bg-red-500', 'hover:bg-red-600');
+            btn.classList.remove('bg-black/50');
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12.732a1 1 0 01-1.707.707l-3.515-3.515H3a1 1 0 01-1-1v-4a1 1 0 011-1h1.778l3.515-3.515a1 1 0 011.09-.231zM12.71 6.29a1 1 0 01.037 1.414l-1.414 1.414 1.414 1.414a1 1 0 01-1.414 1.414l-1.414-1.414-1.414 1.414a1 1 0 01-1.414-1.414l1.414-1.414-1.414-1.414a1 1 0 111.414-1.414l1.414 1.414 1.414-1.414a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
+        } else {
+            btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            btn.classList.add('bg-black/50');
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd" /></svg>`;
+        }
+    }
 }
+
+function toggleCam() {
+    if (localStream) {
+        isCameraOff = !isCameraOff;
+        localStream.getVideoTracks()[0].enabled = !isCameraOff;
+        const btn = document.getElementById('btn-cam');
+        if (isCameraOff) {
+            btn.classList.add('bg-red-500', 'hover:bg-red-600');
+            btn.classList.remove('bg-black/50');
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg>`;
+        } else {
+            btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            btn.classList.add('bg-black/50');
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" /></svg>`;
+        }
+    }
+}
+
 
 async function startCall() {
     showVideoTip();
@@ -307,7 +343,10 @@ async function startCall() {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
         localVideo.srcObject = localStream;
-        videoContainer.style.display = 'flex'; // Show PIP
+
+        // Show Video Container
+        videoContainer.classList.remove('hidden');
+        videoContainer.classList.add('flex');
 
         createPeerConnection();
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
@@ -329,22 +368,16 @@ async function handleSignalMessage(signal) {
     if (signal.type === 'offer') {
         incomingOverlay.classList.remove('hidden');
         window.pendingOffer = signal.sdp;
-        // NOTE: We do not process the ICE queue here. We wait for user to Accept.
     }
     else if (signal.type === 'answer') {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-        // FIX: Process queued candidates now that Remote Description is set
         processIceQueue();
     }
     else if (signal.type === 'candidate' && signal.candidate) {
         const candidate = new RTCIceCandidate(signal.candidate);
-
-        // FIX: Check if we are ready to add the candidate
         if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
             await peerConnection.addIceCandidate(candidate);
         } else {
-            // If not ready, save it for later
-            console.log("Queueing candidate...");
             iceCandidateQueue.push(candidate);
         }
     }
@@ -358,24 +391,22 @@ async function acceptCall() {
     incomingOverlay.classList.add('hidden');
     btnCall.classList.add('hidden');
     btnHangup.classList.remove('hidden');
-    videoContainer.style.display = 'flex'; // Show PIP
+
+    // Show Video Container
+    videoContainer.classList.remove('hidden');
+    videoContainer.classList.add('flex');
 
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
         localVideo.srcObject = localStream;
 
-        // Add tracks safely
         localStream.getTracks().forEach(track => {
             peerConnection.addTrack(track, localStream);
         });
 
-        // 1. Set Remote Description (Offer)
         await peerConnection.setRemoteDescription(new RTCSessionDescription(window.pendingOffer));
-
-        // 2. FIX: PROCESS QUEUE NOW
         processIceQueue();
 
-        // 3. Create Answer
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
 
@@ -383,7 +414,6 @@ async function acceptCall() {
     } catch (e) { console.error(e); endCall(); }
 }
 
-// Helper to flush the queue
 async function processIceQueue() {
     while (iceCandidateQueue.length > 0) {
         const candidate = iceCandidateQueue.shift();
@@ -416,17 +446,23 @@ function endCall(isRemote = false) {
     if (peerConnection) { peerConnection.close(); peerConnection = null; }
     if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
 
-    // Reset Queue & Offer
     iceCandidateQueue = [];
     window.pendingOffer = null;
 
     remoteVideo.srcObject = null;
     localVideo.srcObject = null;
-    videoContainer.style.display = 'none'; // Hide PIP
+
+    // Hide Video Container
+    videoContainer.classList.add('hidden');
+    videoContainer.classList.remove('flex');
 
     btnCall.classList.remove('hidden');
     btnHangup.classList.add('hidden');
     incomingOverlay.classList.add('hidden');
+
+    // Reset Controls State
+    isMuted = false;
+    isCameraOff = false;
 }
 
 function toggleTheme() {

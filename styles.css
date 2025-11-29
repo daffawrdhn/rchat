@@ -30,52 +30,24 @@ body {
     animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Video Call PIP Style */
-#video-container {
-    position: absolute;
-    top: 70px;
-    right: 16px;
-    width: 140px;
-    z-index: 40;
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    transition: all 0.3s ease;
-}
-
-#video-container.expanded {
-    width: 90%;
-    left: 5%;
-    top: 80px;
-    height: auto;
-}
-
+/* Video Call Wrappers */
 .vid-wrapper {
     position: relative;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     background: #000;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #remote-video {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 9/16;
-    object-fit: cover;
+    /* No flip for remote video - see stranger normally */
     background: #111;
 }
 
 #local-video {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    width: 35%;
-    border-radius: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    z-index: 10;
-    object-fit: cover;
+    /* Flip local video so it acts like a mirror */
+    transform: scaleX(-1);
     background: #222;
 }
 
