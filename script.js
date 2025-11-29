@@ -4,7 +4,6 @@ let currentMode = 'random';
 let myNickname = '';
 let unreadRandom = 0;
 let unreadPublic = 0;
-// Flag to track if we are actively searching
 let isSearching = false;
 
 // UI Refs
@@ -23,7 +22,7 @@ const countVal = document.getElementById('count-val');
 const mobileCount = document.getElementById('mobile-count');
 
 const btnStart = document.getElementById('btn-start');
-const btnStop = document.getElementById('btn-stop'); // New Cancel Button
+const btnStop = document.getElementById('btn-stop');
 const btnNext = document.getElementById('btn-next');
 const randomInputArea = document.getElementById('random-input-area');
 const randomInput = document.getElementById('random-msg-input');
@@ -34,8 +33,8 @@ let localStream;
 let peerConnection;
 let isMuted = false;
 let isCameraOff = false;
+let localVideoSizeState = 0; // 0: Default, 1: Big, 2: Small
 
-// Queue for storing candidates that arrive before the connection is ready
 let iceCandidateQueue = [];
 
 const remoteVideo = document.getElementById('remote-video');
@@ -46,10 +45,7 @@ const btnHangup = document.getElementById('btn-hangup');
 const incomingOverlay = document.getElementById('incoming_call_overlay');
 const rtcConfig = {
     iceServers: [
-        // Google's Public STUN (Keep this as backup/first attempt)
         { urls: 'stun:stun.l.google.com:19302' },
-
-        // YOUR NEW TURN SERVER
         {
             urls: 'turn:YOUR_PUBLIC_IP:3478',
             username: 'johndoe',
@@ -64,15 +60,12 @@ const sounds = {
     connect: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),
     disconnect: new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3')
 };
-
-// Preload sounds
 Object.values(sounds).forEach(s => s.load());
 
 function playAudio(type) {
     if (sounds[type]) {
-        // Reset time to allow rapid playback
         sounds[type].currentTime = 0;
-        sounds[type].play().catch(e => console.log("Audio play failed (user interaction needed):", e));
+        sounds[type].play().catch(e => console.log("Audio play failed:", e));
     }
 }
 
@@ -121,18 +114,13 @@ function initSocket() {
             logSystem(currentMode === 'random' ? randomBox : publicBox, `⚠️ ${data.msg}`);
         }
         else if (data.status === 'waiting') {
-            // Only show waiting UI if we initiated a search
             if (isSearching) {
                 setRandomUI('waiting');
                 logSystem(randomBox, data.msg);
             }
         }
         else if (data.status === 'connected') {
-            // If we canceled, ignore late connection attempts
-            if (!isSearching && currentMode === 'random') {
-                console.log("Ignored connection because search was canceled.");
-                return;
-            }
+            if (!isSearching && currentMode === 'random') return;
             playAudio('connect');
             setRandomUI('connected');
             logSystem(randomBox, "You are connected with a Stranger.");
@@ -151,8 +139,6 @@ function initSocket() {
         }
         else if (data.status === 'public_msg') {
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
-            // Optional: Play sound for public messages too?
-            // playAudio('msg'); 
             logMessage(publicBox, 'other', data.name, data.msg, data.type);
         }
         else if (data.status === 'typing') showTyping(true);
@@ -199,12 +185,12 @@ function setRandomUI(state) {
     btnNext.classList.add('hidden');
     randomInputArea.classList.add('hidden');
     btnStart.classList.add('hidden');
-    btnStop.classList.add('hidden'); // Hide cancel by default
+    btnStop.classList.add('hidden');
     randomInputArea.classList.remove('flex');
 
     if (state === 'waiting') {
         updateStatus("Searching...", "warning");
-        btnStop.classList.remove('hidden'); // Show cancel button
+        btnStop.classList.remove('hidden');
     }
     else if (state === 'connected') {
         btnNext.classList.remove('hidden');
@@ -216,12 +202,10 @@ function setRandomUI(state) {
         if (currentMode === 'random') updateStatus("Partner Left", "error");
         showTyping(false);
     } else if (state === 'disconnected') {
-        // Full reset
         btnStart.classList.remove('hidden');
     }
 }
 
-// Image Modal
 function openImageModal(src) {
     const modal = document.getElementById('img_modal');
     const modalImg = document.getElementById('img_modal_src');
@@ -260,29 +244,20 @@ function logSystem(container, msg) {
 // --- ACTIONS ---
 function startRandomChat() {
     if (conn.readyState !== WebSocket.OPEN) return;
-    isSearching = true; // Set flag
+    isSearching = true;
     conn.send(JSON.stringify({ action: 'find_partner' }));
 
-    // Immediate UI update
     btnStart.classList.add('hidden');
     btnStop.classList.remove('hidden');
     updateStatus("Searching...", "warning");
 }
 
 function stopRandomChat() {
-    isSearching = false; // Clear flag
-
-    // We can't strictly "cancel" the queue on some servers without leaving,
-    // so we send a 'next' or re-join logic, or simply reset UI and ignore connection.
-    // Ideally, send {action: 'leave'} if supported, otherwise just UI reset.
-    // Here we will assume a soft reset.
-
+    isSearching = false;
     btnStop.classList.add('hidden');
     btnStart.classList.remove('hidden');
     updateStatus("Idle", "warning");
     logSystem(randomBox, "Search canceled.");
-
-    // Optional: Re-send join to ensure clean state
     conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
 }
 
@@ -290,7 +265,7 @@ function nextPartner() {
     randomBox.innerHTML = '';
     showTyping(false);
     endCall();
-    isSearching = true; // We are searching again
+    isSearching = true;
     conn.send(JSON.stringify({ action: 'next' }));
 }
 
@@ -310,7 +285,6 @@ function insertEmoji(e, ctx) {
     el.value += e; el.focus();
 }
 
-// --- IMAGE HANDLING ---
 function triggerUpload() { document.getElementById('img-upload').click(); }
 
 function handleImageUpload(input) {
@@ -324,8 +298,6 @@ function handleImageUpload(input) {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-
-                // Resize logic (Max 800px)
                 const MAX_SIZE = 800;
                 let width = img.width;
                 let height = img.height;
@@ -334,23 +306,19 @@ function handleImageUpload(input) {
                 } else {
                     if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
                 }
-
                 canvas.width = width;
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
-
-                // Compress (JPEG 60%)
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                 sendMessage(currentMode, 'image', dataUrl);
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
-        input.value = ''; // Reset
+        input.value = '';
     }
 }
 
-// --- TYPING ---
 let typingTimer; let lastTypingTime = 0;
 function sendTypingSignal() {
     const now = Date.now();
@@ -365,14 +333,115 @@ function showTyping(show) {
     if (show) { clearTimeout(typingTimer); typingTimer = setTimeout(() => ind.style.opacity = '0', 3000); }
 }
 
-// --- VIDEO CALLS (PICTURE-IN-PICTURE OVERLAY) ---
+// --- VIDEO CALLS & RESIZABLE LOGIC ---
+
+// Draggable & Resizable Logic
+function makeElementDraggable(elm) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let startX = 0, startY = 0; // For detecting "Tap" vs "Drag"
+
+    // Touch Support
+    elm.ontouchstart = dragTouchStart;
+    elm.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        startX = e.clientX;
+        startY = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        updatePosition(elm.offsetTop - pos2, elm.offsetLeft - pos1);
+    }
+
+    function dragTouchStart(e) {
+        // Don't prevent default immediately if you want other interactions, but here we usually do
+        // e.preventDefault(); 
+        const touch = e.touches[0];
+        pos3 = touch.clientX;
+        pos4 = touch.clientY;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        document.ontouchend = closeDragElement;
+        document.ontouchmove = elementDragTouch;
+    }
+
+    function elementDragTouch(e) {
+        // e.preventDefault(); // Prevent scrolling while dragging
+        const touch = e.touches[0];
+        pos1 = pos3 - touch.clientX;
+        pos2 = pos4 - touch.clientY;
+        pos3 = touch.clientX;
+        pos4 = touch.clientY;
+        updatePosition(elm.offsetTop - pos2, elm.offsetLeft - pos1);
+    }
+
+    function updatePosition(top, left) {
+        const parent = elm.parentElement;
+        const maxTop = parent.clientHeight - elm.clientHeight;
+        const maxLeft = parent.clientWidth - elm.clientWidth;
+
+        // Boundary Check
+        let newTop = Math.max(0, Math.min(top, maxTop));
+        let newLeft = Math.max(0, Math.min(left, maxLeft));
+
+        elm.style.top = newTop + "px";
+        elm.style.left = newLeft + "px";
+        elm.style.right = 'auto'; // Disable CSS right positioning once dragged
+    }
+
+    function closeDragElement(e) {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchmove = null;
+
+        // Calculate distance moved to distinguish Tap vs Drag
+        let endX = e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0);
+        let endY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0);
+
+        const dist = Math.hypot(endX - startX, endY - startY);
+
+        // If moved less than 5 pixels, treat as a TAP
+        if (dist < 5) {
+            toggleLocalVideoSize();
+        }
+    }
+}
+
+function toggleLocalVideoSize() {
+    const elm = document.getElementById('local-wrapper');
+    localVideoSizeState = (localVideoSizeState + 1) % 3;
+
+    if (localVideoSizeState === 0) {
+        // Default
+        elm.style.width = '30%';
+    } else if (localVideoSizeState === 1) {
+        // Bigger
+        elm.style.width = '50%';
+    } else if (localVideoSizeState === 2) {
+        // Smaller
+        elm.style.width = '15%';
+    }
+}
+
+// Initialize Draggable
+makeElementDraggable(document.getElementById("local-wrapper"));
 
 function toggleMic() {
     if (localStream) {
         isMuted = !isMuted;
         localStream.getAudioTracks()[0].enabled = !isMuted;
         const btn = document.getElementById('btn-mic');
-        // Update Icon
         if (isMuted) {
             btn.classList.add('bg-red-500', 'hover:bg-red-600');
             btn.classList.remove('bg-black/50');
@@ -411,7 +480,6 @@ async function startCall() {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
         localVideo.srcObject = localStream;
 
-        // SHOW CONTAINER (BLOCK FOR RELATIVE)
         videoContainer.style.display = 'block';
         videoContainer.classList.remove('hidden');
 
@@ -459,7 +527,6 @@ async function acceptCall() {
     btnCall.classList.add('hidden');
     btnHangup.classList.remove('hidden');
 
-    // SHOW CONTAINER
     videoContainer.style.display = 'block';
     videoContainer.classList.remove('hidden');
 
@@ -519,7 +586,6 @@ function endCall(isRemote = false) {
     remoteVideo.srcObject = null;
     localVideo.srcObject = null;
 
-    // HIDE CONTAINER
     videoContainer.style.display = 'none';
     videoContainer.classList.add('hidden');
 
@@ -527,9 +593,16 @@ function endCall(isRemote = false) {
     btnHangup.classList.add('hidden');
     incomingOverlay.classList.add('hidden');
 
-    // Reset Controls State
     isMuted = false;
     isCameraOff = false;
+
+    // Reset local video position/size
+    const elm = document.getElementById('local-wrapper');
+    elm.style.top = '';
+    elm.style.left = '';
+    elm.style.right = '1rem'; // Reset to CSS default
+    elm.style.width = '30%';
+    localVideoSizeState = 0;
 }
 
 function toggleTheme() {
@@ -537,15 +610,10 @@ function toggleTheme() {
     html.setAttribute('data-theme', html.getAttribute('data-theme') === 'night' ? 'cupcake' : 'night');
 }
 
-// --- NEW: USER AGREEMENT LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('agreement_modal');
-
-    // Check if already agreed in this session
     if (!sessionStorage.getItem('terms_accepted')) {
         modal.showModal();
-
-        // Prevent closing with ESC key
         modal.addEventListener('cancel', (event) => {
             event.preventDefault();
         });
@@ -555,14 +623,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function acceptTerms() {
     sessionStorage.setItem('terms_accepted', 'true');
     document.getElementById('agreement_modal').close();
-
-    // Play a subtle sound or animation if you like
     console.log("Terms accepted.");
 }
 
-// --- NEW: VIDEO TIP LOGIC ---
 function showVideoTip() {
-    // Only show this once per session to avoid annoying the user
     if (!sessionStorage.getItem('video_tip_shown')) {
         document.getElementById('video_tip_modal').showModal();
         sessionStorage.setItem('video_tip_shown', 'true');
@@ -570,15 +634,9 @@ function showVideoTip() {
 }
 
 function checkIOSInstall() {
-    // 1. Detect if device is iOS (iPhone, iPad, iPod)
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-    // 2. Detect if already running in "App Mode" (Standalone)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-    // 3. If it is iOS AND NOT installed yet -> Show a custom instruction
     if (isIOS && !isStandalone) {
-        // Create a simple toast/popup
         const toast = document.createElement('div');
         toast.className = "fixed bottom-4 left-4 right-4 bg-base-100 p-4 rounded-xl border border-white/10 shadow-2xl z-50 flex flex-col gap-2 msg-anim";
         toast.innerHTML = `
@@ -589,22 +647,10 @@ function checkIOSInstall() {
               </div>
               <button onclick="this.parentElement.parentElement.remove()" class="btn btn-xs btn-circle btn-ghost">✕</button>
           </div>
-          <div class="text-xs flex items-center gap-2 mt-2 bg-base-200 p-2 rounded">
-              <span>1. Tap</span> 
-              <span class="text-xl leading-none">📤</span> 
-              <span>(Share) in Safari bar</span>
-          </div>
-          <div class="text-xs flex items-center gap-2">
-              <span>2. Scroll down & tap</span>
-              <span class="font-bold">"Add to Home Screen" ➕</span>
-          </div>
       `;
         document.body.appendChild(toast);
     }
 }
-
-// Run this check 2 seconds after load
 setTimeout(checkIOSInstall, 2000);
 
-// Start
 initSocket();

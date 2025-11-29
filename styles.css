@@ -69,8 +69,8 @@ body {
     /* Dimensions */
     width: 30%;
     /* Take 30% of container width */
-    max-width: 160px;
-    /* Don't get too big on tablets */
+    max-width: 250px;
+    /* Limit size for desktop so it doesn't get huge */
     min-width: 100px;
     /* Don't get too small on tiny phones */
 
@@ -81,7 +81,17 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: #111;
-    transition: all 0.3s ease;
+    transition: width 0.3s ease;
+    /* Smooth size transition */
+
+    /* Interaction */
+    cursor: grab;
+    touch-action: none;
+    /* Important for dragging on mobile */
+}
+
+.local-wrapper:active {
+    cursor: grabbing;
 }
 
 .pulse-ring {
