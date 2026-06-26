@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const path = require('path');
 
 (async () => {
     console.log("Starting Automated Validation Test for XOXO Chat...");
@@ -192,13 +193,14 @@ const puppeteer = require('puppeteer');
         // ==========================================
         console.log("\n--- Running Test 5: Media Upload (Image & Voice) ---");
         
-        const path = require('path');
         // 5A: Image Upload
         await new Promise(r => setTimeout(r, 1000)); // bypass anti-spam
-        await page1.evaluate(() => {
-            sendMessage('random', 'image', 'https://chat.1year.site/apple-touch-icon.png');
-        });
-        console.log("[User1] Sent image message");
+        const [fileChooser] = await Promise.all([
+            page1.waitForFileChooser(),
+            page1.evaluate(() => triggerUpload())
+        ]);
+        await fileChooser.accept([path.resolve(__dirname, 'icon-192.png')]);
+        console.log("[User1] Uploaded image icon-192.png via real upload.php");
 
         try {
             await page2.waitForFunction(
@@ -217,10 +219,15 @@ const puppeteer = require('puppeteer');
 
         // 5B: Voice Record
         await new Promise(r => setTimeout(r, 1000)); // bypass anti-spam
-        await page1.evaluate(() => {
-            sendMessage('random', 'audio', 'https://chat.1year.site/fake-audio.webm');
-        });
-        console.log("[User1] Sent voice message");
+        // Grant permissions in puppeteer
+        const context1 = browser1.defaultBrowserContext();
+        await context1.overridePermissions(SITE_URL, ['microphone', 'camera']);
+        
+        await page1.click('#record-btn-random');
+        console.log("[User1] Started real voice recording...");
+        await new Promise(r => setTimeout(r, 2000)); // record for 2 seconds
+        await page1.click('#record-btn-random');
+        console.log("[User1] Stopped voice recording, sending via upload.php...");
 
         try {
             await page2.waitForFunction(
