@@ -178,7 +178,7 @@
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
         
         <!-- Drawer content: Main Panel -->
-        <div class="drawer-content flex flex-col h-[100dvh]">
+        <div class="drawer-content flex flex-col h-[var(--app-height)]">
             
             <!-- Mobile Header Bar -->
             <div class="navbar themed-navbar border-b lg:hidden min-h-[60px] px-4">
@@ -203,7 +203,7 @@
             </div>
 
             <!-- Bento Chat box Container -->
-            <div class="flex-grow p-3 md:p-6 lg:pl-3 flex flex-col h-[calc(100dvh-60px)] lg:h-full box-border relative overflow-hidden">
+            <div class="flex-grow p-3 md:p-6 lg:pl-3 flex flex-col h-[calc(var(--app-height)-60px)] lg:h-full box-border relative overflow-hidden">
                 
                 <div id="chat-card" class="flex-grow glass-panel rounded-[32px] flex flex-col relative overflow-hidden h-full">
                     
@@ -551,9 +551,6 @@
                             <p class="font-extrabold truncate text-indigo-400 text-sm" id="sidebar-nickname">...</p>
                         </div>
                     </div>
-                    
-                    <div class="h-px bg-current/10 my-0.5 opacity-20"></div>
-
                 </div>
 
             </div>

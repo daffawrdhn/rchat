@@ -390,12 +390,13 @@ function logMessage(container, type, name, msg, msgType = 'text') {
         <div class="chat-header text-xs opacity-50 mb-1 ml-1">${name} ${receipt}</div>
         <div class="chat-bubble ${bubbleColor} shadow-md text-sm break-words">${contentHtml}</div>
     </div>`;
-    container.innerHTML += html;
+    container.insertAdjacentHTML('beforeend', html);
     container.scrollTop = container.scrollHeight;
 }
 
 function logSystem(container, msg) {
-    container.innerHTML += `<div class="flex items-center justify-center my-4 opacity-60 msg-anim"><span class="text-xs bg-base-200 px-3 py-1 rounded-full border border-base-content/5">${msg}</span></div>`;
+    const html = `<div class="flex items-center justify-center my-4 opacity-60 msg-anim"><span class="text-xs bg-base-200 px-3 py-1 rounded-full border border-base-content/5">${msg}</span></div>`;
+    container.insertAdjacentHTML('beforeend', html);
     container.scrollTop = container.scrollHeight;
 }
 
@@ -930,3 +931,23 @@ window.addEventListener('load', () => {
         }, 500);
     }
 });
+
+// --- MOBILE KEYBOARD RESIZE HANDLER (VISUAL VIEWPORT) ---
+function updateAppHeight() {
+    if (window.visualViewport) {
+        const height = window.visualViewport.height;
+        document.documentElement.style.setProperty('--app-height', `${height}px`);
+        setTimeout(() => {
+            const activeBox = currentMode === 'random' ? randomBox : (currentMode === 'group' ? groupBox : publicBox);
+            if (activeBox) {
+                activeBox.scrollTop = activeBox.scrollHeight;
+            }
+        }, 100);
+    }
+}
+
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateAppHeight);
+    window.visualViewport.addEventListener('scroll', updateAppHeight);
+}
+window.addEventListener('load', updateAppHeight);

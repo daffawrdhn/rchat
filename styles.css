@@ -3,6 +3,8 @@
    ============================================================ */
 :root,
 [data-theme="night"] {
+    --app-height:      100dvh;
+
     /* Backgrounds */
     --bg-base:         #020617;   /* slate-950 — page background */
     --bg-surface:      rgba(15, 23, 42, 0.60);  /* panels */
@@ -53,7 +55,7 @@
    ============================================================ */
 body {
     font-family: 'Outfit', sans-serif;
-    height: 100dvh;
+    height: var(--app-height);
     overflow: hidden;
     background-color: var(--bg-base);
     color: var(--text-base);
