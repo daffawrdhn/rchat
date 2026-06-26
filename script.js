@@ -99,6 +99,9 @@ function initSocket() {
             btnStop.classList.add('hidden');
             btnNext.classList.add('hidden');
             randomInputArea.classList.add('hidden');
+            
+            const startOverlay = document.getElementById('start-overlay');
+            if (startOverlay) startOverlay.classList.remove('hidden');
         }
     };
 
@@ -243,6 +246,15 @@ function switchMode(mode) {
         chatTitle.innerText = "Random Chat";
         statusWrapper.classList.remove('invisible');
         unreadRandom = 0; updateBadges();
+        
+        const startOverlay = document.getElementById('start-overlay');
+        if (startOverlay) {
+            if (!isSearching && randomInputArea.classList.contains('hidden')) {
+                startOverlay.classList.remove('hidden');
+            } else {
+                startOverlay.classList.add('hidden');
+            }
+        }
     } else if (mode === 'public') {
         randomView.classList.add('hidden');
         publicView.classList.remove('hidden');
@@ -267,22 +279,28 @@ function setRandomUI(state) {
     btnStart.classList.add('hidden');
     btnStop.classList.add('hidden');
     randomInputArea.classList.remove('flex');
+    
+    const startOverlay = document.getElementById('start-overlay');
 
     if (state === 'waiting') {
         updateStatus("Searching...", "warning");
         btnStop.classList.remove('hidden');
+        if (startOverlay) startOverlay.classList.add('hidden');
     }
     else if (state === 'connected') {
         btnNext.classList.remove('hidden');
         randomInputArea.classList.remove('hidden');
         randomInputArea.classList.add('flex');
         if (currentMode === 'random') updateStatus("Online", "success");
+        if (startOverlay) startOverlay.classList.add('hidden');
     } else if (state === 'disconnected_partner') {
         btnNext.classList.remove('hidden');
         if (currentMode === 'random') updateStatus("Partner Left", "error");
         showTyping(false);
+        if (startOverlay) startOverlay.classList.add('hidden');
     } else if (state === 'disconnected') {
         btnStart.classList.remove('hidden');
+        if (startOverlay) startOverlay.classList.remove('hidden');
     }
 }
 
@@ -388,6 +406,9 @@ function startRandomChat() {
     btnStart.classList.add('hidden');
     btnStop.classList.remove('hidden');
     updateStatus("Searching...", "warning");
+    
+    const startOverlay = document.getElementById('start-overlay');
+    if (startOverlay) startOverlay.classList.add('hidden');
 }
 
 function stopRandomChat() {
@@ -397,6 +418,9 @@ function stopRandomChat() {
     updateStatus("Idle", "warning");
     logSystem(randomBox, "Search canceled.");
     conn.send(JSON.stringify({ action: 'cancel_search' }));
+    
+    const startOverlay = document.getElementById('start-overlay');
+    if (startOverlay) startOverlay.classList.remove('hidden');
 }
 
 function nextPartner() {

@@ -16,11 +16,11 @@
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="manifest" href="manifest.json">
 
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#020617">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -41,43 +41,51 @@
     </style>
 </head>
 
-<body class="text-base-content h-[100dvh] flex flex-col overflow-hidden">
+<body class="text-slate-200 h-[100dvh] flex flex-col overflow-hidden bg-slate-950 relative">
 
+    <!-- Glowing Background Blobs (Glassmorphism backdrop) -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-indigo-600/10 rounded-full filter blur-[120px] blob-1"></div>
+        <div class="absolute top-1/3 right-10 w-[600px] h-[600px] bg-purple-600/10 rounded-full filter blur-[140px] blob-2"></div>
+        <div class="absolute -bottom-40 left-1/3 w-[500px] h-[500px] bg-pink-600/5 rounded-full filter blur-[120px] blob-1"></div>
+    </div>
+
+    <!-- Modals & Overlays -->
     <div id="incoming_call_overlay"
-        class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center hidden">
+        class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-2xl flex flex-col items-center justify-center hidden">
         <div class="avatar placeholder mb-6">
-            <div class="bg-neutral text-neutral-content rounded-full w-24 animate-bounce">
-                <span class="text-3xl">🎥</span>
+            <div class="bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-full w-24 h-24 flex items-center justify-center text-4xl animate-bounce shadow-2xl shadow-indigo-500/20">
+                🎥
             </div>
         </div>
-        <h2 class="text-2xl font-bold text-white mb-1">Incoming Video Call</h2>
-        <p class="text-white/50 mb-12">Stranger wants to see you</p>
+        <h2 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Incoming Video Call</h2>
+        <p class="text-slate-400 mb-12 font-medium">Stranger wants to connect video with you</p>
         <div class="flex gap-8 items-center">
-            <button onclick="rejectCall()" class="btn btn-circle btn-error btn-lg scale-110 shadow-lg">
+            <button onclick="rejectCall()" class="btn btn-circle btn-error btn-lg scale-110 shadow-xl shadow-error/20 hover:scale-115 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
             <button onclick="acceptCall()"
-                class="btn btn-circle btn-success btn-lg scale-125 shadow-[0_0_30px_rgba(34,197,94,0.6)] pulse-ring">
+                class="btn btn-circle btn-success btn-lg scale-125 shadow-2xl shadow-success/40 pulse-ring hover:scale-130 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
             </button>
         </div>
     </div>
 
-    <dialog id="img_modal" class="modal backdrop-blur-sm">
+    <dialog id="img_modal" class="modal backdrop-blur-md">
         <div
             class="modal-box p-0 max-w-5xl bg-transparent shadow-none border-none overflow-hidden flex justify-center items-center">
             <form method="dialog">
                 <button
-                    class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 z-50 bg-black/50 text-white hover:bg-black/80">✕</button>
+                    class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-50 bg-black/60 text-white hover:bg-black/90 border border-white/10">✕</button>
             </form>
-            <img id="img_modal_src" src="" class="max-h-[85vh] max-w-full rounded-lg shadow-2xl object-contain"
+            <img id="img_modal_src" src="" class="max-h-[85vh] max-w-full rounded-2xl shadow-2xl object-contain border border-white/10"
                 alt="Preview">
         </div>
         <form method="dialog" class="modal-backdrop">
@@ -85,46 +93,48 @@
         </form>
     </dialog>
 
-    <dialog id="agreement_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
-        <div class="modal-box border border-error/20 shadow-[0_0_50px_rgba(255,0,0,0.1)]">
-            <h3 class="font-bold text-lg text-error flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+    <dialog id="agreement_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-lg">
+        <div class="modal-box glass-panel border border-white/10 shadow-2xl p-6 rounded-3xl">
+            <h3 class="font-extrabold text-2xl text-error flex items-center gap-3 tracking-tight">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                Age Verification & Terms
+                Terms & Conditions
             </h3>
-            <div class="py-4 space-y-4 text-sm opacity-80">
-                <p>Welcome to XOXO.</p>
-                <p>By entering this site, you legally confirm that:</p>
-                <ul class="list-disc list-inside space-y-1 font-semibold">
-                    <li>You are at least 18 years of age.</li>
-                    <li>You will not upload illegal content.</li>
-                    <li>You will be respectful to other strangers.</li>
+            <div class="py-5 space-y-4 text-sm text-slate-300">
+                <p>Welcome to <span class="text-white font-bold">XOXO - Chat with stranger</span>.</p>
+                <p>Before proceeding, you must agree to the following conditions:</p>
+                <ul class="list-disc list-inside space-y-2 font-medium bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <li>You are <span class="text-error font-bold">at least 18 years of age</span>.</li>
+                    <li>You will respect other users (no harassment/insults).</li>
+                    <li>You will not stream or share illegal content.</li>
                 </ul>
-                <p class="text-xs opacity-50 mt-4">Violators will be banned immediately.</p>
+                <p class="text-[11px] opacity-60">Violation of these terms will lead to an immediate ban.</p>
             </div>
-            <div class="modal-action flex-col gap-2">
-                <button onclick="acceptTerms()" class="btn btn-error w-full text-white">I am 18+ and I Agree</button>
-                <button onclick="window.location.href='https://google.com'" class="btn btn-ghost w-full">Exit</button>
+            <div class="modal-action flex flex-col gap-2 mt-4">
+                <button onclick="acceptTerms()" class="btn btn-error w-full text-white rounded-full font-bold shadow-lg shadow-error/25">I am 18+ and I Agree</button>
+                <button onclick="window.location.href='https://google.com'" class="btn btn-ghost w-full rounded-full">Exit</button>
             </div>
         </div>
     </dialog>
 
     <dialog id="video_tip_modal" class="modal">
-        <div class="modal-box border border-info/20">
-            <h3 class="font-bold text-lg text-info">💡 Connectivity Tip</h3>
-            <p class="py-4 text-base-content/80">
+        <div class="modal-box glass-panel border border-white/10 shadow-2xl p-6 rounded-3xl">
+            <h3 class="font-extrabold text-xl text-info tracking-tight flex items-center gap-2">
+                <span>💡</span> Connectivity Tip
+            </h3>
+            <p class="py-4 text-sm text-slate-300 leading-relaxed">
                 If the video call is black or fails to connect:
                 <br><br>
-                <span class="font-bold text-warning">Try switching from Mobile Data (4G/5G) to WiFi.</span>
+                <span class="font-semibold text-warning">Try switching from Mobile Data (4G/5G) to WiFi, or vice-versa.</span>
                 <br><br>
-                Some mobile networks block video connections for security.
+                Some cellular networks restrict WebRTC video connections for firewall security.
             </p>
             <div class="modal-action">
                 <form method="dialog">
-                    <button class="btn btn-primary">Got it</button>
+                    <button class="btn btn-primary rounded-full px-6 font-bold shadow-lg shadow-primary/25">Got it</button>
                 </form>
             </div>
         </div>
@@ -135,305 +145,190 @@
 
     <input type="file" id="img-upload" hidden accept="image/*" onchange="handleImageUpload(this)">
 
-    <div class="drawer lg:drawer-open h-full">
+    <!-- Main Navigation Drawer -->
+    <div class="drawer lg:drawer-open h-full bg-slate-950/20 z-10 relative">
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+        
+        <!-- Drawer content: Main Panel -->
         <div class="drawer-content flex flex-col h-[100dvh]">
-            <div class="navbar bg-base-100/80 backdrop-blur-md border-b border-base-content/5 lg:hidden min-h-[60px]">
+            
+            <!-- Mobile Header Bar -->
+            <div class="navbar bg-slate-900/60 backdrop-blur-xl border-b border-white/5 lg:hidden min-h-[60px] px-4">
                 <div class="flex-none">
-                    <label for="my-drawer-2" class="btn btn-square btn-ghost">
+                    <label for="my-drawer-2" class="btn btn-square btn-ghost text-slate-200">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             class="inline-block w-6 h-6 stroke-current">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
                                 d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </label>
                 </div>
-                <div class="flex-1"><a class="btn btn-ghost normal-case text-xl font-bold tracking-tight">XOXO</a>
+                <div class="flex-1 px-2">
+                    <span class="text-xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">XOXO</span>
                 </div>
                 <div class="flex-none">
-                    <div class="badge badge-success badge-sm mr-2 font-semibold shadow-sm"><span id="mobile-count">0</span>&nbsp;Online</div>
+                    <div class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold py-2.5 px-3 flex items-center gap-1.5 shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span><span id="mobile-count">0</span> Online</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex-grow flex flex-col relative overflow-hidden bg-base-300/30">
-                <div
-                    class="absolute top-0 w-full z-10 bg-gradient-to-b from-base-300 to-transparent p-4 pointer-events-none">
-                    <div class="flex justify-between items-start pointer-events-auto">
+            <!-- Bento Chat box Container -->
+            <div class="flex-grow p-3 md:p-6 lg:pl-3 flex flex-col h-[calc(100dvh-60px)] lg:h-full box-border relative overflow-hidden">
+                
+                <div id="chat-card" class="flex-grow glass-panel rounded-[32px] flex flex-col relative overflow-hidden h-full">
+                    
+                    <!-- Frosted Glass Chat Header -->
+                    <div class="absolute top-0 w-full z-20 bg-slate-950/40 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
                         <div>
-                            <h2 id="chat-title" class="text-2xl font-black tracking-tight text-white/90 drop-shadow-md">
-                                Random Chat</h2>
-                            <div id="status-wrapper"
-                                class="flex items-center gap-2 mt-1 transition-opacity duration-300">
-                                <span id="status-dot" class="w-2 h-2 rounded-full bg-warning"></span>
-                                <span id="status-bar" class="text-xs font-medium opacity-70">Initializing...</span>
+                            <h2 id="chat-title" class="text-xl font-extrabold tracking-tight text-white">Random Chat</h2>
+                            <div id="status-wrapper" class="flex items-center gap-2 mt-1">
+                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-warning animate-pulse"></span>
+                                <span id="status-bar" class="text-[10px] font-bold tracking-wider opacity-60 uppercase">Initializing...</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="random-chat-view" class="flex flex-col h-full pt-20">
-
-                    <div id="video-container"
-                        class="hidden shadow-2xl transition-all relative w-full bg-black border-b border-white/10">
-
-                        <div class="remote-wrapper relative w-full h-full flex items-center justify-center bg-black">
-                            <video id="remote-video" autoplay playsinline class="w-full h-full object-contain"></video>
-
-                            <div class="absolute top-4 left-4 flex gap-2 pointer-events-none">
-                                <div
-                                    class="badge badge-error gap-1 animate-pulse border-none text-white font-bold text-xs shadow-lg">
-                                    <div class="w-2 h-2 rounded-full bg-white"></div> LIVE
+                    <!-- VIEW 1: RANDOM CHAT -->
+                    <div id="random-chat-view" class="flex flex-col h-full pt-[72px]">
+                        
+                        <!-- Video Stream container -->
+                        <div id="video-container" class="hidden shadow-2xl transition-all relative w-full bg-black border-b border-white/10">
+                            <div class="remote-wrapper relative w-full h-full flex items-center justify-center bg-black">
+                                <video id="remote-video" autoplay playsinline class="w-full h-full object-contain"></video>
+                                <div class="absolute top-4 left-4 flex gap-2 pointer-events-none">
+                                    <div class="badge badge-error gap-1 animate-pulse border-none text-white font-bold text-xs shadow-lg">
+                                        <div class="w-2 h-2 rounded-full bg-white"></div> LIVE
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-white font-bold pointer-events-none">
+                                    Stranger
                                 </div>
                             </div>
-                            <div
-                                class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-white font-bold pointer-events-none">
-                                Stranger</div>
+
+                            <div id="local-wrapper" class="local-wrapper absolute top-4 right-4 z-20 transition-width duration-300">
+                                <video id="local-video" autoplay playsinline muted class="w-full h-auto block transform -scale-x-100 bg-gray-800 pointer-events-none"></video>
+                                <div class="absolute bottom-1 left-2 text-[10px] text-white font-bold drop-shadow-md pointer-events-none">
+                                    You
+                                </div>
+                            </div>
                         </div>
 
-                        <div id="local-wrapper"
-                            class="local-wrapper absolute top-4 right-4 z-20 rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-gray-900 transition-width duration-300 cursor-grab active:cursor-grabbing touch-none">
-                            <video id="local-video" autoplay playsinline muted
-                                class="w-full h-auto block transform -scale-x-100 bg-gray-800 pointer-events-none"></video>
-                            <div
-                                class="absolute bottom-1 left-2 text-[10px] text-white font-bold drop-shadow-md pointer-events-none">
-                                You</div>
+                        <!-- Chat Message Area -->
+                        <div id="random-chat-box" class="flex-grow chat-scroll overflow-y-auto p-6 space-y-4 pb-20">
+                            <div class="divider opacity-30 text-xs">Connected to XOXO Chat</div>
+                        </div>
 
-                            <div class="absolute bottom-1 right-1 flex gap-1 z-30" onmousedown="event.stopPropagation()"
-                                ontouchstart="event.stopPropagation()">
-                                <button onclick="toggleMic()" id="btn-mic"
-                                    class="btn btn-xs btn-circle btn-ghost bg-black/50 text-white hover:bg-white/20 border-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                                <button onclick="toggleCam()" id="btn-cam"
-                                    class="btn btn-xs btn-circle btn-ghost bg-black/50 text-white hover:bg-white/20 border-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <path
-                                            d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                                    </svg>
+                        <!-- Chat Action / Start Button Overlay (Bento-style card) -->
+                        <div id="start-overlay" class="absolute inset-0 z-10 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-md pt-[72px]">
+                            <div class="glass-panel p-8 max-w-sm w-full text-center rounded-3xl border border-white/10 shadow-2xl flex flex-col gap-5">
+                                <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                                    ⚡
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">Stranger Matchmaking</h3>
+                                    <p class="text-xs text-slate-400 leading-relaxed">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
+                                </div>
+                                <button id="btn-start" onclick="startRandomChat()"
+                                    class="btn bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold tracking-wide rounded-full border-none w-full shadow-lg shadow-indigo-500/20">
+                                    Start Searching
                                 </button>
                             </div>
                         </div>
 
-                    </div>
-
-                    <div id="random-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 space-y-4 pb-4">
-                        <div class="flex flex-col items-center justify-center h-full opacity-30 gap-2">
-                            <span class="text-4xl">🕵️</span>
-                            <span class="text-sm">Find a stranger to start</span>
-                        </div>
-                    </div>
-
-                    <div id="typing-indicator"
-                        class="h-6 px-6 text-xs font-semibold text-primary/70 opacity-0 transition-opacity duration-300 flex items-center gap-1">
-                        <span class="loading loading-dots loading-xs"></span> Stranger is typing...
-                    </div>
-
-                    <div class="p-3 bg-base-100/80 backdrop-blur-lg border-t border-white/5 pb-6 lg:pb-3">
-                        <div id="controls" class="w-full mb-3 flex gap-2">
-
-                            <button id="btn-start" onclick="startRandomChat()"
-                                class="btn btn-primary flex-grow shadow-sm text-primary-content font-bold tracking-wide">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                        clip-rule="evenodd" />
-                                </svg> Find Stranger
-                            </button>
-
+                        <!-- Controls Panel (Cancel / Next) -->
+                        <div class="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 w-full max-w-xs flex gap-2 px-4 pointer-events-auto">
                             <button id="btn-stop" onclick="stopRandomChat()"
-                                class="btn btn-ghost w-full border border-white/10 hidden text-error">
-                                Cancel
+                                class="btn glass-panel text-error hover:bg-error/10 border border-error/20 w-full hidden rounded-full font-bold shadow-lg shadow-error/5">
+                                Cancel Search
                             </button>
-
                             <button id="btn-next" onclick="nextPartner()"
-                                class="btn btn-error w-full hidden shadow-lg shadow-error/20 text-white">Next Stranger
-                                (Esc)</button>
-                        </div>
-
-                        <div id="random-input-area" class="flex gap-2 hidden transition-all duration-300">
-                            <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                            <button id="record-btn-random" onclick="toggleRecording('random')" class="btn btn-circle btn-ghost text-primary text-xl">
-                                🎤
-                            </button>
-
-                            <button id="btn-call" onclick="startCall()"
-                                class="btn btn-circle btn-ghost text-info hover:bg-info/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                            <button id="btn-hangup" onclick="endCall()"
-                                class="btn btn-circle btn-error text-white hidden">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-
-                            <div class="relative flex-grow">
-                                <input type="text" id="random-msg-input"
-                                    class="input input-bordered w-full rounded-full pl-4 pr-10 focus:outline-none focus:border-primary bg-base-200/50"
-                                    placeholder="Type a message..." onkeypress="handleInput(event, 'random')"
-                                    onkeyup="sendTypingSignal()" autocomplete="off">
-                                <div
-                                    class="dropdown dropdown-top dropdown-end absolute right-2 top-1/2 -translate-y-1/2">
-                                    <div tabindex="0" role="button"
-                                        class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊
-                                    </div>
-                                    <div tabindex="0"
-                                        class="dropdown-content z-[1] card card-compact w-64 p-2 shadow-xl bg-base-300 border border-white/5 mb-2">
-                                        <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button onclick="sendMessage('random')" class="btn btn-circle btn-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                                </svg>
+                                class="btn btn-error text-white w-full hidden rounded-full font-bold shadow-lg shadow-error/25">
+                                Next Stranger (Esc)
                             </button>
                         </div>
-                    </div>
-                </div>
 
-                <div id="public-chat-view" class="flex flex-col h-full pt-20 hidden">
-                    <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 space-y-4 pb-4">
-                        <div class="divider opacity-50 text-xs">Public Lounge Started</div>
-                    </div>
-                    <div class="p-3 bg-base-100/80 backdrop-blur-lg border-t border-white/5 pb-6 lg:pb-3">
-                        <div class="flex gap-2">
-                            <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-secondary">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                            <button id="record-btn-public" onclick="toggleRecording('public')" class="btn btn-circle btn-ghost text-secondary text-xl">
-                                🎤
-                            </button>
-                            <div class="relative flex-grow">
-                                <input type="text" id="public-msg-input"
-                                    class="input input-bordered w-full rounded-full pl-4 pr-10 bg-base-200/50"
-                                    placeholder="Message everyone..." onkeypress="handleInput(event, 'public')"
-                                    autocomplete="off">
-                                <div
-                                    class="dropdown dropdown-top dropdown-end absolute right-2 top-1/2 -translate-y-1/2">
-                                    <div tabindex="0" role="button"
-                                        class="btn btn-circle btn-ghost btn-xs text-lg opacity-60">😊</div>
-                                    <div tabindex="0"
-                                        class="dropdown-content z-[1] card card-compact w-64 p-2 shadow-xl bg-base-300 border border-white/5 mb-2">
-                                        <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button onclick="sendMessage('public')" class="btn btn-circle btn-secondary">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="group-chat-view" class="flex flex-col h-full pt-20 hidden">
-                    <div id="group-idle" class="flex flex-col items-center justify-center h-full text-center p-8">
-                            <div
-                                class="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center text-accent mx-auto mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                            </div>
-                            <h2 class="text-2xl font-bold mb-2">Custom Room</h2>
-                            <p class="opacity-60 mb-6 text-sm">Create or join a private room by entering a unique room code. Rooms auto-delete after 5 mins of inactivity.</p>
-                            
-                            <div class="w-full max-w-xs flex flex-col gap-2">
-                                <input type="text" id="room-code-input" placeholder="Enter Room Code..." class="input input-bordered w-full rounded-full" />
-                                <button onclick="joinCustomRoom()"
-                                    class="btn btn-accent w-full rounded-full shadow-lg shadow-accent/20 text-white font-bold">
-                                    Join / Create Room
-                                </button>
-                            </div>
-                        </div>
-
-                    <div id="group-active" class="flex flex-col h-full hidden">
-                        <div class="px-4 py-2 bg-base-200/30 border-b border-white/5 flex justify-between items-center">
-                            <div class="flex items-center gap-2 overflow-hidden">
-                                <span class="badge badge-accent badge-outline text-xs whitespace-nowrap">Invite
-                                    Link</span>
-                                <div class="text-xs opacity-60 truncate select-all cursor-pointer hover:text-accent transition-colors"
-                                    id="group-invite-link" onclick="copyInviteLink()">...</div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="copyInviteLink()" class="btn btn-ghost btn-xs btn-circle text-accent" title="Copy Invite Link">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        <!-- Chat Input Box -->
+                        <div id="random-input-area" class="p-4 bg-slate-900/40 backdrop-blur-xl border-t border-white/5 pb-6 lg:pb-4 hidden">
+                            <div class="flex gap-2 items-center">
+                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-indigo-400 hover:bg-indigo-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                </button>
-                                <button onclick="leaveCustomRoom()" class="btn btn-outline btn-error btn-xs rounded-full flex items-center gap-1 font-semibold px-3" title="Leave Group Chat">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    <span>Leave</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="group-chat-box" class="flex-grow chat-scroll overflow-y-auto p-4 space-y-4 pb-4">
-                            <div class="divider opacity-50 text-xs">Group Created</div>
-                        </div>
-
-                        <div class="p-3 bg-base-100/80 backdrop-blur-lg border-t border-white/5 pb-6 lg:pb-3">
-                            <div class="flex gap-2">
-                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-accent">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </button>
-                                <button id="record-btn-group" onclick="toggleRecording('group')" class="btn btn-circle btn-ghost text-accent text-xl">
+                                <button id="record-btn-random" onclick="toggleRecording('random')" class="btn btn-circle btn-ghost text-indigo-400 hover:bg-indigo-500/10 text-lg">
                                     🎤
                                 </button>
+                                <button id="btn-call" onclick="startCall()"
+                                    class="btn btn-circle btn-ghost text-emerald-400 hover:bg-emerald-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
+                                <button id="btn-hangup" onclick="endCall()"
+                                    class="btn btn-circle btn-error text-white hidden shadow-lg shadow-error/20">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+
                                 <div class="relative flex-grow">
-                                    <input type="text" id="group-msg-input"
-                                        class="input input-bordered w-full rounded-full pl-4 pr-10 bg-base-200/50"
-                                        placeholder="Message group..." onkeypress="handleInput(event, 'group')"
-                                        onkeyup="sendTypingSignal('group')" autocomplete="off">
-                                    <div
-                                        class="dropdown dropdown-top dropdown-end absolute right-2 top-1/2 -translate-y-1/2">
+                                    <input type="text" id="random-msg-input"
+                                        class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
+                                        placeholder="Type a message..." onkeypress="handleInput(event, 'random')"
+                                        onkeyup="sendTypingSignal()" autocomplete="off">
+                                    <div class="dropdown dropdown-top dropdown-end absolute right-2.5 top-1/2 -translate-y-1/2">
                                         <div tabindex="0" role="button"
-                                            class="btn btn-circle btn-ghost btn-xs text-lg opacity-60">😊</div>
+                                            class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
                                         <div tabindex="0"
-                                            class="dropdown-content z-[1] card card-compact w-64 p-2 shadow-xl bg-base-300 border border-white/5 mb-2">
-                                            <div class="grid grid-cols-5 gap-1" id="emoji-grid-group"></div>
+                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl glass-panel bg-slate-900/90 border border-white/10 mb-2">
+                                            <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <button onclick="sendMessage('group')" class="btn btn-circle btn-accent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VIEW 2: PUBLIC LOUNGE -->
+                    <div id="public-chat-view" class="flex flex-col h-full pt-[72px] hidden">
+                        <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-6 space-y-4 pb-4">
+                            <div class="divider opacity-30 text-xs">Public Lounge Connected</div>
+                        </div>
+                        <div class="p-4 bg-slate-900/40 backdrop-blur-xl border-t border-white/5 pb-6 lg:pb-4">
+                            <div class="flex gap-2">
+                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-purple-400 hover:bg-purple-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
+                                <button id="record-btn-public" onclick="toggleRecording('public')" class="btn btn-circle btn-ghost text-purple-400 hover:bg-purple-500/10 text-lg">
+                                    🎤
+                                </button>
+                                <div class="relative flex-grow">
+                                    <input type="text" id="public-msg-input"
+                                        class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
+                                        placeholder="Message everyone in public lobby..." onkeypress="handleInput(event, 'public')"
+                                        autocomplete="off">
+                                    <div class="dropdown dropdown-top dropdown-end absolute right-2.5 top-1/2 -translate-y-1/2">
+                                        <div tabindex="0" role="button"
+                                            class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
+                                        <div tabindex="0"
+                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl glass-panel bg-slate-900/90 border border-white/10 mb-2">
+                                            <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="sendMessage('public')" class="btn btn-circle bg-purple-600 border-none hover:bg-purple-700 text-white shadow-lg shadow-purple-600/25">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90"
                                         viewBox="0 0 20 20" fill="currentColor">
                                         <path
@@ -443,96 +338,199 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- VIEW 3: CUSTOM GROUP CHAT -->
+                    <div id="group-chat-view" class="flex flex-col h-full pt-[72px] hidden">
+                        
+                        <!-- Setup Room / Enter Room Code -->
+                        <div id="group-idle" class="flex flex-col items-center justify-center h-full text-center p-6">
+                            <div class="glass-panel p-8 max-w-sm w-full rounded-3xl border border-white/10 shadow-2xl flex flex-col gap-5">
+                                <div class="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                                    🔒
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-extrabold text-white tracking-tight mb-1">Custom Room</h2>
+                                    <p class="text-xs text-slate-400 leading-relaxed">Create or join a private group room. Chats are end-to-end encrypted and auto-delete after 5 mins of inactivity.</p>
+                                </div>
+                                <div class="w-full flex flex-col gap-2.5">
+                                    <input type="text" id="room-code-input" placeholder="Enter Room Code..." class="input input-bordered w-full rounded-full glass-input text-center text-sm font-semibold focus:outline-none" />
+                                    <button onclick="joinCustomRoom()"
+                                        class="btn bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold tracking-wide rounded-full border-none w-full shadow-lg shadow-pink-500/25 mt-1">
+                                        Join / Create Room
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Group Room View -->
+                        <div id="group-active" class="flex flex-col h-full hidden">
+                            
+                            <!-- Invite Header -->
+                            <div class="px-6 py-2.5 bg-slate-900/20 border-b border-white/5 flex justify-between items-center gap-4">
+                                <div class="flex items-center gap-2 overflow-hidden">
+                                    <span class="badge bg-pink-500/10 border border-pink-500/30 text-pink-400 text-[10px] font-bold py-2 shadow-sm whitespace-nowrap">Invite Link</span>
+                                    <div class="text-xs text-slate-400 truncate select-all cursor-pointer hover:text-pink-400 transition-colors font-medium"
+                                        id="group-invite-link" onclick="copyInviteLink()">...</div>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button onclick="copyInviteLink()" class="btn btn-ghost btn-xs btn-circle text-pink-400 hover:bg-pink-500/10" title="Copy Invite Link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="leaveCustomRoom()" class="btn btn-outline btn-error btn-xs rounded-full flex items-center gap-1 font-bold px-3 shadow-sm border-error/30" title="Leave Group Chat">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        <span>Leave</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Group Chat Box -->
+                            <div id="group-chat-box" class="flex-grow chat-scroll overflow-y-auto p-6 space-y-4 pb-4">
+                                <div class="divider opacity-30 text-xs">Group Created</div>
+                            </div>
+
+                            <!-- Group Chat Inputs -->
+                            <div class="p-4 bg-slate-900/40 backdrop-blur-xl border-t border-white/5 pb-6 lg:pb-4">
+                                <div class="flex gap-2">
+                                    <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-pink-400 hover:bg-pink-500/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                    <button id="record-btn-group" onclick="toggleRecording('group')" class="btn btn-circle btn-ghost text-pink-400 hover:bg-pink-500/10 text-lg">
+                                        🎤
+                                    </button>
+                                    <div class="relative flex-grow">
+                                        <input type="text" id="group-msg-input"
+                                            class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
+                                            placeholder="Message group..." onkeypress="handleInput(event, 'group')"
+                                            onkeyup="sendTypingSignal('group')" autocomplete="off">
+                                        <div
+                                            class="dropdown dropdown-top dropdown-end absolute right-2.5 top-1/2 -translate-y-1/2">
+                                            <div tabindex="0" role="button"
+                                                class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
+                                            <div tabindex="0"
+                                                class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl glass-panel bg-slate-900/90 border border-white/10 mb-2">
+                                                <div class="grid grid-cols-5 gap-1" id="emoji-grid-group"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="sendMessage('group')" class="btn btn-circle bg-pink-600 border-none hover:bg-pink-700 text-white shadow-lg shadow-pink-600/25">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path
+                                                d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
             </div>
         </div>
 
-        <div class="drawer-side z-50">
+        <!-- Drawer side: Bento Grid Sidebar Menu -->
+        <div class="drawer-side z-50 lg:bg-transparent">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
-            <ul
-                class="menu p-4 w-80 min-h-full bg-base-100/95 backdrop-blur-xl text-base-content border-r border-base-content/5 flex flex-col">
-                <div class="mb-8 px-2 flex justify-between items-center">
-                    <div>
-                        <h1 class="text-2xl font-bold tracking-tight text-base-content">XOXO</h1>
-                        <p class="text-xs opacity-50 font-medium tracking-wide">Chat with stranger</p>
-                    </div>
-                    <div class="badge badge-outline text-xs"><span id="count-val">0</span>&nbsp;Online</div>
-                </div>
-                <div class="space-y-2 flex-1">
-                    <li>
-                        <a onclick="switchMode('random')" id="nav-random"
-                            class="active group transition-all duration-300 hover:pl-6">
-                            <div class="flex items-center gap-3 w-full">
-                                <div
-                                    class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </div>
-                                <span class="font-bold">Random Chat</span>
-                                <span id="badge-random" class="badge badge-primary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a onclick="switchMode('public')" id="nav-public"
-                            class="opacity-60 transition-all duration-300 hover:pl-6 cursor-pointer">
-                            <div class="flex items-center gap-3 w-full">
-                                <div
-                                    class="w-8 h-8 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                </div>
-                                <span class="font-bold">Public Lounge</span>
-                                <span id="badge-public" class="badge badge-secondary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a onclick="switchMode('group')" id="nav-group"
-                            class="opacity-60 transition-all duration-300 hover:pl-6 cursor-pointer">
-                            <div class="flex items-center gap-3 w-full">
-                                <div
-                                    class="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </div>
-                                <span class="font-bold">Custom Room</span>
-                                <span id="badge-group" class="badge badge-accent badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
-                            </div>
-                        </a>
-                    </li>
-                </div>
-                <div class="bg-base-200 p-3 rounded-lg flex items-center gap-3 mt-auto shadow-sm border border-base-content/5">
-                    <div class="avatar placeholder">
-                        <div class="bg-neutral text-neutral-content rounded-full w-10">
-                            <span class="text-lg">👤</span>
+            
+            <div class="w-80 lg:w-96 min-h-full bg-slate-950/85 lg:bg-transparent backdrop-blur-2xl lg:backdrop-blur-none p-4 lg:p-6 lg:pl-6 lg:pr-3 flex flex-col gap-4 box-border z-10 relative">
+                
+                <!-- Bento Card 1: Branding & Stats -->
+                <div class="glass-panel p-5 rounded-[24px] flex flex-col gap-3 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-3xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 font-sans">XOXO</h1>
+                            <p class="text-[9px] opacity-60 font-bold tracking-widest uppercase mt-0.5">Chat with stranger</p>
+                        </div>
+                        <div class="badge bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] px-2.5 py-3 font-extrabold flex items-center gap-1.5 shadow-lg shadow-emerald-500/5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span><span id="count-val">0</span> Online</span>
                         </div>
                     </div>
-                    <div class="overflow-hidden">
-                        <p class="text-xs opacity-50 font-medium">Logged in as</p>
-                        <p class="font-bold truncate text-primary text-sm" id="sidebar-nickname">...</p>
+                </div>
+
+                <!-- Bento Card 2: Modes / Navigation -->
+                <div class="glass-panel p-4 rounded-[24px] flex flex-col gap-2 flex-grow">
+                    <span class="text-[10px] font-extrabold tracking-widest text-indigo-400/80 uppercase px-2 mb-1.5">Navigation</span>
+                    
+                    <a onclick="switchMode('random')" id="nav-random"
+                        class="glass-card active flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
+                        <div class="w-9.5 h-9.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-sm text-white">Random Chat</span>
+                            <span class="text-[10px] opacity-40">Match with strangers</span>
+                        </div>
+                        <span id="badge-random" class="badge badge-primary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                    </a>
+
+                    <a onclick="switchMode('public')" id="nav-public"
+                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
+                        <div class="w-9.5 h-9.5 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-sm text-white">Public Lounge</span>
+                            <span class="text-[10px] opacity-40">Global public lobby</span>
+                        </div>
+                        <span id="badge-public" class="badge badge-secondary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                    </a>
+
+                    <a onclick="switchMode('group')" id="nav-group"
+                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
+                        <div class="w-9.5 h-9.5 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-sm text-white">Custom Room</span>
+                            <span class="text-[10px] opacity-40">Private group code</span>
+                        </div>
+                        <span id="badge-group" class="badge badge-accent badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                    </a>
+                </div>
+
+                <!-- Bento Card 3: User Details & Theme Toggle -->
+                <div class="glass-panel p-4 rounded-[24px] flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div class="bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-xl w-10 h-10 flex items-center justify-center font-bold text-lg">
+                                👤
+                            </div>
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="text-[9px] opacity-50 font-extrabold tracking-wider uppercase">Logged in as</p>
+                            <p class="font-extrabold truncate text-indigo-400 text-sm" id="sidebar-nickname">...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="h-px bg-white/5 my-0.5"></div>
+
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[10px] font-extrabold opacity-50 tracking-wider">THEME MODE</span>
+                        <input type="checkbox" class="toggle toggle-sm toggle-primary" onclick="toggleTheme()" checked />
                     </div>
                 </div>
+
+            </div>
         </div>
-        <div class="mt-4 flex justify-between items-center px-2">
-            <span class="text-xs font-bold opacity-40">THEME</span>
-            <input type="checkbox" class="toggle toggle-sm toggle-primary" onclick="toggleTheme()" checked />
-        </div>
-    </div>
-    </ul>
-    </div>
     </div>
 
     <script src="script.js"></script>

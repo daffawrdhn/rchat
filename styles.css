@@ -2,16 +2,102 @@ body {
     font-family: 'Outfit', sans-serif;
     height: 100dvh;
     overflow: hidden;
-    background-color: var(--fallback-b2,oklch(var(--b2)/1));
+    background-color: #020617; /* Slate-950 */
+}
+
+/* Glassmorphism system */
+.glass-panel {
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover, .glass-card.active {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #f8fafc !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: #6366f1 !important; /* Indigo-500 */
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2) !important;
+}
+
+.glass-nav-item.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25)) !important;
+    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+    color: #ffffff !important;
+}
+
+.glass-nav-item.active div {
+    background-color: rgba(168, 85, 247, 0.2);
+    color: #ffffff;
+}
+
+/* Chat bubble overrides for glassmorphic aesthetic */
+.chat-bubble {
+    border-radius: 18px !important;
+    padding: 0.75rem 1.1rem !important;
+    font-size: 0.925rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 85% !important;
+    line-height: 1.5 !important;
+}
+
+.chat-start .chat-bubble {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #f8fafc !important;
+}
+
+.chat-end .chat-bubble {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25)) !important;
+    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+    color: #ffffff !important;
 }
 
 .chat-scroll::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
+    height: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .chat-scroll::-webkit-scrollbar-thumb {
-    background-color: var(--fallback-bc,oklch(var(--bc)/0.2));
-    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 @keyframes slideIn {
@@ -19,7 +105,6 @@ body {
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -30,22 +115,42 @@ body {
     animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Background blob animations */
+@keyframes float-blob-1 {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(40px, -60px) scale(1.1); }
+    66% { transform: translate(-30px, 30px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes float-blob-2 {
+    0% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(-50px, 50px) scale(1.15); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.blob-1 {
+    animation: float-blob-1 25s infinite ease-in-out;
+}
+
+.blob-2 {
+    animation: float-blob-2 30s infinite ease-in-out;
+}
+
 /* --- VIDEO CALL LAYOUT (Picture-in-Picture / Overlay) --- */
 #video-container {
     width: 100%;
-    /* Mobile Height: Leaves room for chat */
-    height: 55vh;
+    height: 40vh;
     overflow: hidden;
     display: none;
-    /* Default hidden */
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 1rem;
 }
 
-/* Desktop Height: Cap it so it doesn't take up the whole monitor */
 @media (min-width: 1024px) {
     #video-container {
-        height: 450px;
-        border-radius: 12px;
-        margin-bottom: 1rem;
+        height: 380px;
     }
 }
 
@@ -60,34 +165,23 @@ body {
 }
 
 #remote-video {
-    /* CONTAIN: Shows full video (with black bars if needed), NO CROP */
     object-fit: contain;
 }
 
 /* LOCAL VIDEO (Overlay) */
 .local-wrapper {
-    /* Dimensions */
-    width: 30%;
-    /* Take 30% of container width */
-    max-width: 250px;
-    /* Limit size for desktop so it doesn't get huge */
+    width: 25%;
+    max-width: 200px;
     min-width: 100px;
-    /* Don't get too small on tiny phones */
-
-    /* Height is AUTO so it adjusts to aspect ratio (Vertical/Horizontal) automatically */
     height: auto;
-
-    /* Styling */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     background: #111;
     transition: width 0.3s ease;
-    /* Smooth size transition */
-
-    /* Interaction */
+    border-radius: 14px;
+    overflow: hidden;
     cursor: grab;
     touch-action: none;
-    /* Important for dragging on mobile */
 }
 
 .local-wrapper:active {
@@ -116,12 +210,10 @@ body {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
     }
-
     70% {
         transform: scale(1);
         box-shadow: 0 0 0 15px rgba(34, 197, 94, 0);
     }
-
     100% {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
