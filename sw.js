@@ -34,10 +34,23 @@ self.addEventListener('fetch', event => {
         return;
     }
 
+    console.log('[Service Worker Fetch]', event.request.url);
     event.respondWith(
         fetch(event.request)
-            .catch(() => {
-                return caches.match(event.request);
+            .then(res => {
+                console.log('[Service Worker Fetch Success]', event.request.url, res.status);
+                return res;
+            })
+            .catch(err => {
+                console.error('[Service Worker Fetch Error]', event.request.url, err);
+                return caches.match(event.request).then(cachedResponse => {
+                    if (cachedResponse) {
+                        console.log('[Service Worker Fetch Fallback]', event.request.url);
+                        return cachedResponse;
+                    }
+                    // If not in cache, propagate error
+                    throw err;
+                });
             })
     );
 });
