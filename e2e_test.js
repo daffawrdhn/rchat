@@ -132,6 +132,55 @@ const puppeteer = require('puppeteer');
         );
         console.log("[User2] Received system message that partner left the group.");
 
+        // ==========================================
+        // TEST 4: RANDOM CHAT & NEW FEATURES
+        // ==========================================
+        console.log("\n--- Running Test 4: Random Chat Matchmaking ---");
+        await page1.click('#nav-random');
+        await page2.click('#nav-random');
+
+        // Click Start Searching
+        await page1.waitForSelector('#btn-start', { visible: true });
+        await page1.click('#btn-start');
+        await page2.waitForSelector('#btn-start', { visible: true });
+        await page2.click('#btn-start');
+        
+        console.log("[User1] Started searching...");
+        console.log("[User2] Started searching...");
+
+        // Wait for connection (Next button should appear when connected)
+        await page1.waitForSelector('#btn-next-header', { visible: true, timeout: 15000 });
+        await page2.waitForSelector('#btn-next-header', { visible: true, timeout: 15000 });
+        console.log("Both users successfully matched in Random Chat.");
+
+        // Check if Mic/Cam toggles exist
+        const micToggle1 = await page1.$('#btn-mic');
+        const camToggle1 = await page1.$('#btn-cam');
+        if (micToggle1 && camToggle1) {
+            console.log("Mic and Cam toggle buttons found.");
+        } else {
+            throw new Error("Mic or Cam toggle button not found!");
+        }
+
+        // Send message in Random Chat
+        const randomMsg = "Hello Random from Test " + Date.now();
+        await page1.type('#random-msg-input', randomMsg);
+        await page1.keyboard.press('Enter');
+        console.log(`[User1] Sent random message: ${randomMsg}`);
+
+        await page2.waitForFunction(
+            (msg) => {
+                const boxes = document.querySelectorAll('#random-chat-box .chat-bubble');
+                for (let b of boxes) {
+                    if (b.innerText.includes(msg)) return true;
+                }
+                return false;
+            },
+            { timeout: 5000 },
+            randomMsg
+        );
+        console.log(`[User2] Successfully received random message.`);
+
         console.log("\n✅ ALL TESTS PASSED SUCCESSFULLY!");
 
     } catch (e) {
