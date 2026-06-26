@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v2';
+const CACHE_NAME = 'xoxo-v3';
 const urlsToCache = [
     './',
     './index.html',
@@ -9,6 +9,7 @@ const urlsToCache = [
 
 // Install the Service Worker
 self.addEventListener('install', event => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -30,6 +31,7 @@ self.addEventListener('fetch', event => {
 
 // Update Service Worker
 self.addEventListener('activate', event => {
+    event.waitUntil(self.clients.claim());
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then(cacheNames => {
