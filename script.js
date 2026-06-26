@@ -2,7 +2,6 @@
 let conn;
 let currentMode = 'random';
 let myNickname = '';
-let uploadToken = '';
 let unreadRandom = 0;
 let unreadPublic = 0;
 let unreadGroup = 0;
@@ -118,7 +117,6 @@ function initSocket() {
 
         if (data.status === 'identity') {
             myNickname = data.nickname;
-            if (data.upload_token) uploadToken = data.upload_token;
             document.getElementById('sidebar-nickname').innerText = myNickname;
         }
         else if (data.status === 'stats') {
@@ -346,19 +344,8 @@ async function toggleRecording(context) {
                 const reader = new FileReader();
                 reader.readAsDataURL(audioBlob);
                 reader.onloadend = () => {
-                    // Upload to server instead of sending huge base64
-                    fetch('upload.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'audio', data: reader.result, token: uploadToken })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.url) {
-                            sendMessage(context, 'audio', data.url);
-                        }
-                    })
-                    .catch(err => console.error('Upload failed', err));
+                    // Send huge base64 directly via WebSocket (Zero Storage Architecture)
+                    sendMessage(context, 'audio', reader.result);
                 };
             };
             
@@ -519,19 +506,8 @@ function handleImageUpload(input) {
                 ctx.drawImage(img, 0, 0, width, height);
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                 
-                // Upload to server
-                fetch('upload.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'image', data: dataUrl, token: uploadToken })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.url) {
-                        sendMessage(currentMode, 'image', data.url);
-                    }
-                })
-                .catch(err => console.error('Upload failed', err));
+                // Send base64 directly via WebSocket (Zero Storage Architecture)
+                sendMessage(currentMode, 'image', dataUrl);
             };
             img.src = e.target.result;
         };

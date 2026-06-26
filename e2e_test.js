@@ -200,7 +200,7 @@ const path = require('path');
             page1.evaluate(() => triggerUpload())
         ]);
         await fileChooser.accept([path.resolve(__dirname, 'icon-192.png')]);
-        console.log("[User1] Uploaded image icon-192.png via real upload.php");
+        console.log("[User1] Uploaded image icon-192.png via Base64 WebSocket");
 
         try {
             await page2.waitForFunction(
@@ -227,7 +227,7 @@ const path = require('path');
         console.log("[User1] Started real voice recording...");
         await new Promise(r => setTimeout(r, 2000)); // record for 2 seconds
         await page1.click('#record-btn-random');
-        console.log("[User1] Stopped voice recording, sending via upload.php...");
+        console.log("[User1] Stopped voice recording, sending via Base64 WebSocket...");
 
         try {
             await page2.waitForFunction(

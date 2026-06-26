@@ -32,16 +32,9 @@ class Chat implements MessageComponentInterface
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId}) - {$conn->nickname}\n";
 
-        // Generate HMAC token for upload authorization (expires in 12 hours)
-        $expiry = time() + (12 * 3600);
-        $tokenData = $conn->resourceId . '|' . $expiry;
-        $signature = hash_hmac('sha256', $tokenData, 'xoxo_secure_upload_key_2026!');
-        $uploadToken = $tokenData . '|' . $signature;
-
         $conn->send(json_encode([
             'status' => 'identity',
-            'nickname' => $conn->nickname,
-            'upload_token' => $uploadToken
+            'nickname' => $conn->nickname
         ]));
 
         $this->broadcastUserCount();
@@ -103,13 +96,13 @@ class Chat implements MessageComponentInterface
                 if ($type === 'text') {
                     $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
                 } elseif ($type === 'image') {
-                    // Length check to prevent abuse, allowing base64, URL, or ciphertext
-                    if (strlen($content) > 150000) {
+                    // Length check to prevent abuse, allowing base64, URL, or ciphertext (Max 500KB)
+                    if (strlen($content) > 500000) {
                         return;
                     }
                 } elseif ($type === 'audio') {
-                    // Length check to prevent abuse, allowing base64, URL, or ciphertext
-                    if (strlen($content) > 1000000) {
+                    // Length check to prevent abuse, allowing base64, URL, or ciphertext (Max 2MB)
+                    if (strlen($content) > 2000000) {
                         return;
                     }
                 } else {
