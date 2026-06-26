@@ -2,7 +2,8 @@ body {
     font-family: 'Outfit', sans-serif;
     height: 100dvh;
     overflow: hidden;
-    background-image: radial-gradient(circle at top right, #1d232a 0%, #0f172a 100%);
+    background-color: var(--fallback-b2,oklch(var(--b2)/1));
+    background-image: radial-gradient(circle at top right, var(--fallback-b3,oklch(var(--b3)/1)) 0%, var(--fallback-b1,oklch(var(--b1)/1)) 100%);
 }
 
 .chat-scroll::-webkit-scrollbar {
@@ -10,7 +11,7 @@ body {
 }
 
 .chat-scroll::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--fallback-bc,oklch(var(--bc)/0.2));
     border-radius: 10px;
 }
 

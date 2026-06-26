@@ -9,15 +9,22 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use MyApp\Chat;
 
+$chat = new Chat();
+
 // Running on port 8080
 $server = IoServer::factory(
     new HttpServer(
         new WsServer(
-            new Chat()
+            $chat
         )
     ),
     8080
 );
+
+// Timer for 5 minute inactivity cleanup
+$server->loop->addPeriodicTimer(60, function () use ($chat) {
+    $chat->cleanupInactiveGroups();
+});
 
 echo "Server started on port 8080...\n";
 echo "Features Active:\n";

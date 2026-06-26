@@ -1,20 +1,15 @@
-<?php
-namespace MyApp;
-
-use Ratchet\MessageComponentInterface;
-use Ratchet\ConnectionInterface;
-
-class Chat implements MessageComponentInterface
-{
-    protected $clients;
     protected $waitingClient;
     protected $pairs;
+    protected $groups; // ['groupId' => [client1, client2, ...]]
+    protected $groupActivity; // ['groupId' => timestamp]
 
     public function __construct()
     {
         $this->clients = new \SplObjectStorage;
         $this->waitingClient = null;
         $this->pairs = [];
+        $this->groups = [];
+        $this->groupActivity = [];
     }
 
     public function onOpen(ConnectionInterface $conn)
@@ -23,6 +18,7 @@ class Chat implements MessageComponentInterface
         $conn->nickname = $this->generateNickname();
         $conn->lastMsgTime = 0;
         $conn->spamWarnings = 0;
+        $conn->currentGroup = null;
 
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId}) - {$conn->nickname}\n";
@@ -65,8 +61,16 @@ class Chat implements MessageComponentInterface
                 $from->send(json_encode(['status' => 'room_joined', 'room' => $data['room']]));
                 break;
 
+            case 'cancel_search':
+                $this->cleanupRandomChat($from);
+                break;
+
             case 'find_partner':
                 $this->handleFindPartner($from);
+                break;
+
+            case 'join_group':
+                $this->handleJoinGroup($from, $data['group_id'] ?? '');
                 break;
 
             case 'message':
@@ -76,6 +80,8 @@ class Chat implements MessageComponentInterface
 
                 if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
                     $this->handlePrivateMessage($from, $content, $type);
+                } elseif ($context === 'group' && $from->currentGroup) {
+                    $this->handleGroupMessage($from, $content, $type);
                 } else {
                     $this->handlePublicMessage($from, $content, $type);
                 }
@@ -92,12 +98,101 @@ class Chat implements MessageComponentInterface
                 break;
 
             case 'typing':
-                $this->handleTyping($from);
+                $this->handleTyping($from, $data['context'] ?? 'random');
                 break;
 
             case 'next':
                 $this->handleNext($from);
                 break;
+        }
+    }
+
+    private function handleJoinGroup($from, $groupId)
+    {
+        $groupId = trim($groupId);
+        if (empty($groupId)) {
+            $from->send(json_encode(['status' => 'error', 'msg' => 'Room code cannot be empty.']));
+            return;
+        }
+
+        // Create room if it doesn't exist
+        if (!isset($this->groups[$groupId])) {
+            $this->groups[$groupId] = new \SplObjectStorage;
+            $this->groupActivity[$groupId] = time();
+        }
+
+        $this->groups[$groupId]->attach($from);
+        $from->currentGroup = $groupId;
+        $this->groupActivity[$groupId] = time();
+
+        // Notify user
+        $from->send(json_encode([
+            'status' => 'group_joined',
+            'group_id' => $groupId,
+            'msg' => 'You joined the room: ' . $groupId
+        ]));
+
+        // Notify others
+        foreach ($this->groups[$groupId] as $client) {
+            if ($client !== $from) {
+                $client->send(json_encode([
+                    'status' => 'group_system',
+                    'msg' => "{$from->nickname} joined the room."
+                ]));
+            }
+        }
+    }
+
+    public function cleanupInactiveGroups()
+    {
+        $currentTime = time();
+        foreach ($this->groups as $groupId => $clients) {
+            $lastActivity = $this->groupActivity[$groupId] ?? $currentTime;
+            
+            // 5 minutes = 300 seconds
+            if (($currentTime - $lastActivity) > 300) {
+                foreach ($clients as $client) {
+                    $client->send(json_encode([
+                        'status' => 'group_system',
+                        'msg' => 'Room was deleted due to 5 minutes of inactivity.'
+                    ]));
+                    $client->send(json_encode([
+                        'status' => 'group_kicked'
+                    ]));
+                    $client->currentGroup = null;
+                }
+                
+                unset($this->groups[$groupId]);
+                unset($this->groupActivity[$groupId]);
+                echo "Room $groupId deleted due to inactivity.\n";
+            }
+        }
+    }
+
+    private function handleGroupMessage($from, $msg, $type)
+    {
+        $groupId = $from->currentGroup;
+        if (!isset($this->groups[$groupId])) return;
+
+        $this->groupActivity[$groupId] = time();
+
+        // Basic validation for image size server-side
+        if ($type === 'image' && strlen($msg) > 150000) {
+            return;
+        }
+
+        $payload = json_encode([
+            'status' => 'group_msg',
+            'name' => $from->nickname,
+            'msg' => $msg,
+            'type' => $type,
+            'is_me' => false
+        ]);
+
+        foreach ($this->groups[$groupId] as $client) {
+            if ($client !== $from) {
+                $client->send($payload);
+            }
         }
     }
 
@@ -156,11 +251,17 @@ class Chat implements MessageComponentInterface
         }
     }
 
-    private function handleTyping($from)
+    private function handleTyping($from, $context)
     {
-        if (isset($this->pairs[$from->resourceId])) {
+        if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
             $partner = $this->pairs[$from->resourceId];
             $partner->send(json_encode(['status' => 'typing']));
+        } elseif ($context === 'group' && $from->currentGroup && isset($this->groups[$from->currentGroup])) {
+             foreach ($this->groups[$from->currentGroup] as $client) {
+                if ($client !== $from) {
+                    $client->send(json_encode(['status' => 'typing', 'context' => 'group']));
+                }
+            }
         }
     }
 
@@ -185,6 +286,30 @@ class Chat implements MessageComponentInterface
         }
     }
 
+    private function cleanupGroupChat($conn)
+    {
+        if ($conn->currentGroup && isset($this->groups[$conn->currentGroup])) {
+            $groupId = $conn->currentGroup;
+            $this->groups[$groupId]->detach($conn);
+            
+            // Notify others
+            foreach ($this->groups[$groupId] as $client) {
+                $client->send(json_encode([
+                    'status' => 'group_system',
+                    'msg' => "{$conn->nickname} left the group."
+                ]));
+            }
+
+            // Clean up empty groups
+            if ($this->groups[$groupId]->count() === 0) {
+                unset($this->groups[$groupId]);
+                unset($this->groupActivity[$groupId]);
+            }
+            
+            $conn->currentGroup = null;
+        }
+    }
+
     private function generateNickname()
     {
         $adjs = ['Cool', 'Super', 'Lazy', 'Hyper', 'Happy', 'Sad', 'Wild', 'Neon', 'Dark', 'Fast'];
@@ -195,6 +320,7 @@ class Chat implements MessageComponentInterface
     public function onClose(ConnectionInterface $conn)
     {
         $this->cleanupRandomChat($conn);
+        $this->cleanupGroupChat($conn);
         $this->clients->detach($conn);
         echo "Connection {$conn->resourceId} has disconnected\n";
         $this->broadcastUserCount();

@@ -4,13 +4,17 @@ let currentMode = 'random';
 let myNickname = '';
 let unreadRandom = 0;
 let unreadPublic = 0;
+let unreadGroup = 0;
 let isSearching = false;
+let currentGroupId = null;
 
 // UI Refs
 const randomView = document.getElementById('random-chat-view');
 const publicView = document.getElementById('public-chat-view');
+const groupView = document.getElementById('group-chat-view');
 const randomBox = document.getElementById('random-chat-box');
 const publicBox = document.getElementById('public-chat-box');
+const groupBox = document.getElementById('group-chat-box');
 const chatTitle = document.getElementById('chat-title');
 
 // Status Wrapper
@@ -27,6 +31,7 @@ const btnNext = document.getElementById('btn-next');
 const randomInputArea = document.getElementById('random-input-area');
 const randomInput = document.getElementById('random-msg-input');
 const publicInput = document.getElementById('public-msg-input');
+const groupInput = document.getElementById('group-msg-input');
 
 // Video & WebRTC
 let localStream;
@@ -71,9 +76,10 @@ function playAudio(type) {
 
 // Emojis
 const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
-const renderEmojis = (id, ctx) => document.getElementById(id).innerHTML = emojis.map(e => `<button class="btn btn-ghost btn-sm text-xl hover:bg-white/10" onclick="insertEmoji('${e}', '${ctx}')">${e}</button>`).join('');
+const renderEmojis = (id, ctx) => document.getElementById(id).innerHTML = emojis.map(e => `<button class="btn btn-ghost btn-sm text-xl hover:bg-base-content/10" onclick="insertEmoji('${e}', '${ctx}')">${e}</button>`).join('');
 renderEmojis('emoji-grid-random', 'random');
 renderEmojis('emoji-grid-public', 'public');
+renderEmojis('emoji-grid-group', 'group');
 
 function initSocket() {
     // CHANGE THIS URL TO YOUR WEBSOCKET SERVER
@@ -141,7 +147,37 @@ function initSocket() {
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
             logMessage(publicBox, 'other', data.name, data.msg, data.type);
         }
-        else if (data.status === 'typing') showTyping(true);
+        else if (data.status === 'group_msg') {
+            if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
+            logMessage(groupBox, 'other', data.name, data.msg, data.type);
+        }
+        else if (data.status === 'group_joined') {
+            currentGroupId = data.group_id;
+            setGroupUI('active', data.group_id);
+            logSystem(groupBox, data.msg);
+            
+            // Update URL without reloading
+            const url = new URL(window.location);
+            url.searchParams.set('group', data.group_id);
+            window.history.pushState({}, '', url);
+        }
+        else if (data.status === 'group_kicked') {
+            currentGroupId = null;
+            setGroupUI('idle');
+            const url = new URL(window.location);
+            url.searchParams.delete('group');
+            window.history.pushState({}, '', url);
+        }
+        else if (data.status === 'group_system') {
+            logSystem(groupBox, data.msg);
+        }
+        else if (data.status === 'typing') {
+            if (data.context === 'group') {
+                // Optional: show typing in group
+            } else {
+                showTyping(true);
+            }
+        }
         else if (data.status === 'call_signal') handleSignalMessage(data.signal);
     };
 }
@@ -154,31 +190,48 @@ function updateStatus(text, type) {
 function updateBadges() {
     const bRandom = document.getElementById('badge-random');
     const bPublic = document.getElementById('badge-public');
+    const bGroup = document.getElementById('badge-group');
+
     if (unreadRandom > 0) { bRandom.innerText = unreadRandom; bRandom.classList.remove('scale-0'); }
     else bRandom.classList.add('scale-0');
+
     if (unreadPublic > 0) { bPublic.innerText = unreadPublic; bPublic.classList.remove('scale-0'); }
     else bPublic.classList.add('scale-0');
+
+    if (unreadGroup > 0) { bGroup.innerText = unreadGroup; bGroup.classList.remove('scale-0'); }
+    else bGroup.classList.add('scale-0');
 }
 function switchMode(mode) {
     currentMode = mode;
     document.getElementById('my-drawer-2').checked = false;
     document.getElementById('nav-random').classList.remove('active');
     document.getElementById('nav-public').classList.remove('active');
+    document.getElementById('nav-group').classList.remove('active');
     document.getElementById(`nav-${mode}`).classList.add('active');
 
     if (mode === 'random') {
         randomView.classList.remove('hidden');
         publicView.classList.add('hidden');
+        groupView.classList.add('hidden');
         chatTitle.innerText = "Random Chat";
         statusWrapper.classList.remove('invisible');
         unreadRandom = 0; updateBadges();
-    } else {
+    } else if (mode === 'public') {
         randomView.classList.add('hidden');
         publicView.classList.remove('hidden');
+        groupView.classList.add('hidden');
         chatTitle.innerText = "Public Lounge";
         statusWrapper.classList.add('invisible');
         unreadPublic = 0; updateBadges();
         setTimeout(() => publicBox.scrollTop = publicBox.scrollHeight, 100);
+    } else if (mode === 'group') {
+        randomView.classList.add('hidden');
+        publicView.classList.add('hidden');
+        groupView.classList.remove('hidden');
+        chatTitle.innerText = "Group Chat";
+        statusWrapper.classList.add('invisible');
+        unreadGroup = 0; updateBadges();
+        setTimeout(() => groupBox.scrollTop = groupBox.scrollHeight, 100);
     }
 }
 function setRandomUI(state) {
@@ -221,7 +274,7 @@ function logMessage(container, type, name, msg, msgType = 'text') {
 
     let contentHtml = '';
     if (msgType === 'image') {
-        contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-white/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
+        contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-base-content/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
     } else {
         contentHtml = msg;
     }
@@ -237,7 +290,7 @@ function logMessage(container, type, name, msg, msgType = 'text') {
 }
 
 function logSystem(container, msg) {
-    container.innerHTML += `<div class="flex items-center justify-center my-4 opacity-60 msg-anim"><span class="text-xs bg-base-200 px-3 py-1 rounded-full border border-white/5">${msg}</span></div>`;
+    container.innerHTML += `<div class="flex items-center justify-center my-4 opacity-60 msg-anim"><span class="text-xs bg-base-200 px-3 py-1 rounded-full border border-base-content/5">${msg}</span></div>`;
     container.scrollTop = container.scrollHeight;
 }
 
@@ -258,7 +311,7 @@ function stopRandomChat() {
     btnStart.classList.remove('hidden');
     updateStatus("Idle", "warning");
     logSystem(randomBox, "Search canceled.");
-    conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
+    conn.send(JSON.stringify({ action: 'cancel_search' }));
 }
 
 function nextPartner() {
@@ -270,18 +323,18 @@ function nextPartner() {
 }
 
 function sendMessage(context, type = 'text', content = null) {
-    const input = context === 'random' ? randomInput : publicInput;
+    const input = context === 'random' ? randomInput : (context === 'public' ? publicInput : groupInput);
     const text = content || input.value.trim();
     if (!text) return;
 
-    logMessage(context === 'random' ? randomBox : publicBox, 'you', 'You', text, type);
+    logMessage(context === 'random' ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', 'You', text, type);
     conn.send(JSON.stringify({ action: 'message', content: text, context: context, type: type }));
 
     if (type === 'text') { input.value = ''; input.focus(); }
 }
 function handleInput(e, ctx) { if (e.key === 'Enter') sendMessage(ctx); }
 function insertEmoji(e, ctx) {
-    const el = ctx === 'random' ? randomInput : publicInput;
+    const el = ctx === 'random' ? randomInput : (ctx === 'public' ? publicInput : groupInput);
     el.value += e; el.focus();
 }
 
@@ -445,7 +498,7 @@ function toggleMic() {
         if (isMuted) {
             btn.classList.add('bg-red-500', 'hover:bg-red-600');
             btn.classList.remove('bg-black/50');
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12.732a1 1 0 01-1.707.707l-3.515-3.515H3a1 1 0 01-1-1v-4a1 1 0 011-1h1.778l3.515-3.515a1 1 0 011.09-.231zM12.71 6.29a1 1 0 01.037 1.414l-1.414 1.414 1.414 1.414a1 1 0 01-1.414 1.414l-1.414-1.414-1.414 1.414a1 1 0 01-1.414-1.414l1.414-1.414-1.414-1.414a1 1 0 111.414-1.414l1.414 1.414 1.414-1.414a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12.732a1 1 0 01-1.707.707l-3.515-3.515H3a1 1 0 01-1-1v-4a1 1 0 011-1h1.778l3.515-3.515a1 1 0 011.09-.231zM12.71 6.29a1 1 0 01.037 1.414l-1.414 1.414 1.414 1.414a1 1 0 01-1.414 1.414l-1.414-1.414-1.414 1.414a1 1 0 111.414-1.414l1.414 1.414 1.414-1.414a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
         } else {
             btn.classList.remove('bg-red-500', 'hover:bg-red-600');
             btn.classList.add('bg-black/50');
@@ -638,7 +691,7 @@ function checkIOSInstall() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (isIOS && !isStandalone) {
         const toast = document.createElement('div');
-        toast.className = "fixed bottom-4 left-4 right-4 bg-base-100 p-4 rounded-xl border border-white/10 shadow-2xl z-50 flex flex-col gap-2 msg-anim";
+        toast.className = "fixed bottom-4 left-4 right-4 bg-base-100 p-4 rounded-xl border border-base-content/10 shadow-2xl z-50 flex flex-col gap-2 msg-anim";
         toast.innerHTML = `
           <div class="flex justify-between items-start">
               <div>
@@ -654,3 +707,63 @@ function checkIOSInstall() {
 setTimeout(checkIOSInstall, 2000);
 
 initSocket();
+
+// --- GROUP CHAT FUNCTIONS ---
+function joinCustomRoom() {
+    const code = document.getElementById('room-code-input').value.trim();
+    if (!code) {
+        alert("Please enter a room code!");
+        return;
+    }
+    if (conn.readyState !== WebSocket.OPEN) return;
+    
+    // Reset UI state
+    groupBox.innerHTML = '';
+    
+    conn.send(JSON.stringify({ action: 'join_group', group_id: code }));
+}
+
+function joinGroup(groupId) {
+    conn.send(JSON.stringify({ action: 'join_group', group_id: groupId }));
+}
+
+function setGroupUI(state, groupId = null) {
+    const setup = document.getElementById('group-setup');
+    const active = document.getElementById('group-active');
+    const linkDisplay = document.getElementById('group-invite-link');
+
+    if (state === 'active') {
+        setup.classList.add('hidden');
+        active.classList.remove('hidden');
+        if (groupId) {
+            const link = `${window.location.origin}${window.location.pathname}?group=${groupId}`;
+            linkDisplay.innerText = link;
+        }
+    } else {
+        setup.classList.remove('hidden');
+        active.classList.add('hidden');
+    }
+}
+
+function copyInviteLink() {
+    const text = document.getElementById('group-invite-link').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Link copied to clipboard!");
+    });
+}
+
+// Check for group param on load
+window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    const groupId = params.get('group');
+    if (groupId) {
+        // Wait for connection then join
+        const checkConn = setInterval(() => {
+            if (conn && conn.readyState === WebSocket.OPEN) {
+                switchMode('group');
+                joinGroup(groupId);
+                clearInterval(checkConn);
+            }
+        }, 500);
+    }
+});
