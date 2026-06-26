@@ -1,3 +1,12 @@
+<?php
+namespace MyApp;
+
+use Ratchet\MessageComponentInterface;
+use Ratchet\ConnectionInterface;
+
+class Chat implements MessageComponentInterface
+{
+    protected $clients;
     protected $waitingClient;
     protected $pairs;
     protected $groups; // ['groupId' => [client1, client2, ...]]
