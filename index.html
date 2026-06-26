@@ -27,11 +27,35 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.unregister();
-                    }
-                });
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => {
+                        console.log('ServiceWorker registered successfully:', reg);
+                        
+                        // Check for updates
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('New ServiceWorker version installed and ready.');
+                                    }
+                                });
+                            }
+                        });
+                    })
+                    .catch(err => {
+                        console.error('ServiceWorker registration failed:', err);
+                    });
+            });
+
+            // Force reload when the service worker controller changes
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('Service Worker updated. Reloading page...');
+                    window.location.reload();
+                }
             });
         }
     </script>
