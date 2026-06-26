@@ -70,7 +70,11 @@ Object.values(sounds).forEach(s => s.load());
 function playAudio(type) {
     if (sounds[type]) {
         sounds[type].currentTime = 0;
-        sounds[type].play().catch(e => console.log("Audio play failed:", e));
+        sounds[type].play().catch(e => {
+            if (e.name !== 'NotSupportedError' && e.name !== 'NotAllowedError') {
+                console.log("Audio play failed:", e);
+            }
+        });
     }
 }
 
@@ -217,6 +221,12 @@ function updateBadges() {
 
     if (unreadGroup > 0) { bGroup.innerText = unreadGroup; bGroup.classList.remove('scale-0'); }
     else bGroup.classList.add('scale-0');
+}
+
+function notifyBackground(title, body) {
+    if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body: body });
+    }
 }
 function switchMode(mode) {
     currentMode = mode;
