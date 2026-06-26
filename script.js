@@ -126,7 +126,8 @@ function initSocket() {
             }
         }
         else if (data.status === 'connected') {
-            if (!isSearching && currentMode === 'random') return;
+            if (data.shared_key) currentAesKey = data.shared_key;
+            isSearching = false;
             playAudio('connect');
             setRandomUI('connected');
             notifyBackground("Stranger Found!", "You are now connected with a stranger.");
@@ -142,8 +143,9 @@ function initSocket() {
             if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
             playAudio('msg');
             showTyping(false);
-            logMessage(randomBox, 'stranger', 'Stranger', data.msg, data.type);
-            notifyBackground("New Message", data.msg.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
+            const decrypted = decryptMsg(data.msg, currentAesKey);
+            logMessage(randomBox, 'stranger', 'Stranger', decrypted, data.type);
+            notifyBackground("New Message", decrypted.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'random' }));
         }
         else if (data.status === 'public_msg') {
@@ -153,8 +155,9 @@ function initSocket() {
         }
         else if (data.status === 'group_msg') {
             if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
-            logMessage(groupBox, 'other', data.name, data.msg, data.type);
-            notifyBackground("Custom Room", data.name + ": " + data.msg.substring(0, 30));
+            const decrypted = decryptMsg(data.msg, rawCustomRoomCode);
+            logMessage(groupBox, 'other', data.name, decrypted, data.type);
+            notifyBackground("Custom Room", data.name + ": " + decrypted.substring(0, 30));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'group' }));
         }
         else if (data.status === 'read') {
@@ -303,7 +306,7 @@ async function toggleRecording(context) {
                 const reader = new FileReader();
                 reader.readAsDataURL(audioBlob);
                 reader.onloadend = () => {
-                    sendMessage(context, reader.result, 'audio');
+                    sendMessage(context, 'audio', reader.result);
                 };
             };
             
@@ -394,15 +397,28 @@ function nextPartner() {
     conn.send(JSON.stringify({ action: 'next' }));
 }
 
-function sendMessage(context, type = 'text', content = null) {
+function sendMessage(context, msgType = 'text', overrideMsg = null) {
     const input = context === 'random' ? randomInput : (context === 'public' ? publicInput : groupInput);
-    const text = content || input.value.trim();
-    if (!text) return;
+    const msg = input.value.trim();
+    if (!msg && !overrideMsg) return;
 
-    logMessage(context === 'random' ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', 'You', text, type);
-    conn.send(JSON.stringify({ action: 'message', content: text, context: context, type: type }));
+    if (!overrideMsg) {
+        input.value = '';
+    }
 
-    if (type === 'text') { input.value = ''; input.focus(); }
+    let payloadMsg = overrideMsg || msg;
+
+    // AES Encryption for Random and Custom Rooms
+    if (context === 'random' && currentAesKey) {
+        payloadMsg = encryptMsg(payloadMsg, currentAesKey);
+    } else if (context === 'group' && rawCustomRoomCode) {
+        payloadMsg = encryptMsg(payloadMsg, rawCustomRoomCode);
+    }
+
+    logMessage(context === 'random' ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', 'You', (overrideMsg || msg), msgType);
+    conn.send(JSON.stringify({ action: 'message', content: payloadMsg, context: context, type: msgType }));
+
+    if (msgType === 'text') { input.focus(); }
 }
 function handleInput(e, ctx) { if (e.key === 'Enter') sendMessage(ctx); }
 function insertEmoji(e, ctx) {
@@ -789,14 +805,40 @@ function joinCustomRoom() {
     }
     if (conn.readyState !== WebSocket.OPEN) return;
     
+    // Store raw code for encryption and send hashed code to server
+    rawCustomRoomCode = code;
+    const hashedCode = CryptoJS.SHA256(code).toString();
+    
     // Reset UI state
     groupBox.innerHTML = '';
     
-    conn.send(JSON.stringify({ action: 'join_group', group_id: code }));
+    conn.send(JSON.stringify({ action: 'join_group', group_id: hashedCode }));
 }
 
 function joinGroup(groupId) {
-    conn.send(JSON.stringify({ action: 'join_group', group_id: groupId }));
+    if (conn.readyState !== WebSocket.OPEN) return;
+    groupBox.innerHTML = '';
+    rawCustomRoomCode = groupId;
+    const hashedCode = CryptoJS.SHA256(groupId).toString();
+    conn.send(JSON.stringify({ action: 'join_group', group_id: hashedCode }));
+}
+
+function encryptMsg(msg, key) {
+    if (!key) return msg;
+    try {
+        return CryptoJS.AES.encrypt(msg, key).toString();
+    } catch(e) { return msg; }
+}
+
+function decryptMsg(msg, key) {
+    if (!key) return msg;
+    try {
+        const bytes = CryptoJS.AES.decrypt(msg, key);
+        const originalText = bytes.toString(CryptoJS.enc.Utf8);
+        return originalText || msg;
+    } catch (e) {
+        return msg;
+    }
 }
 
 function setGroupUI(state, groupId = null) {

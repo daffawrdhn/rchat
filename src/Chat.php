@@ -259,13 +259,23 @@
 
         if ($this->waitingClient !== null && $this->waitingClient !== $conn) {
             $partner = $this->waitingClient;
+            $this->waitingClient = null;
 
             $this->pairs[$conn->resourceId] = $partner;
             $this->pairs[$partner->resourceId] = $conn;
-            $this->waitingClient = null;
 
-            $conn->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
-            $partner->send(json_encode(['status' => 'connected', 'msg' => 'Stranger found! Say hello.']));
+            $sharedKey = bin2hex(random_bytes(16));
+
+            $conn->send(json_encode([
+                'status' => 'connected',
+                'shared_key' => $sharedKey,
+                'msg' => 'Stranger found! Say hello.'
+            ]));
+            $partner->send(json_encode([
+                'status' => 'connected',
+                'shared_key' => $sharedKey,
+                'msg' => 'Stranger found! Say hello.'
+            ]));
         } else {
             $this->waitingClient = $conn;
             $conn->send(json_encode(['status' => 'waiting', 'msg' => 'Looking for a stranger...']));
