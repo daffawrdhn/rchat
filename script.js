@@ -876,6 +876,18 @@ function copyInviteLink() {
     });
 }
 
+function leaveCustomRoom() {
+    if (conn && conn.readyState === WebSocket.OPEN) {
+        conn.send(JSON.stringify({ action: 'leave_group' }));
+    }
+    currentGroupId = null;
+    rawCustomRoomCode = null;
+    setGroupUI('idle');
+    const url = new URL(window.location);
+    url.searchParams.delete('group');
+    window.history.pushState({}, '', url);
+}
+
 // Check for group param on load
 window.addEventListener('load', () => {
     const params = new URLSearchParams(window.location.search);

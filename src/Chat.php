@@ -82,6 +82,11 @@ class Chat implements MessageComponentInterface
                 $this->handleJoinGroup($from, $data['group_id'] ?? '');
                 break;
 
+            case 'leave_group':
+                $this->cleanupGroupChat($from);
+                $from->send(json_encode(['status' => 'group_kicked']));
+                break;
+
             case 'message':
                 $context = $data['context'] ?? 'public';
                 $type = $data['type'] ?? 'text'; // 'text' or 'image'

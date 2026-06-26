@@ -105,6 +105,33 @@ const puppeteer = require('puppeteer');
         );
         console.log(`[User2] Successfully decrypted and received room message.`);
 
+        // ==========================================
+        // TEST 3: LEAVE CUSTOM ROOM
+        // ==========================================
+        console.log("\n--- Running Test 3: Leave Custom Room ---");
+
+        // User 1 clicks leave
+        await page1.waitForSelector('button[onclick="leaveCustomRoom()"]', { visible: true });
+        await page1.click('button[onclick="leaveCustomRoom()"]');
+        console.log("[User1] Clicked Leave button");
+
+        // Wait for User1 to be back to idle state
+        await page1.waitForSelector('#group-idle:not(.hidden)', { visible: true });
+        console.log("[User1] Returned to group-idle view");
+
+        // User 2 should receive system message about User1 leaving
+        await page2.waitForFunction(
+            () => {
+                const boxes = document.querySelectorAll('#group-chat-box .text-xs');
+                for (let b of boxes) {
+                    if (b.innerText.includes("left the group.")) return true;
+                }
+                return false;
+            },
+            { timeout: 5000 }
+        );
+        console.log("[User2] Received system message that partner left the group.");
+
         console.log("\n✅ ALL TESTS PASSED SUCCESSFULLY!");
 
     } catch (e) {
