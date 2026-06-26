@@ -637,34 +637,40 @@ makeElementDraggable(document.getElementById("local-wrapper"));
 
 function toggleMic() {
     if (localStream) {
-        isMuted = !isMuted;
-        localStream.getAudioTracks()[0].enabled = !isMuted;
-        const btn = document.getElementById('btn-mic');
-        if (isMuted) {
-            btn.classList.add('bg-red-500', 'hover:bg-red-600');
-            btn.classList.remove('bg-black/50');
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12.732a1 1 0 01-1.707.707l-3.515-3.515H3a1 1 0 01-1-1v-4a1 1 0 011-1h1.778l3.515-3.515a1 1 0 011.09-.231zM12.71 6.29a1 1 0 01.037 1.414l-1.414 1.414 1.414 1.414a1 1 0 01-1.414 1.414l-1.414-1.414-1.414 1.414a1 1 0 111.414-1.414l1.414 1.414 1.414-1.414a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
-        } else {
-            btn.classList.remove('bg-red-500', 'hover:bg-red-600');
-            btn.classList.add('bg-black/50');
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd" /></svg>`;
+        const audioTracks = localStream.getAudioTracks();
+        if (audioTracks.length > 0) {
+            isMuted = !isMuted;
+            audioTracks.forEach(track => track.enabled = !isMuted);
+            const btn = document.getElementById('btn-mic');
+            if (isMuted) {
+                btn.classList.add('bg-red-500', 'hover:bg-red-600');
+                btn.classList.remove('bg-black/50');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12.732a1 1 0 01-1.707.707l-3.515-3.515H3a1 1 0 01-1-1v-4a1 1 0 011-1h1.778l3.515-3.515a1 1 0 011.09-.231zM12.71 6.29a1 1 0 01.037 1.414l-1.414 1.414 1.414 1.414a1 1 0 01-1.414 1.414l-1.414-1.414-1.414 1.414a1 1 0 111.414-1.414l1.414 1.414 1.414-1.414a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
+            } else {
+                btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                btn.classList.add('bg-black/50');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd" /></svg>`;
+            }
         }
     }
 }
 
 function toggleCam() {
     if (localStream) {
-        isCameraOff = !isCameraOff;
-        localStream.getVideoTracks()[0].enabled = !isCameraOff;
-        const btn = document.getElementById('btn-cam');
-        if (isCameraOff) {
-            btn.classList.add('bg-red-500', 'hover:bg-red-600');
-            btn.classList.remove('bg-black/50');
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg>`;
-        } else {
-            btn.classList.remove('bg-red-500', 'hover:bg-red-600');
-            btn.classList.add('bg-black/50');
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" /></svg>`;
+        const videoTracks = localStream.getVideoTracks();
+        if (videoTracks.length > 0) {
+            isCameraOff = !isCameraOff;
+            videoTracks.forEach(track => track.enabled = !isCameraOff);
+            const btn = document.getElementById('btn-cam');
+            if (isCameraOff) {
+                btn.classList.add('bg-red-500', 'hover:bg-red-600');
+                btn.classList.remove('bg-black/50');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" /></svg>`;
+            } else {
+                btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                btn.classList.add('bg-black/50');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" /></svg>`;
+            }
         }
     }
 }
