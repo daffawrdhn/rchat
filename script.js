@@ -266,6 +266,16 @@ function openImageModal(src) {
     modal.showModal();
 }
 
+function escapeHTML(str) {
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag]));
+}
+
 function logMessage(container, type, name, msg, msgType = 'text') {
     const isMe = type === 'you';
     const align = isMe ? 'chat-end' : 'chat-start';
@@ -276,7 +286,11 @@ function logMessage(container, type, name, msg, msgType = 'text') {
     if (msgType === 'image') {
         contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-base-content/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
     } else {
-        contentHtml = msg;
+        let safeMsg = escapeHTML(msg);
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        contentHtml = safeMsg.replace(urlRegex, function(url) {
+            return `<a href="${url}" target="_blank" class="link hover:text-accent font-bold underline cursor-pointer">${url}</a>`;
+        });
     }
 
     const html = `
