@@ -3,7 +3,7 @@
         'name' => 'hackertampan/rchat',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '62e53f5e7cb810ed67115a70ce4b2a97a58d5109',
+        'reference' => '88c287e40730b13c472fc86fe1bd818fcc4f4494',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -40,7 +40,7 @@
         'hackertampan/rchat' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '62e53f5e7cb810ed67115a70ce4b2a97a58d5109',
+            'reference' => '88c287e40730b13c472fc86fe1bd818fcc4f4494',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -84,15 +84,6 @@
             'install_path' => __DIR__ . '/../ralouphie/getallheaders',
             'aliases' => array(),
             'dev_requirement' => false,
-        ),
-        'ratchet/pawl' => array(
-            'pretty_version' => 'v0.4.3',
-            'version' => '0.4.3.0',
-            'reference' => '2c582373c78271de32cb04c755c4c0db7e09c9c0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../ratchet/pawl',
-            'aliases' => array(),
-            'dev_requirement' => true,
         ),
         'ratchet/rfc6455' => array(
             'pretty_version' => 'v0.3.1',

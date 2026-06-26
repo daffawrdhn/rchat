@@ -129,6 +129,7 @@ function initSocket() {
             if (!isSearching && currentMode === 'random') return;
             playAudio('connect');
             setRandomUI('connected');
+            notifyBackground("Stranger Found!", "You are now connected with a stranger.");
             logSystem(randomBox, "You are connected with a Stranger.");
         }
         else if (data.status === 'disconnected') {
@@ -142,14 +143,17 @@ function initSocket() {
             playAudio('msg');
             showTyping(false);
             logMessage(randomBox, 'stranger', 'Stranger', data.msg, data.type);
+            notifyBackground("New Message", data.msg.substring(0, 50) + (data.type === 'image' ? ' [Image]' : ''));
         }
         else if (data.status === 'public_msg') {
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
             logMessage(publicBox, 'other', data.name, data.msg, data.type);
+            notifyBackground("Public Lounge", data.name + ": " + data.msg.substring(0, 30));
         }
         else if (data.status === 'group_msg') {
             if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
             logMessage(groupBox, 'other', data.name, data.msg, data.type);
+            notifyBackground("Custom Room", data.name + ": " + data.msg.substring(0, 30));
         }
         else if (data.status === 'group_joined') {
             currentGroupId = data.group_id;

@@ -12,7 +12,6 @@ class ComposerStaticInitf8caf0db3ca1a5ad6e36030eb10b0b9a
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
-        '3be16222a6efa6dd226a219eaaff823b' => __DIR__ . '/..' . '/ratchet/pawl/src/functions_include.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -32,7 +31,6 @@ class ComposerStaticInitf8caf0db3ca1a5ad6e36030eb10b0b9a
             'React\\Dns\\' => 10,
             'React\\Cache\\' => 12,
             'Ratchet\\RFC6455\\' => 16,
-            'Ratchet\\Client\\' => 15,
             'Ratchet\\' => 8,
         ),
         'P' =>
@@ -97,10 +95,6 @@ class ComposerStaticInitf8caf0db3ca1a5ad6e36030eb10b0b9a
         'Ratchet\\RFC6455\\' =>
         array (
             0 => __DIR__ . '/..' . '/ratchet/rfc6455/src',
-        ),
-        'Ratchet\\Client\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/ratchet/pawl/src',
         ),
         'Ratchet\\' =>
         array (
