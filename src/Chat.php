@@ -96,12 +96,14 @@ class Chat implements MessageComponentInterface
                 if ($type === 'text') {
                     $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
                 } elseif ($type === 'image') {
-                    if (strlen($content) > 150000 || !preg_match('/^data:image\/(jpeg|png|webp|gif);base64,/', $content)) {
-                        return; // Block invalid or too large images
+                    // Length check to prevent abuse, allowing base64, URL, or ciphertext
+                    if (strlen($content) > 150000) {
+                        return;
                     }
                 } elseif ($type === 'audio') {
-                    if (strlen($content) > 1000000 || !preg_match('/^data:audio\/(webm|ogg|mp3|wav|mp4);base64,/', $content)) {
-                        return; // Block invalid or too large audio
+                    // Length check to prevent abuse, allowing base64, URL, or ciphertext
+                    if (strlen($content) > 1000000) {
+                        return;
                     }
                 } else {
                     return; // Block unknown types

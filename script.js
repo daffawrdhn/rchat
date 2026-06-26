@@ -344,7 +344,19 @@ async function toggleRecording(context) {
                 const reader = new FileReader();
                 reader.readAsDataURL(audioBlob);
                 reader.onloadend = () => {
-                    sendMessage(context, 'audio', reader.result);
+                    // Upload to server instead of sending huge base64
+                    fetch('upload.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'audio', data: reader.result })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.url) {
+                            sendMessage(context, 'audio', data.url);
+                        }
+                    })
+                    .catch(err => console.error('Upload failed', err));
                 };
             };
             
@@ -504,7 +516,20 @@ function handleImageUpload(input) {
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                sendMessage(currentMode, 'image', dataUrl);
+                
+                // Upload to server
+                fetch('upload.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'image', data: dataUrl })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.url) {
+                        sendMessage(currentMode, 'image', data.url);
+                    }
+                })
+                .catch(err => console.error('Upload failed', err));
             };
             img.src = e.target.result;
         };
