@@ -295,11 +295,10 @@ function setRandomUI(state) {
         if (currentMode === 'random') updateStatus("Online", "success");
         if (startOverlay) startOverlay.classList.add('hidden');
     } else if (state === 'disconnected_partner') {
-        btnNextHeader.classList.remove('hidden');
-        btnNextHeader.classList.add('flex');
         if (currentMode === 'random') updateStatus("Partner Left", "error");
         showTyping(false);
-        if (startOverlay) startOverlay.classList.add('hidden');
+        btnStart.classList.remove('hidden');
+        if (startOverlay) startOverlay.classList.remove('hidden');
     } else if (state === 'disconnected') {
         btnStart.classList.remove('hidden');
         if (startOverlay) startOverlay.classList.remove('hidden');
