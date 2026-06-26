@@ -304,11 +304,17 @@ class Chat implements MessageComponentInterface
     {
         if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
             $partner = $this->pairs[$from->resourceId];
-            $partner->send(json_encode(['status' => 'typing']));
+            $partner->send(json_encode(['status' => 'typing', 'context' => 'random']));
         } elseif ($context === 'group' && $from->currentGroup && isset($this->groups[$from->currentGroup])) {
              foreach ($this->groups[$from->currentGroup] as $client) {
                 if ($client !== $from) {
-                    $client->send(json_encode(['status' => 'typing', 'context' => 'group']));
+                    $client->send(json_encode(['status' => 'typing', 'context' => 'group', 'name' => $from->nickname]));
+                }
+            }
+        } elseif ($context === 'public') {
+            foreach ($this->clients as $client) {
+                if ($client !== $from) {
+                    $client->send(json_encode(['status' => 'typing', 'context' => 'public', 'name' => $from->nickname]));
                 }
             }
         }

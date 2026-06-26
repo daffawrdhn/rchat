@@ -204,11 +204,9 @@ function initSocket() {
             logSystem(groupBox, data.msg);
         }
         else if (data.status === 'typing') {
-            if (data.context === 'group') {
-                // Optional: show typing in group
-            } else {
-                showTyping(true);
-            }
+            const ctx = data.context || 'random';
+            const name = data.name || (ctx === 'random' ? randomPartnerName : 'Stranger');
+            showTyping(true, ctx, name);
         }
         else if (data.status === 'call_signal') handleSignalMessage(data.signal);
     };
@@ -474,7 +472,13 @@ function sendMessage(context, msgType = 'text', overrideMsg = null) {
 
     if (msgType === 'text') { input.focus(); }
 }
-function handleInput(e, ctx) { if (e.key === 'Enter') sendMessage(ctx); }
+function handleInput(e, ctx) { 
+    if (e.key === 'Enter') {
+        sendMessage(ctx); 
+    } else {
+        sendTypingSignal(ctx);
+    }
+}
 function insertEmoji(e, ctx) {
     const el = ctx === 'random' ? randomInput : (ctx === 'public' ? publicInput : groupInput);
     el.value += e; el.focus();
@@ -516,19 +520,49 @@ function handleImageUpload(input) {
     }
 }
 
-let typingTimer; let lastTypingTime = 0;
-function sendTypingSignal() {
+let typingTimer = {};
+let lastTypingTime = {};
+
+function sendTypingSignal(ctx = 'random') {
     const now = Date.now();
-    if (now - lastTypingTime > 2000 && conn.readyState === WebSocket.OPEN) {
-        conn.send(JSON.stringify({ action: 'typing' }));
-        lastTypingTime = now;
+    if (!lastTypingTime[ctx]) lastTypingTime[ctx] = 0;
+    if (now - lastTypingTime[ctx] > 2000 && conn && conn.readyState === WebSocket.OPEN) {
+        conn.send(JSON.stringify({ action: 'typing', context: ctx }));
+        lastTypingTime[ctx] = now;
     }
 }
-function showTyping(show) {
-    const ind = document.getElementById('typing-indicator');
-    if (!ind) return;
-    ind.style.opacity = show ? '1' : '0';
-    if (show) { clearTimeout(typingTimer); typingTimer = setTimeout(() => ind.style.opacity = '0', 3000); }
+
+function showTyping(show, context = 'random', name = 'Stranger') {
+    const box = context === 'random' ? randomBox : (context === 'public' ? publicBox : groupBox);
+    if (!box) return;
+
+    const typingId = 'typing-' + context;
+    let ind = document.getElementById(typingId);
+    
+    if (show) {
+        if (!ind) {
+            ind = document.createElement('div');
+            ind.id = typingId;
+            ind.className = 'flex items-center gap-2 my-2 msg-anim text-xs italic opacity-80';
+            box.appendChild(ind);
+        }
+        ind.innerHTML = `
+            <div class="flex space-x-1.5 items-center px-4 py-2 bg-base-200/40 rounded-full border border-base-content/5">
+                <span class="font-semibold mr-1 text-base-content">${name} is typing</span>
+                <span class="w-1.5 h-1.5 bg-base-content/40 rounded-full animate-bounce"></span>
+                <span class="w-1.5 h-1.5 bg-base-content/40 rounded-full animate-bounce" style="animation-delay: 0.15s"></span>
+                <span class="w-1.5 h-1.5 bg-base-content/40 rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
+            </div>
+        `;
+        box.scrollTop = box.scrollHeight;
+        
+        if (typingTimer[context]) clearTimeout(typingTimer[context]);
+        typingTimer[context] = setTimeout(() => {
+            if (ind && ind.parentNode) ind.parentNode.removeChild(ind);
+        }, 3000);
+    } else {
+        if (ind && ind.parentNode) ind.parentNode.removeChild(ind);
+    }
 }
 
 // --- VIDEO CALLS & RESIZABLE LOGIC ---
@@ -682,6 +716,11 @@ async function startCall() {
     btnHangup.classList.remove('hidden');
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+        
+        // Sync toggled state
+        if (isMuted) localStream.getAudioTracks().forEach(t => t.enabled = false);
+        if (isCameraOff) localStream.getVideoTracks().forEach(t => t.enabled = false);
+
         localVideo.srcObject = localStream;
 
         videoContainer.style.display = 'block';
@@ -736,6 +775,11 @@ async function acceptCall() {
 
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+        
+        // Sync toggled state
+        if (isMuted) localStream.getAudioTracks().forEach(t => t.enabled = false);
+        if (isCameraOff) localStream.getVideoTracks().forEach(t => t.enabled = false);
+
         localVideo.srcObject = localStream;
 
         localStream.getTracks().forEach(track => {
