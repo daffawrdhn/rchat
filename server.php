@@ -7,16 +7,17 @@ require __DIR__ . '/src/Chat.php';
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
+use Ratchet\Http\OriginCheck;
 use MyApp\Chat;
 
 $chat = new Chat();
+$ws = new WsServer($chat);
+$checkedApp = new OriginCheck($ws, ['chat.1year.site']);
 
 // Running on port 8080
 $server = IoServer::factory(
     new HttpServer(
-        new WsServer(
-            $chat
-        )
+        $checkedApp
     ),
     8080
 );

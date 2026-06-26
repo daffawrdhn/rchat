@@ -78,6 +78,17 @@
                 $type = $data['type'] ?? 'text'; // 'text' or 'image'
                 $content = $data['content'] ?? '';
 
+                // SECURITY: Sanitize text and validate Base64 image
+                if ($type === 'text') {
+                    $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+                } elseif ($type === 'image') {
+                    if (strlen($content) > 150000 || !preg_match('/^data:image\/(jpeg|png|webp|gif);base64,/', $content)) {
+                        return; // Block invalid or too large images
+                    }
+                } else {
+                    return; // Block unknown types
+                }
+
                 if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
                     $this->handlePrivateMessage($from, $content, $type);
                 } elseif ($context === 'group' && $from->currentGroup) {
@@ -176,11 +187,6 @@
 
         $this->groupActivity[$groupId] = time();
 
-        // Basic validation for image size server-side
-        if ($type === 'image' && strlen($msg) > 150000) {
-            return;
-        }
-
         $payload = json_encode([
             'status' => 'group_msg',
             'name' => $from->nickname,
@@ -198,10 +204,6 @@
 
     private function handlePublicMessage($from, $msg, $type)
     {
-        // Basic validation for image size server-side (optional, but good practice)
-        if ($type === 'image' && strlen($msg) > 150000) { // Limit ~150kb raw string
-            return;
-        }
 
         $payload = json_encode([
             'status' => 'public_msg',
