@@ -61,9 +61,9 @@ const rtcConfig = {
 
 // --- SOUND EFFECTS ---
 const sounds = {
-    msg: new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3'),
-    connect: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),
-    disconnect: new Audio('https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3')
+    msg: new Audio('./assets/msg.mp3'),
+    connect: new Audio('./assets/connect.mp3'),
+    disconnect: new Audio('./assets/disconnect.mp3')
 };
 Object.values(sounds).forEach(s => s.load());
 

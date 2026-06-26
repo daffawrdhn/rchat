@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v12';
+const CACHE_NAME = 'xoxo-v13';
 const urlsToCache = [
     './',
     './index.html',
@@ -8,7 +8,10 @@ const urlsToCache = [
     './favicon.ico',
     './favicon-16x16.png',
     './favicon-32x32.png',
-    './apple-touch-icon.png'
+    './apple-touch-icon.png',
+    './assets/msg.mp3',
+    './assets/connect.mp3',
+    './assets/disconnect.mp3'
 ];
 
 // Install the Service Worker
@@ -30,8 +33,12 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
     // Ignore non-GET requests (e.g. POST, WebSockets, WebRTC signaling)
     if (event.request.method !== 'GET') {
-        event.respondWith(fetch(event.request));
-        return;
+        return; // Let browser handle directly
+    }
+
+    // Only intercept same-origin requests to prevent CORS/CSP ERR_FAILED errors on third-party assets
+    if (!event.request.url.startsWith(self.location.origin)) {
+        return; // Let browser handle directly
     }
 
     console.log('[Service Worker Fetch]', event.request.url);
