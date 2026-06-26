@@ -4,14 +4,20 @@ const puppeteer = require('puppeteer');
     console.log("Starting Automated Validation Test for XOXO Chat...");
     
     // Launch two browser instances to simulate two users
-    const browser1 = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
-    const browser2 = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+    const browser1 = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
+    const browser2 = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
+
 
     const page1 = await browser1.newPage();
     const page2 = await browser2.newPage();
 
     await page1.setViewport({ width: 1280, height: 800 });
     await page2.setViewport({ width: 1280, height: 800 });
+
+    page1.on('console', msg => console.log('[Page1 Console]', msg.text()));
+    page1.on('pageerror', err => console.log('[Page1 Error]', err));
+    page2.on('console', msg => console.log('[Page2 Console]', msg.text()));
+    page2.on('pageerror', err => console.log('[Page2 Error]', err));
 
     const SITE_URL = 'https://chat.1year.site';
 
@@ -181,8 +187,57 @@ const puppeteer = require('puppeteer');
         );
         console.log(`[User2] Successfully received random message.`);
 
-        console.log("\n✅ ALL TESTS PASSED SUCCESSFULLY!");
+        // ==========================================
+        // TEST 5: MEDIA UPLOAD (IMAGE & VOICE)
+        // ==========================================
+        console.log("\n--- Running Test 5: Media Upload (Image & Voice) ---");
+        
+        const path = require('path');
+        // 5A: Image Upload
+        await new Promise(r => setTimeout(r, 1000)); // bypass anti-spam
+        await page1.evaluate(() => {
+            sendMessage('random', 'image', 'https://chat.1year.site/apple-touch-icon.png');
+        });
+        console.log("[User1] Sent image message");
 
+        try {
+            await page2.waitForFunction(
+                () => {
+                    const imgs = document.querySelectorAll('#random-chat-box img');
+                    return imgs.length > 0;
+                },
+                { timeout: 8000 }
+            );
+            console.log("[User2] Successfully received image message.");
+        } catch (e) {
+            const html = await page2.evaluate(() => document.getElementById('random-chat-box').innerHTML);
+            console.error("[User2] Chat box HTML at failure:\n", html);
+            throw e;
+        }
+
+        // 5B: Voice Record
+        await new Promise(r => setTimeout(r, 1000)); // bypass anti-spam
+        await page1.evaluate(() => {
+            sendMessage('random', 'audio', 'https://chat.1year.site/fake-audio.webm');
+        });
+        console.log("[User1] Sent voice message");
+
+        try {
+            await page2.waitForFunction(
+                () => {
+                    const audios = document.querySelectorAll('#random-chat-box audio');
+                    return audios.length > 0;
+                },
+                { timeout: 10000 }
+            );
+            console.log("[User2] Successfully received voice message.");
+        } catch (e) {
+            const html = await page2.evaluate(() => document.getElementById('random-chat-box').innerHTML);
+            console.error("[User2] Chat box HTML at failure:\n", html);
+            throw e;
+        }
+
+        console.log("\n✅ ALL TESTS PASSED SUCCESSFULLY!");
     } catch (e) {
         console.error("\n❌ TEST FAILED:");
         console.error(e);
