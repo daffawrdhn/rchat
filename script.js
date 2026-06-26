@@ -27,7 +27,6 @@ const mobileCount = document.getElementById('mobile-count');
 
 const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
-const btnNext = document.getElementById('btn-next');
 const btnNextHeader = document.getElementById('btn-next-header');
 const randomInputArea = document.getElementById('random-input-area');
 const randomInput = document.getElementById('random-msg-input');
@@ -98,7 +97,6 @@ function initSocket() {
         if (currentMode === 'random') {
             btnStart.classList.remove('hidden');
             btnStop.classList.add('hidden');
-            btnNext.classList.add('hidden');
             randomInputArea.classList.add('hidden');
             
             const startOverlay = document.getElementById('start-overlay');
@@ -275,7 +273,6 @@ function switchMode(mode) {
     }
 }
 function setRandomUI(state) {
-    btnNext.classList.add('hidden');
     btnNextHeader.classList.add('hidden');
     btnNextHeader.classList.remove('flex');
     randomInputArea.classList.add('hidden');
@@ -291,7 +288,6 @@ function setRandomUI(state) {
         if (startOverlay) startOverlay.classList.add('hidden');
     }
     else if (state === 'connected') {
-        btnNext.classList.remove('hidden');
         btnNextHeader.classList.remove('hidden');
         btnNextHeader.classList.add('flex');
         randomInputArea.classList.remove('hidden');
@@ -299,7 +295,6 @@ function setRandomUI(state) {
         if (currentMode === 'random') updateStatus("Online", "success");
         if (startOverlay) startOverlay.classList.add('hidden');
     } else if (state === 'disconnected_partner') {
-        btnNext.classList.remove('hidden');
         btnNextHeader.classList.remove('hidden');
         btnNextHeader.classList.add('flex');
         if (currentMode === 'random') updateStatus("Partner Left", "error");
