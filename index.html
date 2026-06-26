@@ -283,7 +283,7 @@
 
                         <!-- Chat Input Box -->
                         <div id="random-input-area" class="p-4 themed-input-bar border-t pb-6 lg:pb-4 hidden">
-                            <div class="flex gap-2 items-center">
+                            <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
                                 <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-indigo-400 hover:bg-indigo-500/10">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
@@ -310,8 +310,7 @@
                                             d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
-
-                                <div class="relative flex-grow">
+                                <div class="relative flex-grow w-full min-w-0">
                                     <input type="text" id="random-msg-input"
                                         class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
                                         placeholder="Type a message..." onkeypress="handleInput(event, 'random')"
@@ -335,7 +334,7 @@
                             <div class="divider opacity-30 text-xs">Public Lounge Connected</div>
                         </div>
                         <div class="p-4 themed-input-bar border-t pb-6 lg:pb-4">
-                            <div class="flex gap-2">
+                            <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
                                 <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-purple-400 hover:bg-purple-500/10">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
@@ -346,7 +345,7 @@
                                 <button id="record-btn-public" onclick="toggleRecording('public')" class="btn btn-circle btn-ghost text-purple-400 hover:bg-purple-500/10 text-lg">
                                     🎤
                                 </button>
-                                <div class="relative flex-grow">
+                                <div class="relative flex-grow min-w-0">
                                     <input type="text" id="public-msg-input"
                                         class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
                                         placeholder="Message everyone in public lobby..." onkeypress="handleInput(event, 'public')"
@@ -428,7 +427,7 @@
 
                             <!-- Group Chat Inputs -->
                             <div class="p-4 themed-input-bar border-t pb-6 lg:pb-4">
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
                                     <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-pink-400 hover:bg-pink-500/10">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
@@ -439,7 +438,7 @@
                                     <button id="record-btn-group" onclick="toggleRecording('group')" class="btn btn-circle btn-ghost text-pink-400 hover:bg-pink-500/10 text-lg">
                                         🎤
                                     </button>
-                                    <div class="relative flex-grow">
+                                    <div class="relative flex-grow min-w-0">
                                         <input type="text" id="group-msg-input"
                                             class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
                                             placeholder="Message group..." onkeypress="handleInput(event, 'group')"
