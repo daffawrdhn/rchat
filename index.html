@@ -321,7 +321,7 @@
                                     </svg>
                                 </button>
                                 <div class="relative flex-grow w-full min-w-0">
-                                    <input type="text" id="random-msg-input"
+                                    <input type="text" id="random-msg-input" name="chat-message-random" enterkeyhint="send" autocorrect="on" spellcheck="true"
                                         class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
                                         placeholder="Type a message..." onkeypress="handleInput(event, 'random')"
                                         onkeyup="sendTypingSignal()" autocomplete="off">
@@ -356,7 +356,7 @@
                                     🎤
                                 </button>
                                 <div class="relative flex-grow min-w-0">
-                                    <input type="text" id="public-msg-input"
+                                    <input type="text" id="public-msg-input" name="chat-message-public" enterkeyhint="send" autocorrect="on" spellcheck="true"
                                         class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
                                         placeholder="Message everyone in public lobby..." onkeypress="handleInput(event, 'public')"
                                         autocomplete="off">
@@ -449,7 +449,7 @@
                                         🎤
                                     </button>
                                     <div class="relative flex-grow min-w-0">
-                                        <input type="text" id="group-msg-input"
+                                        <input type="text" id="group-msg-input" name="chat-message-group" enterkeyhint="send" autocorrect="on" spellcheck="true"
                                             class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
                                             placeholder="Message group..." onkeypress="handleInput(event, 'group')"
                                             onkeyup="sendTypingSignal('group')" autocomplete="off">
