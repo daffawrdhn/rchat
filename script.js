@@ -842,7 +842,7 @@ function decryptMsg(msg, key) {
 }
 
 function setGroupUI(state, groupId = null) {
-    const setup = document.getElementById('group-setup');
+    const setup = document.getElementById('group-idle');
     const active = document.getElementById('group-active');
     const linkDisplay = document.getElementById('group-invite-link');
 
