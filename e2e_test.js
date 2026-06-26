@@ -1,0 +1,118 @@
+const puppeteer = require('puppeteer');
+
+(async () => {
+    console.log("Starting Automated Validation Test for XOXO Chat...");
+    
+    // Launch two browser instances to simulate two users
+    const browser1 = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+    const browser2 = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+
+    const page1 = await browser1.newPage();
+    const page2 = await browser2.newPage();
+
+    await page1.setViewport({ width: 1280, height: 800 });
+    await page2.setViewport({ width: 1280, height: 800 });
+
+    const SITE_URL = 'https://chat.1year.site';
+
+    async function login(page, name) {
+        console.log(`[${name}] Connecting to site...`);
+        await page.goto(SITE_URL, { waitUntil: 'networkidle2' });
+        
+        // Wait for and click Accept Terms
+        await page.waitForSelector('button[onclick="acceptTerms()"]', { visible: true });
+        await page.click('button[onclick="acceptTerms()"]');
+        
+        // Wait for Random Chat view to be visible
+        await page.waitForSelector('#random-chat-view:not(.hidden)', { visible: true });
+        console.log(`[${name}] Logged in successfully.`);
+    }
+
+    try {
+        await login(page1, 'User1');
+        await login(page2, 'User2');
+
+        // ==========================================
+        // TEST 1: PUBLIC LOUNGE
+        // ==========================================
+        console.log("\n--- Running Test 1: Public Lounge ---");
+        
+        await page1.click('#nav-public');
+        await page2.click('#nav-public');
+        
+        await page1.waitForSelector('#public-chat-view:not(.hidden)', { visible: true });
+        await page2.waitForSelector('#public-chat-view:not(.hidden)', { visible: true });
+        
+        const testPublicMsg = "Hello Public from Autotest " + Date.now();
+        
+        // User 1 sends message
+        await page1.type('#public-msg-input', testPublicMsg);
+        await page1.keyboard.press('Enter');
+        console.log(`[User1] Sent public message: ${testPublicMsg}`);
+
+        // User 2 waits to receive
+        await page2.waitForFunction(
+            (msg) => {
+                const boxes = document.querySelectorAll('#public-chat-box .chat-bubble');
+                for (let b of boxes) {
+                    if (b.innerText.includes(msg)) return true;
+                }
+                return false;
+            },
+            { timeout: 5000 },
+            testPublicMsg
+        );
+        console.log(`[User2] Successfully received public message.`);
+
+
+        // ==========================================
+        // TEST 2: CUSTOM ROOM (Encryption test)
+        // ==========================================
+        console.log("\n--- Running Test 2: Custom Room (Encrypted) ---");
+        
+        await page1.click('#nav-group');
+        await page2.click('#nav-group');
+        
+        const testRoomId = "testroom_" + Math.floor(Math.random() * 1000);
+        
+        async function joinRoom(page, name, roomId) {
+            await page.waitForSelector('#room-code-input', { visible: true });
+            await page.type('#room-code-input', roomId);
+            await page.click('button[onclick="joinCustomRoom()"]');
+            await page.waitForSelector('#group-active:not(.hidden)', { visible: true });
+            console.log(`[${name}] Joined room ${roomId}`);
+        }
+
+        await joinRoom(page1, 'User1', testRoomId);
+        await joinRoom(page2, 'User2', testRoomId);
+
+        const testRoomMsg = "Secret Room Message " + Date.now();
+        
+        await page1.type('#group-msg-input', testRoomMsg);
+        await page1.keyboard.press('Enter');
+        console.log(`[User1] Sent encrypted room message: ${testRoomMsg}`);
+
+        await page2.waitForFunction(
+            (msg) => {
+                const boxes = document.querySelectorAll('#group-chat-box .chat-bubble');
+                for (let b of boxes) {
+                    if (b.innerText.includes(msg)) return true;
+                }
+                return false;
+            },
+            { timeout: 5000 },
+            testRoomMsg
+        );
+        console.log(`[User2] Successfully decrypted and received room message.`);
+
+        console.log("\n✅ ALL TESTS PASSED SUCCESSFULLY!");
+
+    } catch (e) {
+        console.error("\n❌ TEST FAILED:");
+        console.error(e);
+        process.exitCode = 1;
+    } finally {
+        await browser1.close();
+        await browser2.close();
+    }
+})();
