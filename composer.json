@@ -13,5 +13,8 @@
     ],
     "require": {
         "cboden/ratchet": "^0.4.4"
+    },
+    "require-dev": {
+        "ratchet/pawl": "^0.4.3"
     }
 }
