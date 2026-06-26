@@ -32,9 +32,16 @@ class Chat implements MessageComponentInterface
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId}) - {$conn->nickname}\n";
 
+        // Generate HMAC token for upload authorization (expires in 12 hours)
+        $expiry = time() + (12 * 3600);
+        $tokenData = $conn->resourceId . '|' . $expiry;
+        $signature = hash_hmac('sha256', $tokenData, 'xoxo_secure_upload_key_2026!');
+        $uploadToken = $tokenData . '|' . $signature;
+
         $conn->send(json_encode([
             'status' => 'identity',
-            'nickname' => $conn->nickname
+            'nickname' => $conn->nickname,
+            'upload_token' => $uploadToken
         ]));
 
         $this->broadcastUserCount();

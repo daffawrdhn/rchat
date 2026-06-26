@@ -2,6 +2,7 @@
 let conn;
 let currentMode = 'random';
 let myNickname = '';
+let uploadToken = '';
 let unreadRandom = 0;
 let unreadPublic = 0;
 let unreadGroup = 0;
@@ -117,6 +118,7 @@ function initSocket() {
 
         if (data.status === 'identity') {
             myNickname = data.nickname;
+            if (data.upload_token) uploadToken = data.upload_token;
             document.getElementById('sidebar-nickname').innerText = myNickname;
         }
         else if (data.status === 'stats') {
@@ -348,7 +350,7 @@ async function toggleRecording(context) {
                     fetch('upload.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'audio', data: reader.result })
+                        body: JSON.stringify({ type: 'audio', data: reader.result, token: uploadToken })
                     })
                     .then(res => res.json())
                     .then(data => {
@@ -521,7 +523,7 @@ function handleImageUpload(input) {
                 fetch('upload.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'image', data: dataUrl })
+                    body: JSON.stringify({ type: 'image', data: dataUrl, token: uploadToken })
                 })
                 .then(res => res.json())
                 .then(data => {

@@ -30,6 +30,27 @@ if (!$data || !isset($data['type']) || !isset($data['data'])) {
 
 $type = $data['type']; // 'image' or 'audio'
 $base64Data = $data['data'];
+$token = $data['token'] ?? '';
+
+// 2.5 Validasi Token HMAC
+$tokenParts = explode('|', $token);
+if (count($tokenParts) !== 3) {
+    echo json_encode(['error' => 'Missing or invalid upload token']);
+    exit;
+}
+
+list($resourceId, $expiry, $signature) = $tokenParts;
+
+if (time() > (int)$expiry) {
+    echo json_encode(['error' => 'Upload token expired']);
+    exit;
+}
+
+$expectedSignature = hash_hmac('sha256', "$resourceId|$expiry", 'xoxo_secure_upload_key_2026!');
+if (!hash_equals($expectedSignature, $signature)) {
+    echo json_encode(['error' => 'Invalid upload token signature']);
+    exit;
+}
 
 // 3. Whitelist Ekstensi yang Aman
 $allowedImageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
