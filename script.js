@@ -6,6 +6,7 @@ let unreadRandom = 0;
 let unreadPublic = 0;
 let unreadGroup = 0;
 let isSearching = false;
+let randomPartnerName = 'Stranger';
 let currentGroupId = null;
 
 // UI Refs
@@ -133,25 +134,33 @@ function initSocket() {
         }
         else if (data.status === 'connected') {
             if (data.shared_key) currentAesKey = data.shared_key;
+            randomPartnerName = data.nickname || 'Stranger';
             isSearching = false;
             playAudio('connect');
             setRandomUI('connected');
-            notifyBackground("Stranger Found!", "You are now connected with a stranger.");
-            logSystem(randomBox, "You are connected with a Stranger.");
+            notifyBackground(`${randomPartnerName} Found!`, `You are now connected with ${randomPartnerName}.`);
+            logSystem(randomBox, `You are connected with ${randomPartnerName}.`);
+            chatTitle.innerText = `Random Chat (${randomPartnerName})`;
+            const videoNameSpan = document.getElementById('video-partner-name');
+            if (videoNameSpan) videoNameSpan.innerText = randomPartnerName;
         }
         else if (data.status === 'disconnected') {
             playAudio('disconnect');
             setRandomUI('disconnected_partner');
-            logSystem(randomBox, "Stranger left.");
+            logSystem(randomBox, `${randomPartnerName} left.`);
             endCall(true);
+            randomPartnerName = 'Stranger';
+            chatTitle.innerText = "Random Chat";
+            const videoNameSpan = document.getElementById('video-partner-name');
+            if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
         }
         else if (data.status === 'message') {
             if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
             playAudio('msg');
             showTyping(false);
             const decrypted = decryptMsg(data.msg, currentAesKey);
-            logMessage(randomBox, 'stranger', 'Stranger', decrypted, data.type);
-            notifyBackground("New Message", decrypted.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
+            logMessage(randomBox, 'stranger', randomPartnerName, decrypted, data.type);
+            notifyBackground(`New message from ${randomPartnerName}`, decrypted.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'random' }));
         }
         else if (data.status === 'public_msg') {
@@ -420,6 +429,10 @@ function stopRandomChat() {
     updateStatus("Idle", "warning");
     logSystem(randomBox, "Search canceled.");
     conn.send(JSON.stringify({ action: 'cancel_search' }));
+    randomPartnerName = 'Stranger';
+    chatTitle.innerText = "Random Chat";
+    const videoNameSpan = document.getElementById('video-partner-name');
+    if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
     
     const startOverlay = document.getElementById('start-overlay');
     if (startOverlay) startOverlay.classList.remove('hidden');
@@ -430,6 +443,10 @@ function nextPartner() {
     showTyping(false);
     endCall();
     isSearching = true;
+    randomPartnerName = 'Stranger';
+    chatTitle.innerText = "Random Chat";
+    const videoNameSpan = document.getElementById('video-partner-name');
+    if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
     conn.send(JSON.stringify({ action: 'next' }));
 }
 

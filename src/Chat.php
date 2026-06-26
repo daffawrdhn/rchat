@@ -283,11 +283,13 @@ class Chat implements MessageComponentInterface
             $conn->send(json_encode([
                 'status' => 'connected',
                 'shared_key' => $sharedKey,
+                'nickname' => $partner->nickname,
                 'msg' => 'Stranger found! Say hello.'
             ]));
             $partner->send(json_encode([
                 'status' => 'connected',
                 'shared_key' => $sharedKey,
+                'nickname' => $conn->nickname,
                 'msg' => 'Stranger found! Say hello.'
             ]));
         } else {
