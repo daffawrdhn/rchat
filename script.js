@@ -28,6 +28,7 @@ const mobileCount = document.getElementById('mobile-count');
 const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
 const btnNext = document.getElementById('btn-next');
+const btnNextHeader = document.getElementById('btn-next-header');
 const randomInputArea = document.getElementById('random-input-area');
 const randomInput = document.getElementById('random-msg-input');
 const publicInput = document.getElementById('public-msg-input');
@@ -275,6 +276,8 @@ function switchMode(mode) {
 }
 function setRandomUI(state) {
     btnNext.classList.add('hidden');
+    btnNextHeader.classList.add('hidden');
+    btnNextHeader.classList.remove('flex');
     randomInputArea.classList.add('hidden');
     btnStart.classList.add('hidden');
     btnStop.classList.add('hidden');
@@ -289,12 +292,16 @@ function setRandomUI(state) {
     }
     else if (state === 'connected') {
         btnNext.classList.remove('hidden');
+        btnNextHeader.classList.remove('hidden');
+        btnNextHeader.classList.add('flex');
         randomInputArea.classList.remove('hidden');
         randomInputArea.classList.add('flex');
         if (currentMode === 'random') updateStatus("Online", "success");
         if (startOverlay) startOverlay.classList.add('hidden');
     } else if (state === 'disconnected_partner') {
         btnNext.classList.remove('hidden');
+        btnNextHeader.classList.remove('hidden');
+        btnNextHeader.classList.add('flex');
         if (currentMode === 'random') updateStatus("Partner Left", "error");
         showTyping(false);
         if (startOverlay) startOverlay.classList.add('hidden');
@@ -780,27 +787,11 @@ function endCall(isRemote = false) {
     localVideoSizeState = 0;
 }
 
-function toggleTheme() {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
-    const newTheme = currentTheme === 'night' ? 'cupcake' : 'night';
-    html.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateToggleState(newTheme);
-}
-
-function updateToggleState(theme) {
-    const toggle = document.getElementById('theme-toggle');
-    if (toggle) {
-        toggle.checked = (theme === 'night');
-    }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Restore theme from localStorage
-    const savedTheme = localStorage.getItem('theme') || 'night';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateToggleState(savedTheme);
+    // Always use dark mode
+    document.documentElement.setAttribute('data-theme', 'night');
+    localStorage.removeItem('theme');
 
     const modal = document.getElementById('agreement_modal');
     if (!sessionStorage.getItem('terms_accepted')) {
