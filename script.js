@@ -782,10 +782,26 @@ function endCall(isRemote = false) {
 
 function toggleTheme() {
     const html = document.documentElement;
-    html.setAttribute('data-theme', html.getAttribute('data-theme') === 'night' ? 'cupcake' : 'night');
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'night' ? 'cupcake' : 'night';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateToggleState(newTheme);
+}
+
+function updateToggleState(theme) {
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+        toggle.checked = (theme === 'night');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Restore theme from localStorage
+    const savedTheme = localStorage.getItem('theme') || 'night';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateToggleState(savedTheme);
+
     const modal = document.getElementById('agreement_modal');
     if (!sessionStorage.getItem('terms_accepted')) {
         modal.showModal();

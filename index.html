@@ -69,25 +69,25 @@
     </style>
 </head>
 
-<body class="text-slate-200 h-[100dvh] flex flex-col overflow-hidden bg-slate-950 relative">
+<body class="h-[100dvh] flex flex-col overflow-hidden relative">
 
     <!-- Glowing Background Blobs (Glassmorphism backdrop) -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-indigo-600/10 rounded-full filter blur-[120px] blob-1"></div>
-        <div class="absolute top-1/3 right-10 w-[600px] h-[600px] bg-purple-600/10 rounded-full filter blur-[140px] blob-2"></div>
-        <div class="absolute -bottom-40 left-1/3 w-[500px] h-[500px] bg-pink-600/5 rounded-full filter blur-[120px] blob-1"></div>
+        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-indigo-600 rounded-full filter blur-[120px] blob-1"></div>
+        <div class="absolute top-1/3 right-10 w-[600px] h-[600px] bg-purple-600 rounded-full filter blur-[140px] blob-2"></div>
+        <div class="absolute -bottom-40 left-1/3 w-[500px] h-[500px] bg-pink-600 rounded-full filter blur-[120px] blob-1"></div>
     </div>
 
     <!-- Modals & Overlays -->
     <div id="incoming_call_overlay"
-        class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-2xl flex flex-col items-center justify-center hidden">
+        class="fixed inset-0 z-50 theme-overlay flex flex-col items-center justify-center hidden">
         <div class="avatar placeholder mb-6">
             <div class="bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-full w-24 h-24 flex items-center justify-center text-4xl animate-bounce shadow-2xl shadow-indigo-500/20">
                 🎥
             </div>
         </div>
-        <h2 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Incoming Video Call</h2>
-        <p class="text-slate-400 mb-12 font-medium">Stranger wants to connect video with you</p>
+        <h2 class="text-3xl font-extrabold mb-2 tracking-tight">Incoming Video Call</h2>
+        <p class="opacity-70 mb-12 font-medium">Stranger wants to connect video with you</p>
         <div class="flex gap-8 items-center">
             <button onclick="rejectCall()" class="btn btn-circle btn-error btn-lg scale-110 shadow-xl shadow-error/20 hover:scale-115 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
@@ -122,7 +122,7 @@
     </dialog>
 
     <dialog id="agreement_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-lg">
-        <div class="modal-box glass-panel border border-white/10 shadow-2xl p-6 rounded-3xl">
+        <div class="modal-box glass-panel shadow-2xl p-6 rounded-3xl">
             <h3 class="font-extrabold text-2xl text-error flex items-center gap-3 tracking-tight">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -131,10 +131,10 @@
                 </svg>
                 Terms & Conditions
             </h3>
-            <div class="py-5 space-y-4 text-sm text-slate-300">
-                <p>Welcome to <span class="text-white font-bold">XOXO - Chat with stranger</span>.</p>
+            <div class="py-5 space-y-4 text-sm opacity-80">
+                <p>Welcome to <span class="font-bold text-primary">XOXO - Chat with stranger</span>.</p>
                 <p>Before proceeding, you must agree to the following conditions:</p>
-                <ul class="list-disc list-inside space-y-2 font-medium bg-white/5 p-4 rounded-2xl border border-white/5">
+                <ul class="list-disc list-inside space-y-2 font-medium bg-current/5 p-4 rounded-2xl border border-current/10">
                     <li>You are <span class="text-error font-bold">at least 18 years of age</span>.</li>
                     <li>You will respect other users (no harassment/insults).</li>
                     <li>You will not stream or share illegal content.</li>
@@ -149,11 +149,11 @@
     </dialog>
 
     <dialog id="video_tip_modal" class="modal">
-        <div class="modal-box glass-panel border border-white/10 shadow-2xl p-6 rounded-3xl">
+        <div class="modal-box glass-panel shadow-2xl p-6 rounded-3xl">
             <h3 class="font-extrabold text-xl text-info tracking-tight flex items-center gap-2">
                 <span>💡</span> Connectivity Tip
             </h3>
-            <p class="py-4 text-sm text-slate-300 leading-relaxed">
+            <p class="py-4 text-sm opacity-80 leading-relaxed">
                 If the video call is black or fails to connect:
                 <br><br>
                 <span class="font-semibold text-warning">Try switching from Mobile Data (4G/5G) to WiFi, or vice-versa.</span>
@@ -500,7 +500,7 @@
                             </svg>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm text-white">Random Chat</span>
+                            <span class="font-bold text-sm">Random Chat</span>
                             <span class="text-[10px] opacity-40">Match with strangers</span>
                         </div>
                         <span id="badge-random" class="badge badge-primary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
@@ -514,7 +514,7 @@
                             </svg>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm text-white">Public Lounge</span>
+                            <span class="font-bold text-sm">Public Lounge</span>
                             <span class="text-[10px] opacity-40">Global public lobby</span>
                         </div>
                         <span id="badge-public" class="badge badge-secondary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
@@ -528,7 +528,7 @@
                             </svg>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm text-white">Custom Room</span>
+                            <span class="font-bold text-sm">Custom Room</span>
                             <span class="text-[10px] opacity-40">Private group code</span>
                         </div>
                         <span id="badge-group" class="badge badge-accent badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
@@ -549,11 +549,15 @@
                         </div>
                     </div>
                     
-                    <div class="h-px bg-white/5 my-0.5"></div>
+                    <div class="h-px bg-current/10 my-0.5 opacity-20"></div>
 
                     <div class="flex justify-between items-center px-1">
                         <span class="text-[10px] font-extrabold opacity-50 tracking-wider">THEME MODE</span>
-                        <input type="checkbox" class="toggle toggle-sm toggle-primary" onclick="toggleTheme()" checked />
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs opacity-60">☀️</span>
+                            <input id="theme-toggle" type="checkbox" class="toggle toggle-sm toggle-primary" onclick="toggleTheme()" checked />
+                            <span class="text-xs opacity-60">🌙</span>
+                        </div>
                     </div>
                 </div>
 
