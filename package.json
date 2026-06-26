@@ -1,0 +1,23 @@
+{
+  "name": "rchat",
+  "version": "1.0.0",
+  "description": "![Project Status](https://img.shields.io/badge/Status-Active-success)\r ![License](https://img.shields.io/badge/License-MIT-blue)\r ![Tech](https://img.shields.io/badge/Tech-PHP%20Ratchet%20%7C%20WebRTC%20%7C%20Tailwind-purple)",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daffawrdhn/rchat.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daffawrdhn/rchat/issues"
+  },
+  "homepage": "https://github.com/daffawrdhn/rchat#readme",
+  "devDependencies": {
+    "tailwindcss": "^4.3.1"
+  }
+}

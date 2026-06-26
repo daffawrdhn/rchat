@@ -1,13 +1,10 @@
-const CACHE_NAME = 'xoxo-v1';
+const CACHE_NAME = 'xoxo-v2';
 const urlsToCache = [
     './',
     './index.html',
     './styles.css',
     './script.js',
-    './manifest.json',
-    'https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css',
-    'https://cdn.tailwindcss.com',
-    'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap'
+    './manifest.json'
 ];
 
 // Install the Service Worker
