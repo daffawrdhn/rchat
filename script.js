@@ -143,7 +143,8 @@ function initSocket() {
             playAudio('msg');
             showTyping(false);
             logMessage(randomBox, 'stranger', 'Stranger', data.msg, data.type);
-            notifyBackground("New Message", data.msg.substring(0, 50) + (data.type === 'image' ? ' [Image]' : ''));
+            notifyBackground("New Message", data.msg.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
+            if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'random' }));
         }
         else if (data.status === 'public_msg') {
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
@@ -154,6 +155,15 @@ function initSocket() {
             if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
             logMessage(groupBox, 'other', data.name, data.msg, data.type);
             notifyBackground("Custom Room", data.name + ": " + data.msg.substring(0, 30));
+            if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'group' }));
+        }
+        else if (data.status === 'read') {
+            const box = data.context === 'random' ? randomBox : (data.context === 'group' ? groupBox : publicBox);
+            const receipts = box.querySelectorAll('.read-receipt');
+            receipts.forEach(r => {
+                r.innerText = '✓✓';
+                r.classList.add('text-blue-500');
+            });
         }
         else if (data.status === 'group_joined') {
             currentGroupId = data.group_id;
@@ -270,6 +280,47 @@ function openImageModal(src) {
     modal.showModal();
 }
 
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+
+async function toggleRecording(context) {
+    const btnId = `record-btn-${context}`;
+    const btn = document.getElementById(btnId);
+    
+    if (!isRecording) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = e => {
+                if (e.data.size > 0) audioChunks.push(e.data);
+            };
+            
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    sendMessage(context, reader.result, 'audio');
+                };
+            };
+            
+            mediaRecorder.start();
+            isRecording = true;
+            btn.classList.add('text-red-500', 'animate-pulse');
+        } catch (err) {
+            alert("Microphone access denied.");
+        }
+    } else {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        isRecording = false;
+        btn.classList.remove('text-red-500', 'animate-pulse');
+    }
+}
+
 function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({
         '&': '&amp;',
@@ -289,6 +340,8 @@ function logMessage(container, type, name, msg, msgType = 'text') {
     let contentHtml = '';
     if (msgType === 'image') {
         contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-base-content/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
+    } else if (msgType === 'audio') {
+        contentHtml = `<audio controls src="${msg}" class="max-w-[200px] h-10"></audio>`;
     } else {
         let safeMsg = escapeHTML(msg);
         const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -297,10 +350,11 @@ function logMessage(container, type, name, msg, msgType = 'text') {
         });
     }
 
+    const receipt = isMe ? `<span class="read-receipt text-xs opacity-50 ml-2">✓</span>` : '';
     const html = `
     <div class="chat ${align} msg-anim">
         <div class="chat-image avatar placeholder"><div class="bg-neutral-focus text-neutral-content rounded-full w-8"><span>${avatar}</span></div></div>
-        <div class="chat-header text-xs opacity-50 mb-1 ml-1">${name}</div>
+        <div class="chat-header text-xs opacity-50 mb-1 ml-1">${name} ${receipt}</div>
         <div class="chat-bubble ${bubbleColor} shadow-md text-sm break-words">${contentHtml}</div>
     </div>`;
     container.innerHTML += html;

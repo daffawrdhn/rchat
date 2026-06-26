@@ -85,6 +85,10 @@
                     if (strlen($content) > 150000 || !preg_match('/^data:image\/(jpeg|png|webp|gif);base64,/', $content)) {
                         return; // Block invalid or too large images
                     }
+                } elseif ($type === 'audio') {
+                    if (strlen($content) > 1000000 || !preg_match('/^data:audio\/(webm|ogg|mp3|wav|mp4);base64,/', $content)) {
+                        return; // Block invalid or too large audio
+                    }
                 } else {
                     return; // Block unknown types
                 }
@@ -105,6 +109,21 @@
                         'status' => 'call_signal',
                         'signal' => $data['data']
                     ]));
+                }
+                break;
+
+            case 'read':
+                $context = $data['context'] ?? 'random';
+                if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
+                    $partner = $this->pairs[$from->resourceId];
+                    $partner->send(json_encode(['status' => 'read', 'context' => 'random']));
+                } elseif ($context === 'group' && $from->currentGroup) {
+                    $groupId = $from->currentGroup;
+                    foreach ($this->groups[$groupId] as $client) {
+                        if ($client !== $from) {
+                            $client->send(json_encode(['status' => 'read', 'context' => 'group']));
+                        }
+                    }
                 }
                 break;
 
