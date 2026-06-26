@@ -506,6 +506,7 @@ function sendTypingSignal() {
 }
 function showTyping(show) {
     const ind = document.getElementById('typing-indicator');
+    if (!ind) return;
     ind.style.opacity = show ? '1' : '0';
     if (show) { clearTimeout(typingTimer); typingTimer = setTimeout(() => ind.style.opacity = '0', 3000); }
 }
