@@ -7,7 +7,7 @@ use Ratchet\ConnectionInterface;
 class Chat implements MessageComponentInterface
 {
     protected $clients;
-    protected $waitingClient;
+    protected $waitingQueue;
     protected $pairs;
     protected $groups; // ['groupId' => [client1, client2, ...]]
     protected $groupActivity; // ['groupId' => timestamp]
@@ -15,7 +15,7 @@ class Chat implements MessageComponentInterface
     public function __construct()
     {
         $this->clients = new \SplObjectStorage;
-        $this->waitingClient = null;
+        $this->waitingQueue = [];
         $this->pairs = [];
         $this->groups = [];
         $this->groupActivity = [];
@@ -28,6 +28,10 @@ class Chat implements MessageComponentInterface
         $conn->lastMsgTime = 0;
         $conn->spamWarnings = 0;
         $conn->currentGroup = null;
+        $conn->matchMode = null;
+        $conn->gender = 'any';
+        $conn->targetGender = 'any';
+        $conn->flag = '🏳️';
 
         $this->clients->attach($conn);
         echo "New connection! ({$conn->resourceId}) - {$conn->nickname}\n";
@@ -66,6 +70,15 @@ class Chat implements MessageComponentInterface
         // -----------------------
 
         switch ($data['action']) {
+            case 'set_profile':
+                $from->flag = $data['flag'] ?? '🏳️';
+                $from->send(json_encode([
+                    'status' => 'identity',
+                    'nickname' => $from->nickname,
+                    'flag' => $from->flag
+                ]));
+                break;
+
             case 'join_room':
                 $from->send(json_encode(['status' => 'room_joined', 'room' => $data['room']]));
                 break;
@@ -75,7 +88,12 @@ class Chat implements MessageComponentInterface
                 break;
 
             case 'find_partner':
-                $this->handleFindPartner($from);
+                $this->handleFindPartner(
+                    $from,
+                    $data['mode'] ?? 'text',
+                    $data['gender'] ?? 'any',
+                    $data['targetGender'] ?? 'any'
+                );
                 break;
 
             case 'join_group':
@@ -109,7 +127,7 @@ class Chat implements MessageComponentInterface
                     return; // Block unknown types
                 }
 
-                if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
+                if (($context === 'random' || $context === 'video') && isset($this->pairs[$from->resourceId])) {
                     $this->handlePrivateMessage($from, $content, $type);
                 } elseif ($context === 'group' && $from->currentGroup) {
                     $this->handleGroupMessage($from, $content, $type);
@@ -130,9 +148,9 @@ class Chat implements MessageComponentInterface
 
             case 'read':
                 $context = $data['context'] ?? 'random';
-                if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
+                if (($context === 'random' || $context === 'video') && isset($this->pairs[$from->resourceId])) {
                     $partner = $this->pairs[$from->resourceId];
-                    $partner->send(json_encode(['status' => 'read', 'context' => 'random']));
+                    $partner->send(json_encode(['status' => 'read', 'context' => $context]));
                 } elseif ($context === 'group' && $from->currentGroup) {
                     $groupId = $from->currentGroup;
                     foreach ($this->groups[$groupId] as $client) {
@@ -183,7 +201,7 @@ class Chat implements MessageComponentInterface
             if ($client !== $from) {
                 $client->send(json_encode([
                     'status' => 'group_system',
-                    'msg' => "{$from->nickname} joined the room."
+                    'msg' => "{$from->nickname} {$from->flag} joined the room."
                 ]));
             }
         }
@@ -224,7 +242,7 @@ class Chat implements MessageComponentInterface
 
         $payload = json_encode([
             'status' => 'group_msg',
-            'name' => $from->nickname,
+            'name' => "{$from->nickname} {$from->flag}",
             'msg' => $msg,
             'type' => $type,
             'is_me' => false
@@ -242,7 +260,7 @@ class Chat implements MessageComponentInterface
 
         $payload = json_encode([
             'status' => 'public_msg',
-            'name' => $from->nickname,
+            'name' => "{$from->nickname} {$from->flag}",
             'msg' => $msg,
             'type' => $type,
             'is_me' => false
@@ -267,54 +285,89 @@ class Chat implements MessageComponentInterface
         }
     }
 
-    private function handleFindPartner($conn)
+    private function handleFindPartner($conn, $mode = 'text', $gender = 'any', $targetGender = 'any')
     {
-        if (isset($this->pairs[$conn->resourceId]) || $this->waitingClient === $conn) {
+        $conn->matchMode = $mode;
+        $conn->gender = $gender;
+        $conn->targetGender = $targetGender;
+
+        // Check if already in pair
+        if (isset($this->pairs[$conn->resourceId])) {
             return;
         }
 
-        if ($this->waitingClient !== null && $this->waitingClient !== $conn) {
-            $partner = $this->waitingClient;
-            $this->waitingClient = null;
+        // Check if already in waiting queue
+        foreach ($this->waitingQueue as $waitingConn) {
+            if ($waitingConn === $conn) {
+                return;
+            }
+        }
 
-            $this->pairs[$conn->resourceId] = $partner;
-            $this->pairs[$partner->resourceId] = $conn;
+        // Try to match with someone in the queue
+        $matchedPartner = null;
+        foreach ($this->waitingQueue as $index => $partner) {
+            // Must be the same matchMode (text vs video)
+            if ($partner->matchMode !== $conn->matchMode) {
+                continue;
+            }
+
+            // Check if partner's gender is what conn wants
+            $connTargetOk = ($conn->targetGender === 'any' || $conn->targetGender === $partner->gender);
+
+            // Check if conn's gender is what partner wants
+            $partnerTargetOk = ($partner->targetGender === 'any' || $partner->targetGender === $conn->gender);
+
+            if ($connTargetOk && $partnerTargetOk) {
+                $matchedPartner = $partner;
+                unset($this->waitingQueue[$index]);
+                $this->waitingQueue = array_values($this->waitingQueue);
+                break;
+            }
+        }
+
+        if ($matchedPartner !== null) {
+            $this->pairs[$conn->resourceId] = $matchedPartner;
+            $this->pairs[$matchedPartner->resourceId] = $conn;
 
             $sharedKey = bin2hex(random_bytes(16));
 
             $conn->send(json_encode([
                 'status' => 'connected',
                 'shared_key' => $sharedKey,
-                'nickname' => $partner->nickname,
+                'nickname' => "{$matchedPartner->nickname} {$matchedPartner->flag}",
+                'mode' => $mode,
+                'initiator' => true,
                 'msg' => 'Stranger found! Say hello.'
             ]));
-            $partner->send(json_encode([
+            $matchedPartner->send(json_encode([
                 'status' => 'connected',
                 'shared_key' => $sharedKey,
-                'nickname' => $conn->nickname,
+                'nickname' => "{$conn->nickname} {$conn->flag}",
+                'mode' => $mode,
+                'initiator' => false,
                 'msg' => 'Stranger found! Say hello.'
             ]));
         } else {
-            $this->waitingClient = $conn;
+            $this->waitingQueue[] = $conn;
             $conn->send(json_encode(['status' => 'waiting', 'msg' => 'Looking for a stranger...']));
         }
     }
 
     private function handleTyping($from, $context)
     {
-        if ($context === 'random' && isset($this->pairs[$from->resourceId])) {
+        if (($context === 'random' || $context === 'video' || $context === 'voice') && isset($this->pairs[$from->resourceId])) {
             $partner = $this->pairs[$from->resourceId];
-            $partner->send(json_encode(['status' => 'typing', 'context' => 'random']));
+            $partner->send(json_encode(['status' => 'typing', 'context' => $context]));
         } elseif ($context === 'group' && $from->currentGroup && isset($this->groups[$from->currentGroup])) {
              foreach ($this->groups[$from->currentGroup] as $client) {
                 if ($client !== $from) {
-                    $client->send(json_encode(['status' => 'typing', 'context' => 'group', 'name' => $from->nickname]));
+                    $client->send(json_encode(['status' => 'typing', 'context' => 'group', 'name' => "{$from->nickname} {$from->flag}"]));
                 }
             }
         } elseif ($context === 'public') {
             foreach ($this->clients as $client) {
                 if ($client !== $from) {
-                    $client->send(json_encode(['status' => 'typing', 'context' => 'public', 'name' => $from->nickname]));
+                    $client->send(json_encode(['status' => 'typing', 'context' => 'public', 'name' => "{$from->nickname} {$from->flag}"]));
                 }
             }
         }
@@ -323,7 +376,10 @@ class Chat implements MessageComponentInterface
     private function handleNext($conn)
     {
         $this->cleanupRandomChat($conn);
-        $this->handleFindPartner($conn);
+        $mode = isset($conn->matchMode) ? $conn->matchMode : 'text';
+        $gender = isset($conn->gender) ? $conn->gender : 'any';
+        $targetGender = isset($conn->targetGender) ? $conn->targetGender : 'any';
+        $this->handleFindPartner($conn, $mode, $gender, $targetGender);
     }
 
     private function cleanupRandomChat($conn)
@@ -336,8 +392,12 @@ class Chat implements MessageComponentInterface
             $partner->send(json_encode(['status' => 'disconnected', 'msg' => 'Stranger disconnected.']));
         }
 
-        if ($this->waitingClient === $conn) {
-            $this->waitingClient = null;
+        foreach ($this->waitingQueue as $index => $waitingConn) {
+            if ($waitingConn === $conn) {
+                unset($this->waitingQueue[$index]);
+                $this->waitingQueue = array_values($this->waitingQueue);
+                break;
+            }
         }
     }
 
@@ -351,7 +411,7 @@ class Chat implements MessageComponentInterface
             foreach ($this->groups[$groupId] as $client) {
                 $client->send(json_encode([
                     'status' => 'group_system',
-                    'msg' => "{$conn->nickname} left the group."
+                    'msg' => "{$conn->nickname} {$conn->flag} left the group."
                 ]));
             }
 
@@ -367,8 +427,8 @@ class Chat implements MessageComponentInterface
 
     private function generateNickname()
     {
-        $adjs = ['Cool', 'Super', 'Lazy', 'Hyper', 'Happy', 'Sad', 'Wild', 'Neon', 'Dark', 'Fast'];
-        $nouns = ['Panda', 'Tiger', 'Fox', 'Wolf', 'Cat', 'Dog', 'Bear', 'Eagle', 'Shark', 'Hawk'];
+        $adjs = ['Sweet', 'Naughty', 'Hot', 'Dreamy', 'Flirty', 'Spicy', 'Playful', 'Cheeky', 'Sassy', 'Lovely', 'Cute', 'Sexy', 'Charming', 'Cuddly', 'Wild'];
+        $nouns = ['Babe', 'Angel', 'Kitten', 'Bunny', 'Cutie', 'Cherry', 'Peach', 'Sweetie', 'Honey', 'Beauty', 'Darling', 'Sugar', 'Princess', 'Prince', 'Bae'];
         return $adjs[array_rand($adjs)] . $nouns[array_rand($nouns)] . rand(100, 999);
     }
 

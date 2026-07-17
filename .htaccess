@@ -6,7 +6,7 @@
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
     # 1.5. Content Security Policy (CSP): Prevents XSS by restricting sources
-    Header set Content-Security-Policy "default-src 'self'; connect-src 'self' wss://chat.1year.site https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; img-src 'self' data:; media-src 'self' data: blob:;"
+    Header set Content-Security-Policy "default-src 'self'; connect-src 'self' wss://chat.1year.site https://ipwho.is https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://fonts.googleapis.com https://cdnjs.cloudflare.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; img-src 'self' data:; media-src 'self' data: blob:;"
 
     # 2. PERMISSIONS POLICY:
     # Explicitly allow Camera and Microphone for your own site (self).

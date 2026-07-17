@@ -2,12 +2,16 @@
 let conn;
 let currentMode = 'random';
 let myNickname = '';
+let myFlag = '🏳️';
 let unreadRandom = 0;
+let unreadVideo = 0;
+let unreadVoice = 0;
 let unreadPublic = 0;
 let unreadGroup = 0;
 let isSearching = false;
 let randomPartnerName = 'Stranger';
 let currentGroupId = null;
+let matchedMode = null;
 
 // UI Refs
 const randomView = document.getElementById('random-chat-view');
@@ -30,6 +34,7 @@ const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
 const btnNextHeader = document.getElementById('btn-next-header');
 const randomInputArea = document.getElementById('random-input-area');
+const btnVoiceCall = document.getElementById('btn-voice-call');
 const randomInput = document.getElementById('random-msg-input');
 const publicInput = document.getElementById('public-msg-input');
 const groupInput = document.getElementById('group-msg-input');
@@ -94,8 +99,9 @@ function initSocket() {
     conn.onopen = function () {
         updateStatus("Connected", "success");
         conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
+        conn.send(JSON.stringify({ action: 'set_profile', flag: myFlag }));
 
-        if (currentMode === 'random') {
+        if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') {
             btnStart.classList.remove('hidden');
             btnStop.classList.add('hidden');
             randomInputArea.classList.add('hidden');
@@ -117,14 +123,15 @@ function initSocket() {
 
         if (data.status === 'identity') {
             myNickname = data.nickname;
-            document.getElementById('sidebar-nickname').innerText = myNickname;
+            myFlag = data.flag || '🏳️';
+            document.getElementById('sidebar-nickname').innerText = myNickname + ' ' + myFlag;
         }
         else if (data.status === 'stats') {
             countVal.innerText = data.count;
             mobileCount.innerText = data.count;
         }
         else if (data.status === 'system') {
-            logSystem(currentMode === 'random' ? randomBox : publicBox, `⚠️ ${data.msg}`);
+            logSystem((currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') ? randomBox : publicBox, `⚠️ ${data.msg}`);
         }
         else if (data.status === 'waiting') {
             if (isSearching) {
@@ -135,14 +142,27 @@ function initSocket() {
         else if (data.status === 'connected') {
             if (data.shared_key) currentAesKey = data.shared_key;
             randomPartnerName = data.nickname || 'Stranger';
+            matchedMode = data.mode || 'text';
             isSearching = false;
             playAudio('connect');
             setRandomUI('connected');
             notifyBackground(`${randomPartnerName} Found!`, `You are now connected with ${randomPartnerName}.`);
             logSystem(randomBox, `You are connected with ${randomPartnerName}.`);
-            chatTitle.innerText = `Random Chat (${randomPartnerName})`;
+            
+            let modeTitle = 'Meet Random';
+            if (matchedMode === 'video') modeTitle = 'Random Video';
+            else if (matchedMode === 'voice') modeTitle = 'Random Call';
+            chatTitle.innerText = `${modeTitle} (${randomPartnerName})`;
+
             const videoNameSpan = document.getElementById('video-partner-name');
             if (videoNameSpan) videoNameSpan.innerText = randomPartnerName;
+
+            // Automatically start call based on matched mode
+            if (matchedMode === 'video' && data.initiator) {
+                startCall(false);
+            } else if (matchedMode === 'voice' && data.initiator) {
+                startCall(true);
+            }
         }
         else if (data.status === 'disconnected') {
             playAudio('disconnect');
@@ -150,18 +170,33 @@ function initSocket() {
             logSystem(randomBox, `${randomPartnerName} left.`);
             endCall(true);
             randomPartnerName = 'Stranger';
-            chatTitle.innerText = "Random Chat";
+            
+            let modeTitle = 'Meet Random';
+            if (currentMode === 'video') modeTitle = 'Random Video';
+            else if (currentMode === 'voice') modeTitle = 'Random Call';
+            chatTitle.innerText = modeTitle;
+
             const videoNameSpan = document.getElementById('video-partner-name');
             if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
+            matchedMode = null;
         }
         else if (data.status === 'message') {
-            if (currentMode !== 'random') { unreadRandom++; updateBadges(); }
+            if (currentMode !== matchedMode) { 
+                if (matchedMode === 'video') {
+                    unreadVideo++;
+                } else if (matchedMode === 'voice') {
+                    unreadVoice++;
+                } else {
+                    unreadRandom++;
+                }
+                updateBadges(); 
+            }
             playAudio('msg');
             showTyping(false);
             const decrypted = decryptMsg(data.msg, currentAesKey);
             logMessage(randomBox, 'stranger', randomPartnerName, decrypted, data.type);
             notifyBackground(`New message from ${randomPartnerName}`, decrypted.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
-            if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'random' }));
+            if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: matchedMode || 'random' }));
         }
         else if (data.status === 'public_msg') {
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
@@ -176,7 +211,7 @@ function initSocket() {
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'group' }));
         }
         else if (data.status === 'read') {
-            const box = data.context === 'random' ? randomBox : (data.context === 'group' ? groupBox : publicBox);
+            const box = (data.context === 'random' || data.context === 'video' || data.context === 'voice') ? randomBox : (data.context === 'group' ? groupBox : publicBox);
             const receipts = box.querySelectorAll('.read-receipt');
             receipts.forEach(r => {
                 r.innerText = '✓✓';
@@ -205,7 +240,7 @@ function initSocket() {
         }
         else if (data.status === 'typing') {
             const ctx = data.context || 'random';
-            const name = data.name || (ctx === 'random' ? randomPartnerName : 'Stranger');
+            const name = data.name || ((ctx === 'random' || ctx === 'video') ? randomPartnerName : 'Stranger');
             showTyping(true, ctx, name);
         }
         else if (data.status === 'call_signal') handleSignalMessage(data.signal);
@@ -219,11 +254,23 @@ function updateStatus(text, type) {
 }
 function updateBadges() {
     const bRandom = document.getElementById('badge-random');
+    const bVideo = document.getElementById('badge-video');
+    const bVoice = document.getElementById('badge-voice');
     const bPublic = document.getElementById('badge-public');
     const bGroup = document.getElementById('badge-group');
 
     if (unreadRandom > 0) { bRandom.innerText = unreadRandom; bRandom.classList.remove('scale-0'); }
     else bRandom.classList.add('scale-0');
+
+    if (bVideo) {
+        if (unreadVideo > 0) { bVideo.innerText = unreadVideo; bVideo.classList.remove('scale-0'); }
+        else bVideo.classList.add('scale-0');
+    }
+
+    if (bVoice) {
+        if (unreadVoice > 0) { bVoice.innerText = unreadVoice; bVoice.classList.remove('scale-0'); }
+        else bVoice.classList.add('scale-0');
+    }
 
     if (unreadPublic > 0) { bPublic.innerText = unreadPublic; bPublic.classList.remove('scale-0'); }
     else bPublic.classList.add('scale-0');
@@ -241,17 +288,46 @@ function switchMode(mode) {
     currentMode = mode;
     document.getElementById('my-drawer-2').checked = false;
     document.getElementById('nav-random').classList.remove('active');
+    document.getElementById('nav-video')?.classList.remove('active');
+    document.getElementById('nav-voice')?.classList.remove('active');
     document.getElementById('nav-public').classList.remove('active');
     document.getElementById('nav-group').classList.remove('active');
     document.getElementById(`nav-${mode}`).classList.add('active');
 
-    if (mode === 'random') {
+    if (mode === 'random' || mode === 'video' || mode === 'voice') {
         randomView.classList.remove('hidden');
         publicView.classList.add('hidden');
         groupView.classList.add('hidden');
-        chatTitle.innerText = "Random Chat";
+        
+        const startIcon = document.getElementById('start-icon');
+        const startHeading = document.getElementById('start-heading');
+        const startDesc = document.getElementById('start-desc');
+        
+        if (mode === 'video') {
+            chatTitle.innerText = "Random Video";
+            if (startIcon) startIcon.innerText = "🎥";
+            if (startHeading) startHeading.innerText = "Video Matchmaking";
+            if (startDesc) startDesc.innerText = "Match and start high-quality video call instantly and anonymously with strangers.";
+            btnStart.innerText = "Start Video Search";
+            unreadVideo = 0;
+        } else if (mode === 'voice') {
+            chatTitle.innerText = "Random Call";
+            if (startIcon) startIcon.innerText = "📞";
+            if (startHeading) startHeading.innerText = "Voice Matchmaking";
+            if (startDesc) startDesc.innerText = "Match and start voice calls instantly and anonymously with strangers.";
+            btnStart.innerText = "Start Voice Search";
+            unreadVoice = 0;
+        } else {
+            chatTitle.innerText = "Meet Random";
+            if (startIcon) startIcon.innerText = "💬";
+            if (startHeading) startHeading.innerText = "Stranger Matchmaking";
+            if (startDesc) startDesc.innerText = "Match randomly, type secretly, or share video calls with stranger completely anonymously.";
+            btnStart.innerText = "Start Searching";
+            unreadRandom = 0;
+        }
+        
         statusWrapper.classList.remove('invisible');
-        unreadRandom = 0; updateBadges();
+        updateBadges();
         
         const startOverlay = document.getElementById('start-overlay');
         if (startOverlay) {
@@ -273,7 +349,7 @@ function switchMode(mode) {
         randomView.classList.add('hidden');
         publicView.classList.add('hidden');
         groupView.classList.remove('hidden');
-        chatTitle.innerText = "Group Chat";
+        chatTitle.innerText = "Private Room";
         statusWrapper.classList.add('invisible');
         unreadGroup = 0; updateBadges();
         setTimeout(() => groupBox.scrollTop = groupBox.scrollHeight, 100);
@@ -297,18 +373,54 @@ function setRandomUI(state) {
     else if (state === 'connected') {
         btnNextHeader.classList.remove('hidden');
         btnNextHeader.classList.add('flex');
-        randomInputArea.classList.remove('hidden');
-        randomInputArea.classList.add('flex');
-        if (currentMode === 'random') updateStatus("Online", "success");
+        
+        if (matchedMode === 'random') {
+            randomInputArea.classList.remove('hidden');
+            randomInputArea.classList.add('flex');
+            randomBox.classList.remove('hidden');
+            btnCall.classList.remove('hidden');
+            btnVoiceCall.classList.remove('hidden');
+            
+            const videoContainer = document.getElementById('video-container');
+            if (videoContainer) videoContainer.classList.remove('full-height');
+        } else {
+            randomInputArea.classList.add('hidden');
+            randomBox.classList.add('hidden');
+            btnCall.classList.add('hidden');
+            btnVoiceCall.classList.add('hidden');
+            
+            const videoContainer = document.getElementById('video-container');
+            if (videoContainer) {
+                videoContainer.classList.add('full-height');
+                videoContainer.style.display = 'block';
+                videoContainer.classList.remove('hidden');
+            }
+        }
+        
+        if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') updateStatus("Online", "success");
         if (startOverlay) startOverlay.classList.add('hidden');
     } else if (state === 'disconnected_partner') {
-        if (currentMode === 'random') updateStatus("Partner Left", "error");
+        if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') updateStatus("Partner Left", "error");
         showTyping(false);
         btnStart.classList.remove('hidden');
         if (startOverlay) startOverlay.classList.remove('hidden');
+        
+        const videoContainer = document.getElementById('video-container');
+        if (videoContainer) {
+            videoContainer.classList.remove('full-height');
+            videoContainer.style.display = 'none';
+        }
+        randomBox.classList.remove('hidden');
     } else if (state === 'disconnected') {
         btnStart.classList.remove('hidden');
         if (startOverlay) startOverlay.classList.remove('hidden');
+        
+        const videoContainer = document.getElementById('video-container');
+        if (videoContainer) {
+            videoContainer.classList.remove('full-height');
+            videoContainer.style.display = 'none';
+        }
+        randomBox.classList.remove('hidden');
     }
 }
 
@@ -371,6 +483,18 @@ function escapeHTML(str) {
     }[tag]));
 }
 
+function revealAndPreviewImage(e, el, src) {
+    const img = el.querySelector('img');
+    const overlay = el.querySelector('.blur-overlay');
+    if (img && img.classList.contains('blur-md')) {
+        img.classList.remove('blur-md');
+        if (overlay) overlay.remove();
+        e.stopPropagation();
+    } else {
+        openImageModal(src);
+    }
+}
+
 function logMessage(container, type, name, msg, msgType = 'text') {
     const isMe = type === 'you';
     const align = isMe ? 'chat-end' : 'chat-start';
@@ -379,7 +503,19 @@ function logMessage(container, type, name, msg, msgType = 'text') {
 
     let contentHtml = '';
     if (msgType === 'image') {
-        contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-base-content/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
+        if (isMe) {
+            contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-base-content/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
+        } else {
+            contentHtml = `
+            <div class="relative overflow-hidden rounded-lg max-w-[200px] cursor-pointer group" onclick="revealAndPreviewImage(event, this, '${msg}')">
+                <img src="${msg}" class="blur-md transition-all duration-300 max-w-full border border-base-content/10">
+                <div class="blur-overlay absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center p-2 transition-opacity group-hover:bg-black/50 pointer-events-none">
+                    <span class="text-[10px] font-bold tracking-wider uppercase text-white flex items-center gap-1">
+                        <span>👁️</span> Reveal Image
+                    </span>
+                </div>
+            </div>`;
+        }
     } else if (msgType === 'audio') {
         contentHtml = `<audio controls src="${msg}" class="max-w-[200px] h-10"></audio>`;
     } else {
@@ -411,7 +547,21 @@ function logSystem(container, msg) {
 function startRandomChat() {
     if (conn.readyState !== WebSocket.OPEN) return;
     isSearching = true;
-    conn.send(JSON.stringify({ action: 'find_partner' }));
+
+    // Get gender preferences
+    const gender = document.getElementById('user-gender')?.value || 'any';
+    const targetGender = document.getElementById('target-gender')?.value || 'any';
+
+    // Save to localStorage
+    localStorage.setItem('user_gender', gender);
+    localStorage.setItem('target_gender', targetGender);
+
+    conn.send(JSON.stringify({ 
+        action: 'find_partner', 
+        mode: currentMode,
+        gender: gender,
+        targetGender: targetGender
+    }));
 
     btnStart.classList.add('hidden');
     btnStop.classList.remove('hidden');
@@ -429,7 +579,7 @@ function stopRandomChat() {
     logSystem(randomBox, "Search canceled.");
     conn.send(JSON.stringify({ action: 'cancel_search' }));
     randomPartnerName = 'Stranger';
-    chatTitle.innerText = "Random Chat";
+    chatTitle.innerText = currentMode === 'video' ? "Random Video" : "Random Chat";
     const videoNameSpan = document.getElementById('video-partner-name');
     if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
     
@@ -443,14 +593,14 @@ function nextPartner() {
     endCall();
     isSearching = true;
     randomPartnerName = 'Stranger';
-    chatTitle.innerText = "Random Chat";
+    chatTitle.innerText = currentMode === 'video' ? "Random Video" : "Random Chat";
     const videoNameSpan = document.getElementById('video-partner-name');
     if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
     conn.send(JSON.stringify({ action: 'next' }));
 }
 
 function sendMessage(context, msgType = 'text', overrideMsg = null) {
-    const input = context === 'random' ? randomInput : (context === 'public' ? publicInput : groupInput);
+    const input = (context === 'random' || context === 'video') ? randomInput : (context === 'public' ? publicInput : groupInput);
     const msg = input.value.trim();
     if (!msg && !overrideMsg) return;
 
@@ -460,14 +610,14 @@ function sendMessage(context, msgType = 'text', overrideMsg = null) {
 
     let payloadMsg = overrideMsg || msg;
 
-    // AES Encryption for Random and Custom Rooms
-    if (context === 'random' && currentAesKey) {
+    // AES Encryption for Random, Video and Custom Rooms
+    if ((context === 'random' || context === 'video') && currentAesKey) {
         payloadMsg = encryptMsg(payloadMsg, currentAesKey);
     } else if (context === 'group' && rawCustomRoomCode) {
         payloadMsg = encryptMsg(payloadMsg, rawCustomRoomCode);
     }
 
-    logMessage(context === 'random' ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', 'You', (overrideMsg || msg), msgType);
+    logMessage((context === 'random' || context === 'video') ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', 'You', (overrideMsg || msg), msgType);
     conn.send(JSON.stringify({ action: 'message', content: payloadMsg, context: context, type: msgType }));
 
     if (msgType === 'text') { input.focus(); }
@@ -480,7 +630,7 @@ function handleInput(e, ctx) {
     }
 }
 function insertEmoji(e, ctx) {
-    const el = ctx === 'random' ? randomInput : (ctx === 'public' ? publicInput : groupInput);
+    const el = (ctx === 'random' || ctx === 'video') ? randomInput : (ctx === 'public' ? publicInput : groupInput);
     el.value += e; el.focus();
 }
 
@@ -533,10 +683,11 @@ function sendTypingSignal(ctx = 'random') {
 }
 
 function showTyping(show, context = 'random', name = 'Stranger') {
-    const box = context === 'random' ? randomBox : (context === 'public' ? publicBox : groupBox);
+    const displayContext = (context === 'random' || context === 'video') ? 'random' : context;
+    const box = displayContext === 'random' ? randomBox : (displayContext === 'public' ? publicBox : groupBox);
     if (!box) return;
 
-    const typingId = 'typing-' + context;
+    const typingId = 'typing-' + displayContext;
     let ind = document.getElementById(typingId);
     
     if (show) {
@@ -556,8 +707,8 @@ function showTyping(show, context = 'random', name = 'Stranger') {
         `;
         box.scrollTop = box.scrollHeight;
         
-        if (typingTimer[context]) clearTimeout(typingTimer[context]);
-        typingTimer[context] = setTimeout(() => {
+        if (typingTimer[displayContext]) clearTimeout(typingTimer[displayContext]);
+        typingTimer[displayContext] = setTimeout(() => {
             if (ind && ind.parentNode) ind.parentNode.removeChild(ind);
         }, 3000);
     } else {
@@ -710,21 +861,40 @@ function toggleCam() {
 }
 
 
-async function startCall() {
+async function startCall(isVoiceOnly = false) {
     showVideoTip();
     btnCall.classList.add('hidden');
+    if (btnVoiceCall) btnVoiceCall.classList.add('hidden');
     btnHangup.classList.remove('hidden');
+
+    const constraints = {
+        video: isVoiceOnly ? false : { facingMode: "user" },
+        audio: true
+    };
+
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
         
         // Sync toggled state
         if (isMuted) localStream.getAudioTracks().forEach(t => t.enabled = false);
-        if (isCameraOff) localStream.getVideoTracks().forEach(t => t.enabled = false);
+        if (!isVoiceOnly && isCameraOff) localStream.getVideoTracks().forEach(t => t.enabled = false);
 
-        localVideo.srcObject = localStream;
+        localVideo.srcObject = isVoiceOnly ? null : localStream;
 
         videoContainer.style.display = 'block';
         videoContainer.classList.remove('hidden');
+
+        // Toggle voice placeholder visibility
+        const voicePlaceholder = document.getElementById('voice-placeholder');
+        if (isVoiceOnly) {
+            if (voicePlaceholder) voicePlaceholder.classList.remove('hidden');
+            localVideo.classList.add('hidden');
+            remoteVideo.classList.add('hidden');
+        } else {
+            if (voicePlaceholder) voicePlaceholder.classList.add('hidden');
+            localVideo.classList.remove('hidden');
+            remoteVideo.classList.remove('hidden');
+        }
 
         createPeerConnection();
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
@@ -732,8 +902,8 @@ async function startCall() {
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
 
-        conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'offer', sdp: offer } }));
-        logSystem(randomBox, "🎥 Calling stranger...");
+        conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'offer', sdp: offer, isVoiceOnly: isVoiceOnly } }));
+        logSystem(randomBox, isVoiceOnly ? "📞 Calling stranger (Voice)..." : "🎥 Calling stranger...");
     } catch (err) {
         console.error(err);
         alert("Camera/Microphone access required!"); endCall();
@@ -744,8 +914,15 @@ async function handleSignalMessage(signal) {
     if (!peerConnection) createPeerConnection();
 
     if (signal.type === 'offer') {
-        incomingOverlay.classList.remove('hidden');
+        const isVoiceOnly = signal.isVoiceOnly || false;
         window.pendingOffer = signal.sdp;
+        window.pendingVoiceOnly = isVoiceOnly;
+
+        if (currentMode === 'video' || currentMode === 'voice') {
+            acceptCall();
+        } else {
+            incomingOverlay.classList.remove('hidden');
+        }
     }
     else if (signal.type === 'answer') {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp));
@@ -768,19 +945,37 @@ async function handleSignalMessage(signal) {
 async function acceptCall() {
     incomingOverlay.classList.add('hidden');
     btnCall.classList.add('hidden');
+    if (btnVoiceCall) btnVoiceCall.classList.add('hidden');
     btnHangup.classList.remove('hidden');
 
     videoContainer.style.display = 'block';
     videoContainer.classList.remove('hidden');
 
+    const isVoiceOnly = window.pendingVoiceOnly || false;
+    const constraints = {
+        video: isVoiceOnly ? false : { facingMode: "user" },
+        audio: true
+    };
+
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true });
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
         
         // Sync toggled state
         if (isMuted) localStream.getAudioTracks().forEach(t => t.enabled = false);
-        if (isCameraOff) localStream.getVideoTracks().forEach(t => t.enabled = false);
+        if (!isVoiceOnly && isCameraOff) localStream.getVideoTracks().forEach(t => t.enabled = false);
 
-        localVideo.srcObject = localStream;
+        localVideo.srcObject = isVoiceOnly ? null : localStream;
+
+        const voicePlaceholder = document.getElementById('voice-placeholder');
+        if (isVoiceOnly) {
+            if (voicePlaceholder) voicePlaceholder.classList.remove('hidden');
+            localVideo.classList.add('hidden');
+            remoteVideo.classList.add('hidden');
+        } else {
+            if (voicePlaceholder) voicePlaceholder.classList.add('hidden');
+            localVideo.classList.remove('hidden');
+            remoteVideo.classList.remove('hidden');
+        }
 
         localStream.getTracks().forEach(track => {
             peerConnection.addTrack(track, localStream);
@@ -830,14 +1025,21 @@ function endCall(isRemote = false) {
 
     iceCandidateQueue = [];
     window.pendingOffer = null;
+    window.pendingVoiceOnly = false;
 
     remoteVideo.srcObject = null;
     localVideo.srcObject = null;
+
+    const voicePlaceholder = document.getElementById('voice-placeholder');
+    if (voicePlaceholder) voicePlaceholder.classList.add('hidden');
+    localVideo.classList.remove('hidden');
+    remoteVideo.classList.remove('hidden');
 
     videoContainer.style.display = 'none';
     videoContainer.classList.add('hidden');
 
     btnCall.classList.remove('hidden');
+    if (btnVoiceCall) btnVoiceCall.classList.remove('hidden');
     btnHangup.classList.add('hidden');
     incomingOverlay.classList.add('hidden');
 
@@ -854,10 +1056,49 @@ function endCall(isRemote = false) {
 }
 
 
+function fetchFlag() {
+    fetch('https://ipwho.is/')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.success) {
+                myFlag = data.country_flag || getFlagEmoji(data.country_code);
+                if (conn && conn.readyState === WebSocket.OPEN) {
+                    conn.send(JSON.stringify({ action: 'set_profile', flag: myFlag }));
+                }
+            }
+        })
+        .catch(err => {
+            console.log("Failed to fetch flag:", err);
+        });
+}
+
+function getFlagEmoji(countryCode) {
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Always use dark mode
     document.documentElement.setAttribute('data-theme', 'night');
     localStorage.removeItem('theme');
+
+    // Fetch user country flag
+    fetchFlag();
+
+    // Restore Gender Preferences
+    const savedUserGender = localStorage.getItem('user_gender');
+    const savedTargetGender = localStorage.getItem('target_gender');
+    if (savedUserGender) {
+        const userGenderSelect = document.getElementById('user-gender');
+        if (userGenderSelect) userGenderSelect.value = savedUserGender;
+    }
+    if (savedTargetGender) {
+        const targetGenderSelect = document.getElementById('target-gender');
+        if (targetGenderSelect) targetGenderSelect.value = savedTargetGender;
+    }
 
     const modal = document.getElementById('agreement_modal');
     if (!sessionStorage.getItem('terms_accepted')) {
@@ -1007,7 +1248,7 @@ function updateAppHeight() {
         const height = window.visualViewport.height;
         document.documentElement.style.setProperty('--app-height', `${height}px`);
         setTimeout(() => {
-            const activeBox = currentMode === 'random' ? randomBox : (currentMode === 'group' ? groupBox : publicBox);
+            const activeBox = (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') ? randomBox : (currentMode === 'group' ? groupBox : publicBox);
             if (activeBox) {
                 activeBox.scrollTop = activeBox.scrollHeight;
             }

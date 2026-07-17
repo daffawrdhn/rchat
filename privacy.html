@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - XOXO</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden relative p-6 md:p-12">
+    <!-- Glowing background blobs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-indigo-600/20 rounded-full filter blur-[120px]"></div>
+        <div class="absolute -bottom-40 right-10 w-[600px] h-[600px] bg-pink-600/10 rounded-full filter blur-[140px]"></div>
+    </div>
+
+    <div class="max-w-2xl mx-auto w-full glass-panel p-8 md:p-12 rounded-[32px] shadow-2xl relative z-10 my-8">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Privacy Policy</h1>
+            <p class="text-[10px] themed-muted font-bold tracking-widest uppercase mt-2">Zero Log, Complete Anonymity</p>
+        </div>
+
+        <div class="space-y-6 text-sm leading-relaxed opacity-90">
+            <div class="alert bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-2xl p-4 flex gap-3">
+                <span class="text-2xl">🔒</span>
+                <div>
+                    <h3 class="font-bold text-sm">True Zero-Log Commitment</h3>
+                    <p class="text-xs opacity-80 mt-1">We do not store, write, or log any messages, call logs, metadata, or media content. Our servers operate entirely in-memory.</p>
+                </div>
+            </div>
+
+            <section>
+                <h2 class="text-lg font-bold text-indigo-400 mb-2">1. Information We Do Not Collect</h2>
+                <p>Because XOXO is built on a <strong>Zero-Storage Architecture</strong>, we do not require, request, or store:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1.5">
+                    <li>Your real name, email address, phone number, or social profiles.</li>
+                    <li>IP addresses, browser footprints, or device registration data.</li>
+                    <li>Chat history, shared photos, or audio recordings (all base64 image data and WebRTC signal payloads are forwarded in real-time and cleared immediately from server memory).</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-indigo-400 mb-2">2. How WebRTC Video Calls Work</h2>
+                <p>Our servers only act as a WebRTC signaling facilitator. Once a video connection is established, the stream is directly Peer-to-Peer (P2P) between your browser and the stranger's browser. Video and audio packets never pass through or get recorded by our servers.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-indigo-400 mb-2">3. Client-Side Encryption</h2>
+                <p>Private chats and group rooms are secured using client-side encryption. The keys are stored locally in your browser session and are never transmitted to our servers in plaintext, protecting your conversations from interception.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-indigo-400 mb-2">4. Third-Party Links</h2>
+                <p>Our website may contain links to external sites. We are not responsible for the privacy practices of external web portals.</p>
+            </section>
+        </div>
+
+        <div class="mt-12 text-center">
+            <button onclick="window.close()" class="btn btn-primary rounded-full px-8 font-bold shadow-lg shadow-primary/25">Close Window</button>
+        </div>
+    </div>
+
+    <footer class="text-center text-xs opacity-40 mt-auto z-10">
+        &copy; 2026 XOXO Chat. All rights reserved.
+    </footer>
+</body>
+</html>

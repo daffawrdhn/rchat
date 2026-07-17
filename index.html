@@ -243,6 +243,16 @@
                                 </div>
                             </div>
 
+                            <div id="voice-placeholder" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-md z-10">
+                                <div class="avatar placeholder mb-4">
+                                    <div class="bg-gradient-to-tr from-rose-500 to-pink-600 text-white rounded-full w-24 h-24 flex items-center justify-center shadow-2xl animate-pulse">
+                                        <span class="text-4xl">📞</span>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-extrabold text-white">Voice Call Connected</h3>
+                                <p class="text-xs opacity-60 mt-1">Talking with stranger...</p>
+                            </div>
+
                             <div id="local-wrapper" class="local-wrapper absolute top-4 right-4 z-20 transition-width duration-300">
                                 <video id="local-video" autoplay playsinline muted class="w-full h-auto block transform -scale-x-100 bg-gray-800 pointer-events-none"></video>
                                 <div class="absolute bottom-1 left-2 text-[10px] text-white font-bold drop-shadow-md pointer-events-none">
@@ -269,12 +279,33 @@
                         <!-- Chat Action / Start Button Overlay (Bento-style card) -->
                         <div id="start-overlay" class="absolute inset-0 z-10 flex items-center justify-center p-6 theme-start-overlay pt-[72px]">
                             <div class="glass-panel p-8 max-w-sm w-full text-center rounded-3xl shadow-2xl flex flex-col gap-5">
-                                <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                                <div id="start-icon" class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
                                     💬
                                 </div>
                                 <div>
-                                    <h3 class="text-xl font-bold themed-heading mb-1">Stranger Matchmaking</h3>
-                                    <p class="text-xs themed-desc leading-relaxed">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
+                                    <h3 id="start-heading" class="text-xl font-bold themed-heading mb-1">Stranger Matchmaking</h3>
+                                    <p id="start-desc" class="text-xs themed-desc leading-relaxed">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
+                                </div>
+                                <!-- Gender Preferences Selection -->
+                                <div class="flex flex-col gap-3 text-left w-full border-t border-white/5 pt-4">
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div class="flex flex-col gap-1 w-1/2">
+                                            <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">My Gender</label>
+                                            <select id="user-gender" class="select select-bordered select-sm rounded-full w-full glass-input text-xs font-semibold focus:outline-none">
+                                                <option value="any">Secret 👤</option>
+                                                <option value="male">Male ♂</option>
+                                                <option value="female">Female ♀</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex flex-col gap-1 w-1/2">
+                                            <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">Match Gender</label>
+                                            <select id="target-gender" class="select select-bordered select-sm rounded-full w-full glass-input text-xs font-semibold focus:outline-none">
+                                                <option value="any">Everyone 🌐</option>
+                                                <option value="male">Male ♂</option>
+                                                <option value="female">Female ♀</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                                 <button id="btn-start" onclick="startRandomChat()"
                                     class="btn bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold tracking-wide rounded-full border-none w-full shadow-lg shadow-indigo-500/20">
@@ -304,12 +335,18 @@
                                 <button id="record-btn-random" onclick="toggleRecording('random')" class="btn btn-circle btn-ghost text-indigo-400 hover:bg-indigo-500/10 text-lg">
                                     🎤
                                 </button>
-                                <button id="btn-call" onclick="startCall()"
-                                    class="btn btn-circle btn-ghost text-emerald-400 hover:bg-emerald-500/10">
+                                <button id="btn-call" onclick="startCall(false)"
+                                    class="btn btn-circle btn-ghost text-emerald-400 hover:bg-emerald-500/10" title="Video Call">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
                                             d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
+                                <button id="btn-voice-call" onclick="startCall(true)"
+                                    class="btn btn-circle btn-ghost text-amber-400 hover:bg-amber-500/10" title="Voice Call">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                 </button>
                                 <button id="btn-hangup" onclick="endCall()"
@@ -513,10 +550,38 @@
                             </svg>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm">Random Chat</span>
-                            <span class="text-[10px] opacity-40">Match with strangers</span>
+                            <span class="font-bold text-sm">Meet Random</span>
+                            <span class="text-[10px] opacity-40">Text, Video, or Voice</span>
                         </div>
                         <span id="badge-random" class="badge badge-primary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                    </a>
+
+                    <a onclick="switchMode('video')" id="nav-video"
+                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
+                        <div class="w-9.5 h-9.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-sm">Random Video</span>
+                            <span class="text-[10px] opacity-40">Only video matchmaking</span>
+                        </div>
+                        <span id="badge-video" class="badge badge-error badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                    </a>
+
+                    <a onclick="switchMode('voice')" id="nav-voice"
+                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
+                        <div class="w-9.5 h-9.5 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-sm">Random Call</span>
+                            <span class="text-[10px] opacity-40">Only voice matchmaking</span>
+                        </div>
+                        <span id="badge-voice" class="badge badge-warning badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
 
                     <a onclick="switchMode('public')" id="nav-public"
@@ -541,7 +606,7 @@
                             </svg>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm">Custom Room</span>
+                            <span class="font-bold text-sm">Private Room</span>
                             <span class="text-[10px] opacity-40">Private group code</span>
                         </div>
                         <span id="badge-group" class="badge badge-accent badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
@@ -561,6 +626,13 @@
                             <p class="font-extrabold truncate text-indigo-400 text-sm" id="sidebar-nickname">...</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Footer Navigation Links -->
+                <div class="flex justify-center gap-4 text-[11px] opacity-50 mt-1 font-bold">
+                    <a href="privacy.html" target="_blank" class="hover:text-primary hover:opacity-100 transition-colors">Privacy Policy</a>
+                    <span>•</span>
+                    <a href="terms.html" target="_blank" class="hover:text-primary hover:opacity-100 transition-colors">Terms of Service</a>
                 </div>
 
             </div>

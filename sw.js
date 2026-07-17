@@ -1,7 +1,9 @@
-const CACHE_NAME = 'xoxo-v1.0.21';
+const CACHE_NAME = 'xoxo-v1.0.22-5modes';
 const urlsToCache = [
     './',
     './index.html',
+    './privacy.html',
+    './terms.html',
     './styles.css',
     './script.js',
     './manifest.json',
