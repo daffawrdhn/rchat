@@ -288,8 +288,10 @@ function notifyBackground(title, body) {
         new Notification(title, { body: body });
     }
 }
-function updateMatchModeUI() {
-    const mode = document.getElementById('match-mode')?.value || 'random';
+function updateMatchModeUI(mode) {
+    if (!mode) {
+        mode = document.querySelector('.match-mode-btn.bg-gradient-to-br')?.getAttribute('data-value') || 'random';
+    }
     currentMode = mode;
     
     const startIcon = document.getElementById('start-icon');
@@ -331,7 +333,7 @@ function switchMode(mode) {
     }
 
     if (mode === 'random') {
-        currentMode = document.getElementById('match-mode')?.value || 'random';
+        currentMode = document.querySelector('.match-mode-btn.bg-gradient-to-br')?.getAttribute('data-value') || 'random';
     } else {
         currentMode = mode;
     }
@@ -581,13 +583,12 @@ function startRandomChat() {
     if (conn.readyState !== WebSocket.OPEN) return;
     isSearching = true;
 
-    // Get match mode preference
-    const mode = document.getElementById('match-mode')?.value || 'random';
+    // Get preferences from selected segment buttons
+    const mode = document.querySelector('.match-mode-btn.bg-gradient-to-br')?.getAttribute('data-value') || 'random';
     currentMode = mode;
 
-    // Get gender preferences
-    const gender = document.getElementById('user-gender')?.value || 'any';
-    const targetGender = document.getElementById('target-gender')?.value || 'any';
+    const gender = document.querySelector('.user-gender-btn.bg-white\\/15')?.getAttribute('data-value') || 'any';
+    const targetGender = document.querySelector('.target-gender-btn.bg-white\\/15')?.getAttribute('data-value') || 'any';
 
     // Save to localStorage
     localStorage.setItem('match_mode', mode);
@@ -621,7 +622,7 @@ function stopRandomChat() {
     conn.send(JSON.stringify({ action: 'cancel_search' }));
     
     // Reset mode back to select preference
-    currentMode = document.getElementById('match-mode')?.value || 'random';
+    currentMode = document.querySelector('.match-mode-btn.bg-gradient-to-br')?.getAttribute('data-value') || 'random';
     
     randomPartnerName = 'Stranger';
     let modeTitle = 'Meet Random';
@@ -1161,27 +1162,64 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch user country flag
     fetchFlag();
 
+    // Segmented Controls (Button Groups) click listeners
+    const matchModeButtons = document.querySelectorAll('.match-mode-btn');
+    matchModeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            matchModeButtons.forEach(b => {
+                b.className = 'match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10';
+            });
+            btn.className = 'match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border-indigo-500/40 text-white shadow-md shadow-indigo-500/10';
+            
+            const val = btn.getAttribute('data-value');
+            localStorage.setItem('match_mode', val);
+            updateMatchModeUI(val);
+        });
+    });
+
+    const userGenderButtons = document.querySelectorAll('.user-gender-btn');
+    userGenderButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            userGenderButtons.forEach(b => {
+                b.className = 'user-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5';
+            });
+            btn.className = 'user-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all bg-white/15 text-white shadow-sm';
+            
+            const val = btn.getAttribute('data-value');
+            localStorage.setItem('user_gender', val);
+        });
+    });
+
+    const targetGenderButtons = document.querySelectorAll('.target-gender-btn');
+    targetGenderButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            targetGenderButtons.forEach(b => {
+                b.className = 'target-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5';
+            });
+            btn.className = 'target-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all bg-white/15 text-white shadow-sm';
+            
+            const val = btn.getAttribute('data-value');
+            localStorage.setItem('target_gender', val);
+        });
+    });
+
     // Restore Match Mode Preference
-    const savedMatchMode = localStorage.getItem('match_mode');
-    if (savedMatchMode) {
-        const matchModeSelect = document.getElementById('match-mode');
-        if (matchModeSelect) {
-            matchModeSelect.value = savedMatchMode;
-        }
+    const savedMatchMode = localStorage.getItem('match_mode') || 'random';
+    const matchModeBtn = document.querySelector(`.match-mode-btn[data-value="${savedMatchMode}"]`);
+    if (matchModeBtn) {
+        matchModeBtn.click();
+    } else {
+        updateMatchModeUI('random');
     }
-    updateMatchModeUI();
 
     // Restore Gender Preferences
-    const savedUserGender = localStorage.getItem('user_gender');
-    const savedTargetGender = localStorage.getItem('target_gender');
-    if (savedUserGender) {
-        const userGenderSelect = document.getElementById('user-gender');
-        if (userGenderSelect) userGenderSelect.value = savedUserGender;
-    }
-    if (savedTargetGender) {
-        const targetGenderSelect = document.getElementById('target-gender');
-        if (targetGenderSelect) targetGenderSelect.value = savedTargetGender;
-    }
+    const savedUserGender = localStorage.getItem('user_gender') || 'any';
+    const userGenderBtn = document.querySelector(`.user-gender-btn[data-value="${savedUserGender}"]`);
+    if (userGenderBtn) userGenderBtn.click();
+
+    const savedTargetGender = localStorage.getItem('target_gender') || 'any';
+    const targetGenderBtn = document.querySelector(`.target-gender-btn[data-value="${savedTargetGender}"]`);
+    if (targetGenderBtn) targetGenderBtn.click();
 
     const modal = document.getElementById('agreement_modal');
     if (!sessionStorage.getItem('terms_accepted')) {

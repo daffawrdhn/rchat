@@ -286,31 +286,55 @@
                                     <p id="start-desc" class="text-xs themed-desc leading-relaxed">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
                                 </div>
                                 <!-- Gender & Mode Preferences Selection -->
-                                <div class="flex flex-col gap-3 text-left w-full border-t border-white/5 pt-4">
-                                    <div class="flex flex-col gap-1 w-full mb-1">
+                                <div class="flex flex-col gap-4 text-left w-full border-t border-white/5 pt-4">
+                                    <!-- Match Mode Selection Group -->
+                                    <div class="flex flex-col gap-1.5 w-full">
                                         <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">Match Mode</label>
-                                        <select id="match-mode" onchange="updateMatchModeUI()" class="select select-bordered select-sm rounded-full w-full glass-input text-xs font-semibold focus:outline-none">
-                                            <option value="random">Text & Media 💬</option>
-                                            <option value="video">Video Call Only 🎥</option>
-                                            <option value="voice">Voice Call Only 📞</option>
-                                        </select>
+                                        <div id="match-mode-group" class="grid grid-cols-3 gap-2">
+                                            <button type="button" data-value="random" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10">
+                                                <span class="text-base">💬</span>
+                                                <span>Text & Media</span>
+                                            </button>
+                                            <button type="button" data-value="video" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10">
+                                                <span class="text-base">🎥</span>
+                                                <span>Video Call</span>
+                                            </button>
+                                            <button type="button" data-value="voice" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10">
+                                                <span class="text-base">📞</span>
+                                                <span>Voice Call</span>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="flex justify-between items-center gap-4">
-                                        <div class="flex flex-col gap-1 w-1/2">
+                                        <!-- My Gender Selection Group -->
+                                        <div class="flex flex-col gap-1.5 w-1/2">
                                             <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">My Gender</label>
-                                            <select id="user-gender" class="select select-bordered select-sm rounded-full w-full glass-input text-xs font-semibold focus:outline-none">
-                                                <option value="any">Secret 👤</option>
-                                                <option value="male">Male ♂</option>
-                                                <option value="female">Female ♀</option>
-                                            </select>
+                                            <div id="user-gender-group" class="grid grid-cols-3 gap-0.5 bg-white/5 border border-white/10 p-0.5 rounded-full">
+                                                <button type="button" data-value="any" class="user-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5">
+                                                    👤 Sec
+                                                </button>
+                                                <button type="button" data-value="male" class="user-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5">
+                                                    ♂ M
+                                                </button>
+                                                <button type="button" data-value="female" class="user-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5">
+                                                    ♀ F
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="flex flex-col gap-1 w-1/2">
+                                        <!-- Match Gender Selection Group -->
+                                        <div class="flex flex-col gap-1.5 w-1/2">
                                             <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">Match Gender</label>
-                                            <select id="target-gender" class="select select-bordered select-sm rounded-full w-full glass-input text-xs font-semibold focus:outline-none">
-                                                <option value="any">Everyone 🌐</option>
-                                                <option value="male">Male ♂</option>
-                                                <option value="female">Female ♀</option>
-                                            </select>
+                                            <div id="target-gender-group" class="grid grid-cols-3 gap-0.5 bg-white/5 border border-white/10 p-0.5 rounded-full">
+                                                <button type="button" data-value="any" class="target-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5">
+                                                    🌐 All
+                                                </button>
+                                                <button type="button" data-value="male" class="target-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5">
+                                                    ♂ M
+                                                </button>
+                                                <button type="button" data-value="female" class="target-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5">
+                                                    ♀ F
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

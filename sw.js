@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.23-native-crypto';
+const CACHE_NAME = 'xoxo-v1.0.24-segmented-controls';
 const urlsToCache = [
     './',
     './index.html',
