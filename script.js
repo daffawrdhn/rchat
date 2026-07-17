@@ -144,6 +144,10 @@ function initSocket() {
             randomPartnerName = data.nickname || 'Stranger';
             matchedMode = data.mode || 'text';
             isSearching = false;
+            
+            // Clear previous chat messages
+            randomBox.innerHTML = '';
+            
             playAudio('connect');
             setRandomUI('connected');
             notifyBackground(`${randomPartnerName} Found!`, `You are now connected with ${randomPartnerName}.`);
@@ -284,47 +288,70 @@ function notifyBackground(title, body) {
         new Notification(title, { body: body });
     }
 }
-function switchMode(mode) {
+function updateMatchModeUI() {
+    const mode = document.getElementById('match-mode')?.value || 'random';
     currentMode = mode;
+    
+    const startIcon = document.getElementById('start-icon');
+    const startHeading = document.getElementById('start-heading');
+    const startDesc = document.getElementById('start-desc');
+    
+    if (mode === 'video') {
+        chatTitle.innerText = "Random Video";
+        if (startIcon) startIcon.innerText = "🎥";
+        if (startHeading) startHeading.innerText = "Video Matchmaking";
+        if (startDesc) startDesc.innerText = "Match and start high-quality video call instantly and anonymously with strangers.";
+        btnStart.innerText = "Start Video Search";
+    } else if (mode === 'voice') {
+        chatTitle.innerText = "Random Call";
+        if (startIcon) startIcon.innerText = "📞";
+        if (startHeading) startHeading.innerText = "Voice Matchmaking";
+        if (startDesc) startDesc.innerText = "Match and start voice calls instantly and anonymously with strangers.";
+        btnStart.innerText = "Start Voice Search";
+    } else {
+        chatTitle.innerText = "Meet Random";
+        if (startIcon) startIcon.innerText = "💬";
+        if (startHeading) startHeading.innerText = "Stranger Matchmaking";
+        if (startDesc) startDesc.innerText = "Match randomly, type secretly, or share video calls with stranger completely anonymously.";
+        btnStart.innerText = "Start Searching";
+    }
+}
+
+function switchMode(mode) {
+    const isMatchingMode = (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice');
+
+    if (mode !== currentMode) {
+        if (isMatchingMode && (isSearching || matchedMode !== null)) {
+            const confirmMsg = "Apakah Anda yakin ingin mengganti mode? Ini akan memutuskan obrolan atau membatalkan pencarian aktif Anda.";
+            if (!confirm(confirmMsg)) {
+                return; // Keep current mode
+            }
+            stopRandomChat();
+        }
+    }
+
+    if (mode === 'random') {
+        currentMode = document.getElementById('match-mode')?.value || 'random';
+    } else {
+        currentMode = mode;
+    }
+
     document.getElementById('my-drawer-2').checked = false;
     document.getElementById('nav-random').classList.remove('active');
-    document.getElementById('nav-video')?.classList.remove('active');
-    document.getElementById('nav-voice')?.classList.remove('active');
     document.getElementById('nav-public').classList.remove('active');
     document.getElementById('nav-group').classList.remove('active');
-    document.getElementById(`nav-${mode}`).classList.add('active');
+    
+    const activeNavId = (mode === 'random' || mode === 'video' || mode === 'voice') ? 'nav-random' : `nav-${mode}`;
+    const activeNavEl = document.getElementById(activeNavId);
+    if (activeNavEl) activeNavEl.classList.add('active');
 
     if (mode === 'random' || mode === 'video' || mode === 'voice') {
         randomView.classList.remove('hidden');
         publicView.classList.add('hidden');
         groupView.classList.add('hidden');
         
-        const startIcon = document.getElementById('start-icon');
-        const startHeading = document.getElementById('start-heading');
-        const startDesc = document.getElementById('start-desc');
-        
-        if (mode === 'video') {
-            chatTitle.innerText = "Random Video";
-            if (startIcon) startIcon.innerText = "🎥";
-            if (startHeading) startHeading.innerText = "Video Matchmaking";
-            if (startDesc) startDesc.innerText = "Match and start high-quality video call instantly and anonymously with strangers.";
-            btnStart.innerText = "Start Video Search";
-            unreadVideo = 0;
-        } else if (mode === 'voice') {
-            chatTitle.innerText = "Random Call";
-            if (startIcon) startIcon.innerText = "📞";
-            if (startHeading) startHeading.innerText = "Voice Matchmaking";
-            if (startDesc) startDesc.innerText = "Match and start voice calls instantly and anonymously with strangers.";
-            btnStart.innerText = "Start Voice Search";
-            unreadVoice = 0;
-        } else {
-            chatTitle.innerText = "Meet Random";
-            if (startIcon) startIcon.innerText = "💬";
-            if (startHeading) startHeading.innerText = "Stranger Matchmaking";
-            if (startDesc) startDesc.innerText = "Match randomly, type secretly, or share video calls with stranger completely anonymously.";
-            btnStart.innerText = "Start Searching";
-            unreadRandom = 0;
-        }
+        // Render current start overlay text based on match mode
+        updateMatchModeUI();
         
         statusWrapper.classList.remove('invisible');
         updateBadges();
@@ -424,10 +451,13 @@ function setRandomUI(state) {
     }
 }
 
-function openImageModal(src) {
+let activeDisappearingElement = null;
+
+function openImageModal(src, element = null) {
     const modal = document.getElementById('img_modal');
     const modalImg = document.getElementById('img_modal_src');
     modalImg.src = src;
+    activeDisappearingElement = element;
     modal.showModal();
 }
 
@@ -491,7 +521,7 @@ function revealAndPreviewImage(e, el, src) {
         if (overlay) overlay.remove();
         e.stopPropagation();
     } else {
-        openImageModal(src);
+        openImageModal(src, el);
     }
 }
 
@@ -504,7 +534,10 @@ function logMessage(container, type, name, msg, msgType = 'text') {
     let contentHtml = '';
     if (msgType === 'image') {
         if (isMe) {
-            contentHtml = `<img src="${msg}" class="rounded-lg max-w-[200px] border border-base-content/10 cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)">`;
+            contentHtml = `
+            <div class="relative overflow-hidden rounded-lg max-w-[200px] cursor-pointer group" onclick="openImageModal('${msg}', this)">
+                <img src="${msg}" class="max-w-full border border-base-content/10 hover:opacity-80 transition-opacity">
+            </div>`;
         } else {
             contentHtml = `
             <div class="relative overflow-hidden rounded-lg max-w-[200px] cursor-pointer group" onclick="revealAndPreviewImage(event, this, '${msg}')">
@@ -548,11 +581,16 @@ function startRandomChat() {
     if (conn.readyState !== WebSocket.OPEN) return;
     isSearching = true;
 
+    // Get match mode preference
+    const mode = document.getElementById('match-mode')?.value || 'random';
+    currentMode = mode;
+
     // Get gender preferences
     const gender = document.getElementById('user-gender')?.value || 'any';
     const targetGender = document.getElementById('target-gender')?.value || 'any';
 
     // Save to localStorage
+    localStorage.setItem('match_mode', mode);
     localStorage.setItem('user_gender', gender);
     localStorage.setItem('target_gender', targetGender);
 
@@ -577,14 +615,32 @@ function stopRandomChat() {
     btnStart.classList.remove('hidden');
     updateStatus("Idle", "warning");
     logSystem(randomBox, "Search canceled.");
+    
+    // Hang up WebRTC and notify backend to clear matching
+    endCall();
     conn.send(JSON.stringify({ action: 'cancel_search' }));
+    
+    // Reset mode back to select preference
+    currentMode = document.getElementById('match-mode')?.value || 'random';
+    
     randomPartnerName = 'Stranger';
-    chatTitle.innerText = currentMode === 'video' ? "Random Video" : "Random Chat";
+    let modeTitle = 'Meet Random';
+    if (currentMode === 'video') modeTitle = 'Random Video';
+    else if (currentMode === 'voice') modeTitle = 'Random Call';
+    chatTitle.innerText = modeTitle;
+
     const videoNameSpan = document.getElementById('video-partner-name');
     if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
     
     const startOverlay = document.getElementById('start-overlay');
     if (startOverlay) startOverlay.classList.remove('hidden');
+
+    const videoContainer = document.getElementById('video-container');
+    if (videoContainer) {
+        videoContainer.classList.remove('full-height');
+        videoContainer.style.display = 'none';
+    }
+    randomBox.classList.remove('hidden');
 }
 
 function nextPartner() {
@@ -1081,12 +1137,39 @@ function getFlagEmoji(countryCode) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Image Modal Close Disappearing Listener
+    const imgModal = document.getElementById('img_modal');
+    if (imgModal) {
+        imgModal.addEventListener('close', () => {
+            const modalImg = document.getElementById('img_modal_src');
+            if (modalImg) modalImg.src = '';
+            
+            if (activeDisappearingElement) {
+                activeDisappearingElement.outerHTML = `
+                    <div class="flex items-center gap-1.5 text-xs font-bold text-base-content/40 bg-base-300/40 px-3 py-2 rounded-lg border border-base-content/5 select-none">
+                        <span>✕</span> Media dibuka (Pesan Sekali Lihat)
+                    </div>`;
+                activeDisappearingElement = null;
+            }
+        });
+    }
+
     // Always use dark mode
     document.documentElement.setAttribute('data-theme', 'night');
     localStorage.removeItem('theme');
 
     // Fetch user country flag
     fetchFlag();
+
+    // Restore Match Mode Preference
+    const savedMatchMode = localStorage.getItem('match_mode');
+    if (savedMatchMode) {
+        const matchModeSelect = document.getElementById('match-mode');
+        if (matchModeSelect) {
+            matchModeSelect.value = savedMatchMode;
+        }
+    }
+    updateMatchModeUI();
 
     // Restore Gender Preferences
     const savedUserGender = localStorage.getItem('user_gender');

@@ -286,8 +286,16 @@
                                     <h3 id="start-heading" class="text-xl font-bold themed-heading mb-1">Stranger Matchmaking</h3>
                                     <p id="start-desc" class="text-xs themed-desc leading-relaxed">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
                                 </div>
-                                <!-- Gender Preferences Selection -->
+                                <!-- Gender & Mode Preferences Selection -->
                                 <div class="flex flex-col gap-3 text-left w-full border-t border-white/5 pt-4">
+                                    <div class="flex flex-col gap-1 w-full mb-1">
+                                        <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">Match Mode</label>
+                                        <select id="match-mode" onchange="updateMatchModeUI()" class="select select-bordered select-sm rounded-full w-full glass-input text-xs font-semibold focus:outline-none">
+                                            <option value="random">Text & Media 💬</option>
+                                            <option value="video">Video Call Only 🎥</option>
+                                            <option value="voice">Voice Call Only 📞</option>
+                                        </select>
+                                    </div>
                                     <div class="flex justify-between items-center gap-4">
                                         <div class="flex flex-col gap-1 w-1/2">
                                             <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">My Gender</label>
@@ -554,34 +562,6 @@
                             <span class="text-[10px] opacity-40">Text, Video, or Voice</span>
                         </div>
                         <span id="badge-random" class="badge badge-primary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
-                    </a>
-
-                    <a onclick="switchMode('video')" id="nav-video"
-                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
-                        <div class="w-9.5 h-9.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover:bg-rose-500 group-hover:text-white transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="font-bold text-sm">Random Video</span>
-                            <span class="text-[10px] opacity-40">Only video matchmaking</span>
-                        </div>
-                        <span id="badge-video" class="badge badge-error badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
-                    </a>
-
-                    <a onclick="switchMode('voice')" id="nav-voice"
-                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
-                        <div class="w-9.5 h-9.5 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="font-bold text-sm">Random Call</span>
-                            <span class="text-[10px] opacity-40">Only voice matchmaking</span>
-                        </div>
-                        <span id="badge-voice" class="badge badge-warning badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
 
                     <a onclick="switchMode('public')" id="nav-public"

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.22-5modes';
+const CACHE_NAME = 'xoxo-v1.0.22-disappearing-media';
 const urlsToCache = [
     './',
     './index.html',
