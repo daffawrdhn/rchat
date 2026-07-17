@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.22-disappearing-media';
+const CACHE_NAME = 'xoxo-v1.0.23-native-crypto';
 const urlsToCache = [
     './',
     './index.html',

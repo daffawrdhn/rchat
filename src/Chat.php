@@ -11,6 +11,7 @@ class Chat implements MessageComponentInterface
     protected $pairs;
     protected $groups; // ['groupId' => [client1, client2, ...]]
     protected $groupActivity; // ['groupId' => timestamp]
+    protected $redis;
 
     public function __construct()
     {
@@ -19,6 +20,14 @@ class Chat implements MessageComponentInterface
         $this->pairs = [];
         $this->groups = [];
         $this->groupActivity = [];
+
+        try {
+            $this->redis = new \Redis();
+            $this->redis->connect('127.0.0.1', 6379);
+        } catch (\Exception $e) {
+            echo "Redis connection error: " . $e->getMessage() . "\n";
+            $this->redis = null;
+        }
     }
 
     public function onOpen(ConnectionInterface $conn)
@@ -34,6 +43,9 @@ class Chat implements MessageComponentInterface
         $conn->flag = '🏳️';
 
         $this->clients->attach($conn);
+        if ($this->redis) {
+            $this->redis->incr('xoxo:user_count');
+        }
         echo "New connection! ({$conn->resourceId}) - {$conn->nickname}\n";
 
         $conn->send(json_encode([
@@ -437,6 +449,9 @@ class Chat implements MessageComponentInterface
         $this->cleanupRandomChat($conn);
         $this->cleanupGroupChat($conn);
         $this->clients->detach($conn);
+        if ($this->redis) {
+            $this->redis->decr('xoxo:user_count');
+        }
         echo "Connection {$conn->resourceId} has disconnected\n";
         $this->broadcastUserCount();
     }
@@ -449,7 +464,9 @@ class Chat implements MessageComponentInterface
 
     private function broadcastUserCount()
     {
-        $count = count($this->clients);
+        $count = $this->redis ? (int)$this->redis->get('xoxo:user_count') : count($this->clients);
+        if ($count < 0) $count = count($this->clients);
+
         $data = json_encode(['status' => 'stats', 'count' => $count]);
         foreach ($this->clients as $client) {
             $client->send($data);

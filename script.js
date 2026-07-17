@@ -118,7 +118,7 @@ function initSocket() {
         endCall(true);
     };
 
-    conn.onmessage = function (e) {
+    conn.onmessage = async function (e) {
         const data = JSON.parse(e.data);
 
         if (data.status === 'identity') {
@@ -197,7 +197,7 @@ function initSocket() {
             }
             playAudio('msg');
             showTyping(false);
-            const decrypted = decryptMsg(data.msg, currentAesKey);
+            const decrypted = await decryptMsg(data.msg, currentAesKey);
             logMessage(randomBox, 'stranger', randomPartnerName, decrypted, data.type);
             notifyBackground(`New message from ${randomPartnerName}`, decrypted.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: matchedMode || 'random' }));
@@ -209,7 +209,7 @@ function initSocket() {
         }
         else if (data.status === 'group_msg') {
             if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
-            const decrypted = decryptMsg(data.msg, rawCustomRoomCode);
+            const decrypted = await decryptMsg(data.msg, rawCustomRoomCode);
             logMessage(groupBox, 'other', data.name, decrypted, data.type);
             notifyBackground("Custom Room", data.name + ": " + decrypted.substring(0, 30));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'group' }));
@@ -655,7 +655,7 @@ function nextPartner() {
     conn.send(JSON.stringify({ action: 'next' }));
 }
 
-function sendMessage(context, msgType = 'text', overrideMsg = null) {
+async function sendMessage(context, msgType = 'text', overrideMsg = null) {
     const input = (context === 'random' || context === 'video') ? randomInput : (context === 'public' ? publicInput : groupInput);
     const msg = input.value.trim();
     if (!msg && !overrideMsg) return;
@@ -668,9 +668,9 @@ function sendMessage(context, msgType = 'text', overrideMsg = null) {
 
     // AES Encryption for Random, Video and Custom Rooms
     if ((context === 'random' || context === 'video') && currentAesKey) {
-        payloadMsg = encryptMsg(payloadMsg, currentAesKey);
+        payloadMsg = await encryptMsg(payloadMsg, currentAesKey);
     } else if (context === 'group' && rawCustomRoomCode) {
-        payloadMsg = encryptMsg(payloadMsg, rawCustomRoomCode);
+        payloadMsg = await encryptMsg(payloadMsg, rawCustomRoomCode);
     }
 
     logMessage((context === 'random' || context === 'video') ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', 'You', (overrideMsg || msg), msgType);
@@ -1227,8 +1227,76 @@ setTimeout(checkIOSInstall, 2000);
 
 initSocket();
 
+// --- NATIVE CRYPTO FUNCTIONS (SUBTLECRYPTO) ---
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function deriveAesKey(passphrase) {
+    const msgBuffer = new TextEncoder().encode(passphrase);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+    return window.crypto.subtle.importKey(
+        'raw',
+        hashBuffer,
+        { name: 'AES-GCM' },
+        false,
+        ['encrypt', 'decrypt']
+    );
+}
+
+async function encryptMsg(msg, key) {
+    if (!key) return msg;
+    try {
+        const aesKey = await deriveAesKey(key);
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const encodedMessage = new TextEncoder().encode(msg);
+        const ciphertextBuffer = await window.crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv: iv },
+            aesKey,
+            encodedMessage
+        );
+        const combined = new Uint8Array(iv.length + ciphertextBuffer.byteLength);
+        combined.set(iv, 0);
+        combined.set(new Uint8Array(ciphertextBuffer), iv.length);
+        let binary = '';
+        for (let i = 0; i < combined.length; i++) {
+            binary += String.fromCharCode(combined[i]);
+        }
+        return btoa(binary);
+    } catch(e) { 
+        console.error("Encryption failed:", e);
+        return msg; 
+    }
+}
+
+async function decryptMsg(msg, key) {
+    if (!key) return msg;
+    try {
+        const aesKey = await deriveAesKey(key);
+        const binary = atob(msg);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        const iv = bytes.slice(0, 12);
+        const ciphertext = bytes.slice(12);
+        const decryptedBuffer = await window.crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            aesKey,
+            ciphertext
+        );
+        return new TextDecoder().decode(decryptedBuffer);
+    } catch (e) {
+        console.error("Decryption failed:", e);
+        return msg;
+    }
+}
+
 // --- GROUP CHAT FUNCTIONS ---
-function joinCustomRoom() {
+async function joinCustomRoom() {
     const code = document.getElementById('room-code-input').value.trim();
     if (!code) {
         alert("Please enter a room code!");
@@ -1238,7 +1306,7 @@ function joinCustomRoom() {
     
     // Store raw code for encryption and send hashed code to server
     rawCustomRoomCode = code;
-    const hashedCode = CryptoJS.SHA256(code).toString();
+    const hashedCode = await sha256(code);
     
     // Reset UI state
     groupBox.innerHTML = '';
@@ -1246,30 +1314,12 @@ function joinCustomRoom() {
     conn.send(JSON.stringify({ action: 'join_group', group_id: hashedCode }));
 }
 
-function joinGroup(groupId) {
+async function joinGroup(groupId) {
     if (conn.readyState !== WebSocket.OPEN) return;
     groupBox.innerHTML = '';
     rawCustomRoomCode = groupId;
-    const hashedCode = CryptoJS.SHA256(groupId).toString();
+    const hashedCode = await sha256(groupId);
     conn.send(JSON.stringify({ action: 'join_group', group_id: hashedCode }));
-}
-
-function encryptMsg(msg, key) {
-    if (!key) return msg;
-    try {
-        return CryptoJS.AES.encrypt(msg, key).toString();
-    } catch(e) { return msg; }
-}
-
-function decryptMsg(msg, key) {
-    if (!key) return msg;
-    try {
-        const bytes = CryptoJS.AES.decrypt(msg, key);
-        const originalText = bytes.toString(CryptoJS.enc.Utf8);
-        return originalText || msg;
-    } catch (e) {
-        return msg;
-    }
 }
 
 function setGroupUI(state, groupId = null) {
