@@ -203,14 +203,37 @@ const path = require('path');
         console.log("[User1] Uploaded image icon-192.png via Base64 WebSocket");
 
         try {
+            // Wait for image container to appear on User2
+            await page2.waitForSelector('#random-chat-box img', { visible: true, timeout: 8000 });
+            console.log("[User2] Successfully received image message in chat.");
+
+            // Click the blurred image to open full-screen preview
+            await page2.click('#random-chat-box img');
+            console.log("[User2] Clicked blurred image to open view-once preview");
+
+            // Wait for the modal dialog to open
             await page2.waitForFunction(
                 () => {
-                    const imgs = document.querySelectorAll('#random-chat-box img');
-                    return imgs.length > 0;
+                    const modal = document.getElementById('img_modal');
+                    return modal && modal.open === true;
                 },
-                { timeout: 8000 }
+                { timeout: 5000 }
             );
-            console.log("[User2] Successfully received image message.");
+            console.log("[User2] View-once image modal is open.");
+
+            // Close the modal
+            await page2.evaluate(() => document.getElementById('img_modal').close());
+            console.log("[User2] Closed image modal.");
+
+            // Verify that the view-once image container is replaced by "Media dibuka"
+            await page2.waitForFunction(
+                () => {
+                    const box = document.getElementById('random-chat-box');
+                    return box && box.innerText.includes("Media dibuka");
+                },
+                { timeout: 5000 }
+            );
+            console.log("[User2] View-once image vanished and turned into placeholder successfully!");
         } catch (e) {
             const html = await page2.evaluate(() => document.getElementById('random-chat-box').innerHTML);
             console.error("[User2] Chat box HTML at failure:\n", html);
