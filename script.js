@@ -519,18 +519,6 @@ function escapeHTML(str) {
     }[tag]));
 }
 
-function revealAndPreviewImage(e, el, src) {
-    const img = el.querySelector('img');
-    const overlay = el.querySelector('.blur-overlay');
-    if (img && img.classList.contains('blur-md')) {
-        img.classList.remove('blur-md');
-        if (overlay) overlay.remove();
-        e.stopPropagation();
-    } else {
-        openImageModal(src, el);
-    }
-}
-
 function logMessage(container, type, name, msg, msgType = 'text') {
     const isMe = type === 'you';
     const align = isMe ? 'chat-end' : 'chat-start';
@@ -541,16 +529,20 @@ function logMessage(container, type, name, msg, msgType = 'text') {
     if (msgType === 'image') {
         if (isMe) {
             contentHtml = `
-            <div class="relative overflow-hidden rounded-lg max-w-[200px] cursor-pointer group" onclick="openImageModal('${msg}', this)">
-                <img src="${msg}" class="max-w-full border border-base-content/10 hover:opacity-80 transition-opacity">
+            <div class="relative overflow-hidden rounded-lg max-w-[200px] cursor-pointer group" onclick="openImageModal('${msg}', null)">
+                <img src="${msg}" class="max-w-full border border-slate-200 hover:opacity-90 transition-opacity">
             </div>`;
         } else {
             contentHtml = `
-            <div class="relative overflow-hidden rounded-lg max-w-[200px] cursor-pointer group" onclick="revealAndPreviewImage(event, this, '${msg}')">
-                <img src="${msg}" class="blur-md transition-all duration-300 max-w-full border border-base-content/10">
-                <div class="blur-overlay absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center p-2 transition-opacity group-hover:bg-black/50 pointer-events-none">
-                    <span class="text-[10px] font-bold tracking-wider uppercase text-white flex items-center gap-1">
-                        <span>👁️</span> Reveal Image
+            <div class="relative overflow-hidden rounded-lg max-w-[200px] cursor-pointer group" onclick="openImageModal('${msg}', this)">
+                <img src="${msg}" class="blur-md transition-all duration-300 max-w-full border border-slate-200">
+                <div class="blur-overlay absolute inset-0 bg-black/45 flex flex-col items-center justify-center text-center p-2 transition-opacity group-hover:bg-black/55 pointer-events-none">
+                    <span class="text-xs font-bold tracking-wide text-white flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        View Once
                     </span>
                 </div>
             </div>`;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.30-telegram-balanced-icons';
+const CACHE_NAME = 'xoxo-v1.0.31-fix-view-once-image-race-condition';
 const urlsToCache = [
     './',
     './index.html',
