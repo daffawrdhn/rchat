@@ -1181,9 +1181,9 @@ document.addEventListener('DOMContentLoaded', () => {
     userGenderButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             userGenderButtons.forEach(b => {
-                b.className = 'user-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5';
+                b.className = 'user-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5';
             });
-            btn.className = 'user-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all bg-white/15 text-white shadow-sm';
+            btn.className = 'user-gender-btn py-1.5 rounded-full text-xs transition-all bg-white/15 text-white shadow-sm';
             
             const val = btn.getAttribute('data-value');
             localStorage.setItem('user_gender', val);
@@ -1194,9 +1194,9 @@ document.addEventListener('DOMContentLoaded', () => {
     targetGenderButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             targetGenderButtons.forEach(b => {
-                b.className = 'target-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all text-white/60 hover:bg-white/5';
+                b.className = 'target-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5';
             });
-            btn.className = 'target-gender-btn py-1.5 rounded-full text-[9px] font-bold transition-all bg-white/15 text-white shadow-sm';
+            btn.className = 'target-gender-btn py-1.5 rounded-full text-xs transition-all bg-white/15 text-white shadow-sm';
             
             const val = btn.getAttribute('data-value');
             localStorage.setItem('target_gender', val);
