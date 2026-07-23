@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.35-remove-country-flags';
+const CACHE_NAME = 'xoxo-v1.0.36-svg-vector-favicon';
 const urlsToCache = [
     './',
     './index.html',
