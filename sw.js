@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.24-segmented-controls';
+const CACHE_NAME = 'xoxo-v1.0.25-gender-symbols';
 const urlsToCache = [
     './',
     './index.html',
