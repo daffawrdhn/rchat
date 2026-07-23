@@ -40,7 +40,7 @@ class Chat implements MessageComponentInterface
         $conn->matchMode = null;
         $conn->gender = 'any';
         $conn->targetGender = 'any';
-        $conn->flag = '🏳️';
+        // Country flag feature disabled
 
         $this->clients->attach($conn);
         if ($this->redis) {
@@ -83,11 +83,9 @@ class Chat implements MessageComponentInterface
 
         switch ($data['action']) {
             case 'set_profile':
-                $from->flag = $data['flag'] ?? '🏳️';
                 $from->send(json_encode([
                     'status' => 'identity',
-                    'nickname' => $from->nickname,
-                    'flag' => $from->flag
+                    'nickname' => $from->nickname
                 ]));
                 break;
 
@@ -213,7 +211,7 @@ class Chat implements MessageComponentInterface
             if ($client !== $from) {
                 $client->send(json_encode([
                     'status' => 'group_system',
-                    'msg' => "{$from->nickname} {$from->flag} joined the room."
+                    'msg' => "{$from->nickname} joined the room."
                 ]));
             }
         }
@@ -254,7 +252,7 @@ class Chat implements MessageComponentInterface
 
         $payload = json_encode([
             'status' => 'group_msg',
-            'name' => "{$from->nickname} {$from->flag}",
+            'name' => $from->nickname,
             'msg' => $msg,
             'type' => $type,
             'is_me' => false
@@ -272,7 +270,7 @@ class Chat implements MessageComponentInterface
 
         $payload = json_encode([
             'status' => 'public_msg',
-            'name' => "{$from->nickname} {$from->flag}",
+            'name' => $from->nickname,
             'msg' => $msg,
             'type' => $type,
             'is_me' => false
@@ -346,7 +344,7 @@ class Chat implements MessageComponentInterface
             $conn->send(json_encode([
                 'status' => 'connected',
                 'shared_key' => $sharedKey,
-                'nickname' => "{$matchedPartner->nickname} {$matchedPartner->flag}",
+                'nickname' => $matchedPartner->nickname,
                 'mode' => $mode,
                 'initiator' => true,
                 'msg' => 'Stranger found! Say hello.'
@@ -354,7 +352,7 @@ class Chat implements MessageComponentInterface
             $matchedPartner->send(json_encode([
                 'status' => 'connected',
                 'shared_key' => $sharedKey,
-                'nickname' => "{$conn->nickname} {$conn->flag}",
+                'nickname' => $conn->nickname,
                 'mode' => $mode,
                 'initiator' => false,
                 'msg' => 'Stranger found! Say hello.'
@@ -373,13 +371,13 @@ class Chat implements MessageComponentInterface
         } elseif ($context === 'group' && $from->currentGroup && isset($this->groups[$from->currentGroup])) {
              foreach ($this->groups[$from->currentGroup] as $client) {
                 if ($client !== $from) {
-                    $client->send(json_encode(['status' => 'typing', 'context' => 'group', 'name' => "{$from->nickname} {$from->flag}"]));
+                    $client->send(json_encode(['status' => 'typing', 'context' => 'group', 'name' => $from->nickname]));
                 }
             }
         } elseif ($context === 'public') {
             foreach ($this->clients as $client) {
                 if ($client !== $from) {
-                    $client->send(json_encode(['status' => 'typing', 'context' => 'public', 'name' => "{$from->nickname} {$from->flag}"]));
+                    $client->send(json_encode(['status' => 'typing', 'context' => 'public', 'name' => $from->nickname]));
                 }
             }
         }
@@ -423,7 +421,7 @@ class Chat implements MessageComponentInterface
             foreach ($this->groups[$groupId] as $client) {
                 $client->send(json_encode([
                     'status' => 'group_system',
-                    'msg' => "{$conn->nickname} {$conn->flag} left the group."
+                    'msg' => "{$conn->nickname} left the group."
                 ]));
             }
 

@@ -2,7 +2,7 @@
 let conn;
 let currentMode = 'random';
 let myNickname = '';
-let myFlag = '🏳️';
+// Flag feature disabled
 let unreadRandom = 0;
 let unreadVideo = 0;
 let unreadVoice = 0;
@@ -92,7 +92,7 @@ function initSocket() {
     conn.onopen = function () {
         updateStatus("Connected", "success");
         conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
-        conn.send(JSON.stringify({ action: 'set_profile', flag: myFlag }));
+        conn.send(JSON.stringify({ action: 'set_profile' }));
 
         if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') {
             btnStart.classList.remove('hidden');
@@ -116,8 +116,7 @@ function initSocket() {
 
         if (data.status === 'identity') {
             myNickname = data.nickname;
-            myFlag = data.flag || '🏳️';
-            document.getElementById('sidebar-nickname').innerText = myNickname + ' ' + myFlag;
+            document.getElementById('sidebar-nickname').innerText = myNickname;
             const avatarCharEl = document.getElementById('sidebar-avatar-char');
             if (avatarCharEl && myNickname) {
                 avatarCharEl.innerText = myNickname.charAt(0).toUpperCase();
@@ -1103,29 +1102,7 @@ function endCall(isRemote = false) {
 }
 
 
-function fetchFlag() {
-    fetch('https://ipwho.is/')
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.success) {
-                myFlag = data.country_flag || getFlagEmoji(data.country_code);
-                if (conn && conn.readyState === WebSocket.OPEN) {
-                    conn.send(JSON.stringify({ action: 'set_profile', flag: myFlag }));
-                }
-            }
-        })
-        .catch(err => {
-            console.log("Failed to fetch flag:", err);
-        });
-}
-
-function getFlagEmoji(countryCode) {
-    const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-}
+// fetchFlag and getFlagEmoji helpers removed
 
 document.addEventListener('DOMContentLoaded', () => {
     // Image Modal Close Disappearing Listener
@@ -1149,8 +1126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.setAttribute('data-theme', 'light');
     localStorage.removeItem('theme');
 
-    // Fetch user country flag
-    fetchFlag();
+    // Flag fetching removed
 
     // Segmented Controls (Button Groups) click listeners
     const matchModeButtons = document.querySelectorAll('.match-mode-btn');

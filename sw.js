@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.34-fix-paperclip-svg-path';
+const CACHE_NAME = 'xoxo-v1.0.35-remove-country-flags';
 const urlsToCache = [
     './',
     './index.html',
