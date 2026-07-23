@@ -191,6 +191,16 @@ body {
 .glass-nav-item.active .font-bold {
     color: #000000 !important;
 }
+.glass-nav-item svg {
+    color: #707579;
+    transition: color 0.15s ease;
+}
+.glass-nav-item:hover svg {
+    color: #2481cc;
+}
+.glass-nav-item.active svg {
+    color: #2481cc !important;
+}
 
 /* ============================================================
    SCROLLBARS
