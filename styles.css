@@ -1,43 +1,43 @@
 /* ============================================================
-   DESIGN TOKENS — TELEGRAM DARK PALETTE
+   DESIGN TOKENS — TELEGRAM LIGHT PALETTE
    ============================================================ */
 :root,
-[data-theme="night"] {
+[data-theme="light"] {
     --app-height:      100dvh;
 
-    /* Telegram Dark Theme Colors */
-    --bg-base:         #0e1621;   /* Telegram main background */
-    --bg-surface:      #17212b;   /* Telegram panels & headers */
-    --bg-card:         #17212b;
-    --bg-card-hover:   #202b36;
-    --bg-input:        #24303f;
-    --bg-input-focus:  #24303f;
-    --bg-navbar:       #17212b;
-    --bg-chat-input:   #17212b;
-    --bg-chat-header:  #17212b;
+    /* Telegram Light Theme Colors */
+    --bg-base:         #e7ebf0;   /* Telegram main light background */
+    --bg-surface:      #ffffff;   /* Telegram panels & headers */
+    --bg-card:         #ffffff;
+    --bg-card-hover:   #f4f5f6;
+    --bg-input:        #f1f5f9;
+    --bg-input-focus:  #ffffff;
+    --bg-navbar:       #ffffff;
+    --bg-chat-input:   #ffffff;
+    --bg-chat-header:  #ffffff;
 
     /* Borders */
-    --border-default:  #101921;
-    --border-hover:    #242f3d;
+    --border-default:  #dfe5ec;
+    --border-hover:    #cdd6e2;
     --border-focus:    #2481cc;   /* Telegram Blue */
 
     /* Text */
-    --text-base:       #f5f6f7;
-    --text-muted:      #7f91a4;   /* Telegram muted blue-gray */
-    --text-faint:      #6c7883;
+    --text-base:       #000000;
+    --text-muted:      #707579;   /* Telegram light muted text */
+    --text-faint:      #9ea3a7;
     --text-on-accent:  #ffffff;
 
     /* Chat bubbles */
-    --bubble-in-bg:    #182533;
-    --bubble-in-text:  #f5f6f7;
-    --bubble-in-border:#182533;
+    --bubble-in-bg:    #ffffff;
+    --bubble-in-text:  #000000;
+    --bubble-in-border:#ffffff;
 
     /* Scrollbar */
-    --scrollbar:       rgba(255, 255, 255, 0.05);
-    --scrollbar-hover: rgba(255, 255, 255, 0.1);
+    --scrollbar:       rgba(0, 0, 0, 0.08);
+    --scrollbar-hover: rgba(0, 0, 0, 0.15);
 
     /* Divider */
-    --divider-color:   #101921;
+    --divider-color:   #dfe5ec;
     --divider-opacity: 0.8;
 }
 
@@ -69,17 +69,17 @@ body {
    TELEGRAM INPUT FIELD OVERRIDES
    ============================================================ */
 .glass-input {
-    background: #242f3d !important;
-    border: 1px solid transparent !important;
-    color: var(--text-base) !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #dfe5ec !important;
+    color: #000000 !important;
     transition: all 0.2s ease;
 }
 .glass-input::placeholder {
-    color: var-[#7f91a4] !important;
+    color: #707579 !important;
     opacity: 0.7 !important;
 }
 .glass-input:focus {
-    background: #242f3d !important;
+    background: #ffffff !important;
     border-color: var(--border-focus) !important;
     box-shadow: none !important;
     outline: none !important;
@@ -93,7 +93,7 @@ body {
     padding: 8px 14px !important;
     font-size: 0.95rem !important;
     max-width: 75% !important;
-    box-shadow: none !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.07) !important;
     line-height: 1.45 !important;
     word-break: break-word;
 }
@@ -105,17 +105,17 @@ body {
     color: var(--bubble-in-text) !important;
 }
 
-/* Outgoing Bubble */
+/* Outgoing Bubble (Classic Telegram Light Green) */
 .chat-end .chat-bubble {
-    background: #2b5278 !important;   /* Telegram blue-gray active */
+    background: #effdde !important;   
     border: none !important;
-    color: #ffffff !important;
+    color: #000000 !important;
     border-radius: 14px 14px 2px 14px !important;
 }
 
 /* System and Divider message overrides */
 .divider {
-    color: #7f91a4 !important;
+    color: #707579 !important;
     font-size: 11px !important;
     font-weight: 500 !important;
     margin: 16px 0 !important;
@@ -127,15 +127,15 @@ body {
 
 /* Match Mode button inactive */
 .match-mode-btn {
-    background-color: #17212b !important;
-    border: 1px solid #101921 !important;
-    color: #7f91a4 !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #dfe5ec !important;
+    color: #707579 !important;
     border-radius: 12px !important;
     font-weight: 600 !important;
     text-transform: none !important;
 }
 .match-mode-btn:hover {
-    background-color: #202b36 !important;
+    background-color: #e2e8f0 !important;
 }
 
 /* Match Mode button active (Tailwind trigger class) */
@@ -151,12 +151,12 @@ body {
 .target-gender-btn {
     background-color: transparent !important;
     border: none !important;
-    color: #7f91a4 !important;
+    color: #707579 !important;
     font-weight: bold !important;
 }
 .user-gender-btn:hover,
 .target-gender-btn:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
 /* User & Target Gender buttons active (Tailwind trigger class) */
@@ -164,7 +164,7 @@ body {
 .target-gender-btn.bg-white\/15 {
     background-color: #2481cc !important;
     color: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
 }
 
 /* ============================================================
@@ -177,19 +177,19 @@ body {
     transition: background-color 0.15s ease;
 }
 .glass-nav-item:hover {
-    background-color: #202b36 !important;
+    background-color: #f4f5f6 !important;
     transform: none !important;
     box-shadow: none !important;
 }
 .glass-nav-item.active {
-    background-color: #202b36 !important;
+    background-color: #f4f5f6 !important;
     border-left: 3px solid #2481cc !important;
 }
 .glass-nav-item.active span {
     color: #2481cc !important;
 }
 .glass-nav-item.active .font-bold {
-    color: #ffffff !important;
+    color: #000000 !important;
 }
 
 /* ============================================================
@@ -215,7 +215,7 @@ body {
     display: none;
     border-radius: 0;
     border: none;
-    border-bottom: 1px solid #101921;
+    border-bottom: 1px solid #dfe5ec;
     margin-bottom: 0;
 }
 @media (min-width: 1024px) {
@@ -227,9 +227,9 @@ body {
     max-width: 160px;
     min-width: 90px;
     height: auto;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-    border: 1px solid #242f3d;
-    background: #111;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    border: 1px solid #dfe5ec;
+    background: #ffffff;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -238,9 +238,9 @@ body {
    INCOMING CALL OVERLAY
    ============================================================ */
 .theme-overlay {
-    background: #0e1621;
+    background: #e7ebf0;
 }
 
 .theme-start-overlay {
-    background: #0e1621;
+    background: #e7ebf0;
 }

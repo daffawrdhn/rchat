@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.28-telegram-theme-redesign';
+const CACHE_NAME = 'xoxo-v1.0.29-telegram-light-theme-only';
 const urlsToCache = [
     './',
     './index.html',

@@ -1159,8 +1159,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Always use dark mode
-    document.documentElement.setAttribute('data-theme', 'night');
+    // Always use light mode
+    document.documentElement.setAttribute('data-theme', 'light');
     localStorage.removeItem('theme');
 
     // Fetch user country flag

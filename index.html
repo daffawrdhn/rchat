@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="night">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script>
-        document.documentElement.setAttribute('data-theme', 'night');
+        document.documentElement.setAttribute('data-theme', 'light');
         localStorage.removeItem('theme');
         const originalWarn = console.warn;
         console.warn = function(...args) {
@@ -21,9 +21,9 @@
 
     <link rel="manifest" href="manifest.json">
 
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#ffffff">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -180,9 +180,9 @@
         <div class="drawer-content flex flex-col h-[var(--app-height)]">
             
             <!-- Mobile Header Bar -->
-            <div class="navbar bg-[#17212b] border-b border-[#101921] lg:hidden min-h-[60px] px-4">
+            <div class="navbar bg-white border-b border-[#dfe5ec] lg:hidden min-h-[60px] px-4">
                 <div class="flex-none">
-                    <label for="my-drawer-2" class="btn btn-square btn-ghost text-white">
+                    <label for="my-drawer-2" class="btn btn-square btn-ghost text-[#707579]">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             class="inline-block w-6 h-6 stroke-current">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
@@ -191,11 +191,11 @@
                     </label>
                 </div>
                 <div class="flex-1 px-2">
-                    <span class="text-lg font-bold text-white tracking-normal">XOXO Chat</span>
+                    <span class="text-lg font-bold text-slate-900 tracking-normal">XOXO Chat</span>
                 </div>
                 <div class="flex-none">
-                    <div class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold py-2 px-2.5 flex items-center gap-1 shadow-sm">
-                        <span class="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <div class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-bold py-2 px-2.5 flex items-center gap-1 shadow-sm">
+                        <span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span><span id="mobile-count">0</span> Online</span>
                     </div>
                 </div>
@@ -204,15 +204,15 @@
             <!-- Bento Chat box Container -->
             <div class="flex-grow flex flex-col h-[calc(var(--app-height)-60px)] lg:h-full box-border relative overflow-hidden">
                 
-                <div id="chat-card" class="flex-grow bg-[#0e1621] flex flex-col relative overflow-hidden h-full">
+                <div id="chat-card" class="flex-grow bg-[#e7ebf0] flex flex-col relative overflow-hidden h-full">
                     
                     <!-- Telegram Chat Header -->
-                    <div class="absolute top-0 w-full z-20 themed-chat-header border-b px-5 py-3 flex justify-between items-center bg-[#17212b] border-[#101921]">
+                    <div class="absolute top-0 w-full z-20 themed-chat-header border-b px-5 py-3 flex justify-between items-center bg-white border-[#dfe5ec]">
                         <div>
-                            <h2 id="chat-title" class="text-[16px] font-bold tracking-tight themed-chat-title text-white">Random Chat</h2>
+                            <h2 id="chat-title" class="text-[16px] font-bold tracking-tight themed-chat-title text-slate-900">Random Chat</h2>
                             <div id="status-wrapper" class="flex items-center gap-2 mt-0.5">
-                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-[#7f91a4]"></span>
-                                <span id="status-bar" class="text-xs text-[#7f91a4] font-normal tracking-normal themed-chat-status">Initializing...</span>
+                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-[#707579]"></span>
+                                <span id="status-bar" class="text-xs text-[#707579] font-normal tracking-normal themed-chat-status">Initializing...</span>
                             </div>
                         </div>
                         <!-- Next Stranger button — right side of header (only visible in random-chat-view) -->
@@ -276,30 +276,30 @@
                         </div>
 
                         <!-- Chat Action / Start Button Overlay (Telegram style) -->
-                        <div id="start-overlay" class="absolute inset-0 z-10 flex items-center justify-center p-6 bg-[#0e1621] pt-[72px]">
-                            <div class="bg-[#17212b] border border-[#101921] p-8 max-w-sm w-full text-center rounded-2xl shadow-xl flex flex-col gap-5">
-                                <div id="start-icon" class="w-16 h-16 rounded-full bg-[#2481cc]/15 text-[#2481cc] flex items-center justify-center text-3xl mx-auto">
+                        <div id="start-overlay" class="absolute inset-0 z-10 flex items-center justify-center p-6 bg-[#e7ebf0] pt-[72px]">
+                            <div class="bg-white border border-[#dfe5ec] p-8 max-w-sm w-full text-center rounded-2xl shadow-md flex flex-col gap-5">
+                                <div id="start-icon" class="w-16 h-16 rounded-full bg-[#2481cc]/10 text-[#2481cc] flex items-center justify-center text-3xl mx-auto">
                                     💬
                                 </div>
                                 <div>
-                                    <h3 id="start-heading" class="text-lg font-bold themed-heading mb-1 text-white">Stranger Matchmaking</h3>
-                                    <p id="start-desc" class="text-xs themed-desc leading-relaxed text-[#7f91a4]">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
+                                    <h3 id="start-heading" class="text-lg font-bold themed-heading mb-1 text-slate-900">Stranger Matchmaking</h3>
+                                    <p id="start-desc" class="text-xs themed-desc leading-relaxed text-[#707579]">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
                                 </div>
                                 <!-- Gender & Mode Preferences Selection -->
-                                <div class="flex flex-col gap-4 text-left w-full border-t border-white/5 pt-4">
+                                <div class="flex flex-col gap-4 text-left w-full border-t border-[#dfe5ec] pt-4">
                                     <!-- Match Mode Selection Group -->
                                     <div class="flex flex-col gap-1.5 w-full">
-                                        <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">Match Mode</label>
+                                        <label class="text-[10px] font-extrabold uppercase text-[#707579] tracking-wider">Match Mode</label>
                                         <div id="match-mode-group" class="grid grid-cols-3 gap-2">
-                                            <button type="button" data-value="random" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10">
+                                            <button type="button" data-value="random" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-slate-100 border-[#dfe5ec] text-[#707579] hover:bg-slate-200">
                                                 <span class="text-base">💬</span>
                                                 <span>Text & Media</span>
                                             </button>
-                                            <button type="button" data-value="video" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10">
+                                            <button type="button" data-value="video" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-slate-100 border-[#dfe5ec] text-[#707579] hover:bg-slate-200">
                                                 <span class="text-base">🎥</span>
                                                 <span>Video Call</span>
                                             </button>
-                                            <button type="button" data-value="voice" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10">
+                                            <button type="button" data-value="voice" class="match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-slate-100 border-[#dfe5ec] text-[#707579] hover:bg-slate-200">
                                                 <span class="text-base">📞</span>
                                                 <span>Voice Call</span>
                                             </button>
@@ -308,27 +308,27 @@
                                     <div class="flex justify-between items-center gap-4">
                                         <!-- My Gender Selection Group -->
                                         <div class="flex flex-col gap-1.5 w-1/2">
-                                            <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">My Gender</label>
-                                            <div id="user-gender-group" class="grid grid-cols-2 gap-0.5 bg-white/5 border border-white/10 p-0.5 rounded-full">
-                                                <button type="button" data-value="male" title="Male" class="user-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5">
+                                            <label class="text-[10px] font-extrabold uppercase text-[#707579] tracking-wider">My Gender</label>
+                                            <div id="user-gender-group" class="grid grid-cols-2 gap-0.5 bg-slate-100 border border-[#dfe5ec] p-0.5 rounded-full">
+                                                <button type="button" data-value="male" title="Male" class="user-gender-btn py-1.5 rounded-full text-xs transition-all text-[#707579] hover:bg-slate-200">
                                                     ♂️
                                                 </button>
-                                                <button type="button" data-value="female" title="Female" class="user-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5">
+                                                <button type="button" data-value="female" title="Female" class="user-gender-btn py-1.5 rounded-full text-xs transition-all text-[#707579] hover:bg-slate-200">
                                                     ♀️
                                                 </button>
                                             </div>
                                         </div>
                                         <!-- Match Gender Selection Group -->
                                         <div class="flex flex-col gap-1.5 w-1/2">
-                                            <label class="text-[10px] font-extrabold uppercase opacity-60 tracking-wider">Match Gender</label>
-                                            <div id="target-gender-group" class="grid grid-cols-3 gap-0.5 bg-white/5 border border-white/10 p-0.5 rounded-full">
-                                                <button type="button" data-value="any" title="All Genders" class="target-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5">
+                                            <label class="text-[10px] font-extrabold uppercase text-[#707579] tracking-wider">Match Gender</label>
+                                            <div id="target-gender-group" class="grid grid-cols-3 gap-0.5 bg-slate-100 border border-[#dfe5ec] p-0.5 rounded-full">
+                                                <button type="button" data-value="any" title="All Genders" class="target-gender-btn py-1.5 rounded-full text-xs transition-all text-[#707579] hover:bg-slate-200">
                                                     🌐
                                                 </button>
-                                                <button type="button" data-value="male" title="Male" class="target-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5">
+                                                <button type="button" data-value="male" title="Male" class="target-gender-btn py-1.5 rounded-full text-xs transition-all text-[#707579] hover:bg-slate-200">
                                                     ♂️
                                                 </button>
-                                                <button type="button" data-value="female" title="Female" class="target-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5">
+                                                <button type="button" data-value="female" title="Female" class="target-gender-btn py-1.5 rounded-full text-xs transition-all text-[#707579] hover:bg-slate-200">
                                                     ♀️
                                                 </button>
                                             </div>
@@ -351,20 +351,20 @@
                         </div>
 
                         <!-- Chat Input Box -->
-                        <div id="random-input-area" class="p-3 bg-[#17212b] border-t border-[#101921] pb-6 lg:pb-4 hidden">
+                        <div id="random-input-area" class="p-3 bg-white border-t border-[#dfe5ec] pb-6 lg:pb-4 hidden">
                             <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
-                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Share Image">
+                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100" title="Share Image">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </button>
-                                <button id="record-btn-random" onclick="toggleRecording('random')" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5 text-lg" title="Voice Message">
+                                <button id="record-btn-random" onclick="toggleRecording('random')" class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100 text-lg" title="Voice Message">
                                     🎤
                                 </button>
                                 <button id="btn-call" onclick="startCall(false)"
-                                    class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Video Call">
+                                    class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100" title="Video Call">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -372,7 +372,7 @@
                                     </svg>
                                 </button>
                                 <button id="btn-voice-call" onclick="startCall(true)"
-                                    class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Voice Call">
+                                    class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100" title="Voice Call">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
@@ -394,7 +394,7 @@
                                         <div tabindex="0" role="button"
                                             class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
                                         <div tabindex="0"
-                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-[#17212b] border border-[#101921] mb-2">
+                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-white border border-[#dfe5ec] mb-2">
                                             <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
                                         </div>
                                     </div>
@@ -413,16 +413,16 @@
                         <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-6 space-y-4 pb-4">
                             <div class="divider opacity-30 text-xs">Public Lounge Connected</div>
                         </div>
-                        <div class="p-3 bg-[#17212b] border-t border-[#101921] pb-6 lg:pb-4">
+                        <div class="p-3 bg-white border-t border-[#dfe5ec] pb-6 lg:pb-4">
                             <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
-                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Share Image">
+                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100" title="Share Image">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </button>
-                                <button id="record-btn-public" onclick="toggleRecording('public')" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5 text-lg" title="Voice Message">
+                                <button id="record-btn-public" onclick="toggleRecording('public')" class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100 text-lg" title="Voice Message">
                                     🎤
                                 </button>
                                 <div class="relative flex-grow min-w-0">
@@ -434,12 +434,12 @@
                                         <div tabindex="0" role="button"
                                             class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
                                         <div tabindex="0"
-                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-[#17212b] border border-[#101921] mb-2">
+                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-white border border-[#dfe5ec] mb-2">
                                             <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <button onclick="sendMessage('public')" class="btn btn-circle bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow-md">
+                                <button onclick="sendMessage('public')" class="btn btn-circle bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 pl-0.5">
                                         <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
                                     </svg>
@@ -452,14 +452,14 @@
                     <div id="group-chat-view" class="flex flex-col h-full pt-[72px] hidden">
                         
                         <!-- Setup Room / Enter Room Code -->
-                        <div id="group-idle" class="flex flex-col items-center justify-center h-full text-center p-6 bg-[#0e1621]">
-                            <div class="bg-[#17212b] border border-[#101921] p-8 max-w-sm w-full text-center rounded-2xl shadow-xl flex flex-col gap-5">
-                                <div class="w-16 h-16 rounded-full bg-[#2481cc]/15 text-[#2481cc] flex items-center justify-center text-3xl mx-auto">
+                        <div id="group-idle" class="flex flex-col items-center justify-center h-full text-center p-6 bg-[#e7ebf0]">
+                            <div class="bg-white border border-[#dfe5ec] p-8 max-w-sm w-full text-center rounded-2xl shadow-md flex flex-col gap-5">
+                                <div class="w-16 h-16 rounded-full bg-[#2481cc]/10 text-[#2481cc] flex items-center justify-center text-3xl mx-auto">
                                     🔒
                                 </div>
                                 <div>
-                                    <h2 class="text-lg font-bold themed-heading tracking-tight mb-1 text-white">Custom Room</h2>
-                                    <p class="text-xs themed-desc leading-relaxed text-[#7f91a4]">Create or join a private group room. Chats are end-to-end encrypted and auto-delete after 5 mins of inactivity.</p>
+                                    <h2 class="text-lg font-bold themed-heading tracking-tight mb-1 text-slate-900">Custom Room</h2>
+                                    <p class="text-xs themed-desc leading-relaxed text-[#707579]">Create or join a private group room. Chats are end-to-end encrypted and auto-delete after 5 mins of inactivity.</p>
                                 </div>
                                 <div class="w-full flex flex-col gap-2.5">
                                     <input type="text" id="room-code-input" placeholder="Enter Room Code..." class="input input-bordered w-full rounded-full glass-input text-center text-sm font-semibold focus:outline-none" />
@@ -475,14 +475,14 @@
                         <div id="group-active" class="flex flex-col h-full hidden">
                             
                             <!-- Invite Header -->
-                            <div class="px-5 py-2.5 bg-[#17212b] border-b border-[#101921] flex justify-between items-center gap-4">
+                            <div class="px-5 py-2.5 bg-white border-b border-[#dfe5ec] flex justify-between items-center gap-4">
                                 <div class="flex items-center gap-2 overflow-hidden">
-                                    <span class="badge bg-[#2481cc]/15 border border-[#2481cc]/30 text-[#2481cc] text-[10px] font-bold py-2 shadow-sm whitespace-nowrap">Invite Link</span>
-                                    <div class="text-xs text-[#7f91a4] truncate select-all cursor-pointer transition-colors font-medium hover:text-[#2481cc]"
+                                    <span class="badge bg-[#2481cc]/10 border border-[#2481cc]/20 text-[#2481cc] text-[10px] font-bold py-2 shadow-sm whitespace-nowrap">Invite Link</span>
+                                    <div class="text-xs text-[#707579] truncate select-all cursor-pointer transition-colors font-medium hover:text-[#2481cc]"
                                         id="group-invite-link" onclick="copyInviteLink()">...</div>
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
-                                    <button onclick="copyInviteLink()" class="btn btn-ghost btn-xs btn-circle text-[#7f91a4] hover:bg-white/5" title="Copy Invite Link">
+                                    <button onclick="copyInviteLink()" class="btn btn-ghost btn-xs btn-circle text-[#707579] hover:bg-slate-100" title="Copy Invite Link">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -491,7 +491,7 @@
                                     </button>
                                     <button onclick="leaveCustomRoom()" class="btn btn-outline btn-error btn-xs rounded-full flex items-center gap-1 font-bold px-3 shadow-sm border-error/30" title="Leave Group Chat">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h4a3 3 0 013 3v1" />
                                         </svg>
                                         <span>Leave</span>
                                     </button>
@@ -504,16 +504,16 @@
                             </div>
 
                             <!-- Group Chat Inputs -->
-                            <div class="p-3 bg-[#17212b] border-t border-[#101921] pb-6 lg:pb-4">
+                            <div class="p-3 bg-white border-t border-[#dfe5ec] pb-6 lg:pb-4">
                                 <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
-                                    <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Share Image">
+                                    <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100" title="Share Image">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </button>
-                                    <button id="record-btn-group" onclick="toggleRecording('group')" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5 text-lg" title="Voice Message">
+                                    <button id="record-btn-group" onclick="toggleRecording('group')" class="btn btn-circle btn-ghost text-[#707579] hover:bg-slate-100 text-lg" title="Voice Message">
                                         🎤
                                     </button>
                                     <div class="relative flex-grow min-w-0">
@@ -526,7 +526,7 @@
                                             <div tabindex="0" role="button"
                                                 class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
                                             <div tabindex="0"
-                                                class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-[#17212b] border border-[#101921] mb-2">
+                                                class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-white border border-[#dfe5ec] mb-2">
                                                 <div class="grid grid-cols-5 gap-1" id="emoji-grid-group"></div>
                                             </div>
                                         </div>
@@ -550,13 +550,13 @@
         <div class="drawer-side z-50">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
             
-            <div class="w-72 md:w-80 min-h-full bg-[#17212b] border-r border-[#101921] flex flex-col box-border z-10 relative">
+            <div class="w-72 md:w-80 min-h-full bg-white border-r border-[#dfe5ec] flex flex-col box-border z-10 relative">
                 
                 <!-- Telegram-Style User Profile Header -->
-                <div class="bg-gradient-to-r from-[#2a7bb0] to-[#2481cc] p-5 text-white flex flex-col gap-3 relative select-none">
+                <div class="bg-gradient-to-r from-[#5b95c6] to-[#4682b4] p-5 text-white flex flex-col gap-3 relative select-none">
                     <div class="flex justify-between items-start">
-                        <div class="avatar placeholder shadow-md">
-                            <div class="bg-[#1f2c3a] text-white rounded-full w-14 h-14 flex items-center justify-center font-bold text-2xl border-2 border-white/20" id="sidebar-avatar-char">
+                        <div class="avatar placeholder shadow-sm">
+                            <div class="bg-white/20 text-white rounded-full w-14 h-14 flex items-center justify-center font-bold text-2xl border-2 border-white/30" id="sidebar-avatar-char">
                                 U
                             </div>
                         </div>
@@ -570,46 +570,46 @@
                 <!-- Navigation List -->
                 <div class="flex flex-col flex-grow py-2">
                     <a onclick="switchMode('random')" id="nav-random"
-                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-[#202b36] cursor-pointer transition-colors text-white/80 active glass-nav-item">
+                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-100 cursor-pointer transition-colors text-slate-700 active glass-nav-item">
                         <span class="text-xl">💬</span>
                         <div class="flex flex-col">
-                            <span class="font-semibold text-sm text-[#f5f6f7]">Meet Random</span>
-                            <span class="text-xs text-[#7f91a4]">Text, Video, or Voice</span>
+                            <span class="font-semibold text-sm text-slate-900">Meet Random</span>
+                            <span class="text-xs text-[#707579]">Text, Video, or Voice</span>
                         </div>
                         <span id="badge-random" class="badge bg-[#2481cc] border-none text-white text-[10px] ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
 
                     <a onclick="switchMode('public')" id="nav-public"
-                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-[#202b36] cursor-pointer transition-colors text-white/80 glass-nav-item">
+                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-100 cursor-pointer transition-colors text-slate-700 glass-nav-item">
                         <span class="text-xl">👥</span>
                         <div class="flex flex-col">
-                            <span class="font-semibold text-sm text-[#f5f6f7]">Public Lounge</span>
-                            <span class="text-xs text-[#7f91a4]">Global public lobby</span>
+                            <span class="font-semibold text-sm text-slate-900">Public Lounge</span>
+                            <span class="text-xs text-[#707579]">Global public lobby</span>
                         </div>
                         <span id="badge-public" class="badge bg-[#2481cc] border-none text-white text-[10px] ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
 
                     <a onclick="switchMode('group')" id="nav-group"
-                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-[#202b36] cursor-pointer transition-colors text-white/80 glass-nav-item">
+                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-100 cursor-pointer transition-colors text-slate-700 glass-nav-item">
                         <span class="text-xl">🔒</span>
                         <div class="flex flex-col">
-                            <span class="font-semibold text-sm text-[#f5f6f7]">Private Room</span>
-                            <span class="text-xs text-[#7f91a4]">Private group code</span>
+                            <span class="font-semibold text-sm text-slate-900">Private Room</span>
+                            <span class="text-xs text-[#707579]">Private group code</span>
                         </div>
                         <span id="badge-group" class="badge bg-[#2481cc] border-none text-white text-[10px] ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
                 </div>
 
                 <!-- Active Online Statistics & Legal Links at Bottom -->
-                <div class="p-4 border-t border-[#101921] flex flex-col gap-3">
-                    <div class="flex justify-between items-center text-xs text-[#7f91a4]">
+                <div class="p-4 border-t border-[#dfe5ec] flex flex-col gap-3">
+                    <div class="flex justify-between items-center text-xs text-[#707579]">
                         <span>Users online:</span>
-                        <span class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold px-2 py-2 flex items-center gap-1 shadow-sm">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="badge bg-emerald-50 border border-emerald-200 text-emerald-600 text-[11px] font-bold px-2 py-2 flex items-center gap-1 shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span><span id="count-val">0</span> Online</span>
                         </span>
                     </div>
-                    <div class="flex justify-center gap-4 text-[11px] text-[#7f91a4] opacity-80 font-semibold">
+                    <div class="flex justify-center gap-4 text-[11px] text-[#707579] opacity-80 font-semibold">
                         <a href="privacy.html" target="_blank" class="hover:text-[#2481cc] transition-colors">Privacy Policy</a>
                         <span>•</span>
                         <a href="terms.html" target="_blank" class="hover:text-[#2481cc] transition-colors">Terms of Service</a>
