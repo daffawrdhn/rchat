@@ -1179,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const userGenderButtons = document.querySelectorAll('.user-gender-btn');
     userGenderButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
             userGenderButtons.forEach(b => {
                 b.className = 'user-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5';
             });
@@ -1187,6 +1187,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const val = btn.getAttribute('data-value');
             localStorage.setItem('user_gender', val);
+
+            // Auto-select opposite match gender for user-initiated clicks
+            if (e.isTrusted) {
+                if (val === 'male') {
+                    const femaleTargetBtn = document.querySelector('.target-gender-btn[data-value="female"]');
+                    if (femaleTargetBtn) femaleTargetBtn.click();
+                } else if (val === 'female') {
+                    const maleTargetBtn = document.querySelector('.target-gender-btn[data-value="male"]');
+                    if (maleTargetBtn) maleTargetBtn.click();
+                }
+            }
         });
     });
 
