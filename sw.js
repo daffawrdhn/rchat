@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.27-auto-opposite-gender-matching';
+const CACHE_NAME = 'xoxo-v1.0.28-telegram-theme-redesign';
 const urlsToCache = [
     './',
     './index.html',

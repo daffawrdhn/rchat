@@ -1,219 +1,201 @@
 /* ============================================================
-   DESIGN TOKENS — DARK MODE (night)
+   DESIGN TOKENS — TELEGRAM DARK PALETTE
    ============================================================ */
 :root,
 [data-theme="night"] {
     --app-height:      100dvh;
 
-    /* Backgrounds */
-    --bg-base:         #020617;   /* slate-950 — page background */
-    --bg-surface:      rgba(15, 23, 42, 0.60);  /* panels */
-    --bg-card:         rgba(255, 255, 255, 0.04);
-    --bg-card-hover:   rgba(255, 255, 255, 0.08);
-    --bg-input:        rgba(255, 255, 255, 0.05);
-    --bg-input-focus:  rgba(255, 255, 255, 0.09);
-    --bg-navbar:       rgba(2, 6, 23, 0.80);
-    --bg-chat-input:   rgba(2, 6, 23, 0.60);
-    --bg-chat-header:  rgba(2, 6, 23, 0.70);
+    /* Telegram Dark Theme Colors */
+    --bg-base:         #0e1621;   /* Telegram main background */
+    --bg-surface:      #17212b;   /* Telegram panels & headers */
+    --bg-card:         #17212b;
+    --bg-card-hover:   #202b36;
+    --bg-input:        #24303f;
+    --bg-input-focus:  #24303f;
+    --bg-navbar:       #17212b;
+    --bg-chat-input:   #17212b;
+    --bg-chat-header:  #17212b;
 
     /* Borders */
-    --border-default:  rgba(255, 255, 255, 0.10);
-    --border-hover:    rgba(255, 255, 255, 0.18);
-    --border-focus:    #6366f1;
+    --border-default:  #101921;
+    --border-hover:    #242f3d;
+    --border-focus:    #2481cc;   /* Telegram Blue */
 
     /* Text */
-    --text-base:       #e2e8f0;   /* slate-200 */
-    --text-muted:      #94a3b8;   /* slate-400 */
-    --text-faint:      #64748b;   /* slate-500 */
+    --text-base:       #f5f6f7;
+    --text-muted:      #7f91a4;   /* Telegram muted blue-gray */
+    --text-faint:      #6c7883;
     --text-on-accent:  #ffffff;
 
     /* Chat bubbles */
-    --bubble-in-bg:    rgba(255, 255, 255, 0.06);
-    --bubble-in-text:  #e2e8f0;
-    --bubble-in-border:rgba(255, 255, 255, 0.10);
+    --bubble-in-bg:    #182533;
+    --bubble-in-text:  #f5f6f7;
+    --bubble-in-border:#182533;
 
     /* Scrollbar */
-    --scrollbar:       rgba(255, 255, 255, 0.10);
-    --scrollbar-hover: rgba(255, 255, 255, 0.20);
-
-    /* Blobs */
-    --blob-opacity:    0.07;
-
-    /* Overlays */
-    --overlay-bg:      rgba(2, 6, 23, 0.85);
-    --start-overlay:   rgba(2, 6, 23, 0.65);
-    --sidebar-bg:      rgba(2, 6, 23, 0.90);
+    --scrollbar:       rgba(255, 255, 255, 0.05);
+    --scrollbar-hover: rgba(255, 255, 255, 0.1);
 
     /* Divider */
-    --divider-color:   rgba(255, 255, 255, 0.08);
-    --divider-opacity: 0.4;
+    --divider-color:   #101921;
+    --divider-opacity: 0.8;
 }
 
-
 /* ============================================================
-   BASE
+   BASE LAYOUT
    ============================================================ */
 body {
-    font-family: 'Outfit', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     height: var(--app-height);
     overflow: hidden;
     background-color: var(--bg-base);
     color: var(--text-base);
 }
 
-/* ============================================================
-   GLASS PANEL (sidebar cards, main chat card)
-   ============================================================ */
+/* Reset bento-style glass panels to flat solid panels */
 .glass-panel {
     background: var(--bg-surface);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-default);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.10);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.glass-panel:hover {
-    border-color: var(--border-hover);
+    box-shadow: none;
+    transition: background-color 0.2s ease;
 }
 
-/* GLASS CARD (nav items) */
-.glass-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-default);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: var(--text-base);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.glass-card:hover,
-.glass-card.active {
-    background: var(--bg-card-hover);
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+/* Hide background glowing blobs */
+.blob-1, .blob-2 {
+    display: none !important;
 }
 
 /* ============================================================
-   INPUTS
+   TELEGRAM INPUT FIELD OVERRIDES
    ============================================================ */
 .glass-input {
-    background: var(--bg-input) !important;
-    border: 1px solid var(--border-default) !important;
+    background: #242f3d !important;
+    border: 1px solid transparent !important;
     color: var(--text-base) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 .glass-input::placeholder {
-    color: var(--text-faint) !important;
-    opacity: 1 !important;
+    color: var-[#7f91a4] !important;
+    opacity: 0.7 !important;
 }
 .glass-input:focus {
-    background: var(--bg-input-focus) !important;
+    background: #242f3d !important;
     border-color: var(--border-focus) !important;
-    box-shadow: 0 0 16px rgba(99, 102, 241, 0.20) !important;
+    box-shadow: none !important;
     outline: none !important;
 }
 
 /* ============================================================
-   NAV ITEMS — active state
+   TELEGRAM CHAT BUBBLES
    ============================================================ */
-.glass-nav-item.active {
-    background: linear-gradient(135deg,
-        rgba(99, 102, 241, 0.22),
-        rgba(168, 85, 247, 0.22)) !important;
-    border: 1px solid rgba(168, 85, 247, 0.35) !important;
+.chat-bubble {
+    border-radius: 14px 14px 14px 2px !important;
+    padding: 8px 14px !important;
+    font-size: 0.95rem !important;
+    max-width: 75% !important;
+    box-shadow: none !important;
+    line-height: 1.45 !important;
+    word-break: break-word;
 }
-/* Dark mode active nav text */
-.glass-nav-item.active span,
+
+/* Incoming Bubble */
+.chat-start .chat-bubble {
+    background: var(--bubble-in-bg) !important;
+    border: none !important;
+    color: var(--bubble-in-text) !important;
+}
+
+/* Outgoing Bubble */
+.chat-end .chat-bubble {
+    background: #2b5278 !important;   /* Telegram blue-gray active */
+    border: none !important;
+    color: #ffffff !important;
+    border-radius: 14px 14px 2px 14px !important;
+}
+
+/* System and Divider message overrides */
+.divider {
+    color: #7f91a4 !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    margin: 16px 0 !important;
+}
+
+/* ============================================================
+   ACTIVE BUTTON OVERRIDES (Preserving HTML class signatures)
+   ============================================================ */
+
+/* Match Mode button inactive */
+.match-mode-btn {
+    background-color: #17212b !important;
+    border: 1px solid #101921 !important;
+    color: #7f91a4 !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
+.match-mode-btn:hover {
+    background-color: #202b36 !important;
+}
+
+/* Match Mode button active (Tailwind trigger class) */
+.match-mode-btn.bg-gradient-to-br {
+    background-image: none !important;
+    background-color: rgba(36, 129, 204, 0.15) !important;
+    border-color: #2481cc !important;
+    color: #2481cc !important;
+}
+
+/* User & Target Gender buttons inactive */
+.user-gender-btn,
+.target-gender-btn {
+    background-color: transparent !important;
+    border: none !important;
+    color: #7f91a4 !important;
+    font-weight: bold !important;
+}
+.user-gender-btn:hover,
+.target-gender-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* User & Target Gender buttons active (Tailwind trigger class) */
+.user-gender-btn.bg-white\/15,
+.target-gender-btn.bg-white\/15 {
+    background-color: #2481cc !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+/* ============================================================
+   NAVIGATION MENUS
+   ============================================================ */
+.glass-nav-item {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    transition: background-color 0.15s ease;
+}
+.glass-nav-item:hover {
+    background-color: #202b36 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.glass-nav-item.active {
+    background-color: #202b36 !important;
+    border-left: 3px solid #2481cc !important;
+}
+.glass-nav-item.active span {
+    color: #2481cc !important;
+}
 .glass-nav-item.active .font-bold {
     color: #ffffff !important;
 }
 
-/* Nav icon wrapper */
-.glass-nav-item.active div {
-    background-color: rgba(168, 85, 247, 0.18);
-}
-
-/* Inactive nav item text */
-.glass-nav-item:not(.active) .font-bold {
-    color: var(--text-base) !important;
-}
-.glass-nav-item:not(.active) .opacity-40 {
-    color: var(--text-muted) !important;
-    opacity: 1 !important;
-}
-
 /* ============================================================
-   NAVBAR (mobile header)
+   SCROLLBARS
    ============================================================ */
-.themed-navbar {
-    background: var(--bg-navbar) !important;
-    border-color: var(--border-default) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-}
-
-/* ============================================================
-   CHAT INPUT AREAS (bottom bars)
-   ============================================================ */
-.themed-input-bar {
-    background: var(--bg-chat-input) !important;
-    border-color: var(--border-default) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-}
-
-/* ============================================================
-   CHAT HEADER (frosted top bar)
-   ============================================================ */
-.themed-chat-header {
-    background: var(--bg-chat-header) !important;
-    border-color: var(--border-default) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-}
-
-/* ============================================================
-   CHAT HEADER TEXT
-   ============================================================ */
-.themed-chat-title {
-    color: var(--text-base) !important;
-}
-.themed-chat-status {
-    color: var(--text-muted) !important;
-}
-
-/* ============================================================
-   CHAT BUBBLES
-   ============================================================ */
-.chat-bubble {
-    border-radius: 18px !important;
-    padding: 0.75rem 1.1rem !important;
-    font-size: 0.925rem !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    max-width: 85% !important;
-    line-height: 1.5 !important;
-}
-/* Incoming bubble */
-.chat-start .chat-bubble {
-    background: var(--bubble-in-bg) !important;
-    border: 1px solid var(--bubble-in-border) !important;
-    color: var(--bubble-in-text) !important;
-}
-/* Outgoing bubble — always dark bg + white text for contrast */
-.chat-end .chat-bubble {
-    background: linear-gradient(135deg,
-        rgba(99, 102, 241, 0.85),
-        rgba(168, 85, 247, 0.85)) !important;
-    border: 1px solid rgba(168, 85, 247, 0.50) !important;
-    color: #ffffff !important;
-}
-
-/* ============================================================
-   SCROLLBAR
-   ============================================================ */
-.chat-scroll::-webkit-scrollbar        { width: 5px; height: 5px; }
+.chat-scroll::-webkit-scrollbar        { width: 4px; height: 4px; }
 .chat-scroll::-webkit-scrollbar-track  { background: transparent; }
 .chat-scroll::-webkit-scrollbar-thumb  {
     background-color: var(--scrollbar);
@@ -224,148 +206,41 @@ body {
 }
 
 /* ============================================================
-   DIVIDERS
-   ============================================================ */
-.divider {
-    color: var(--text-faint) !important;
-    opacity: var(--divider-opacity) !important;
-}
-.themed-divider {
-    background-color: var(--divider-color) !important;
-}
-
-/* ============================================================
-   MUTED TEXT
-   ============================================================ */
-.themed-muted {
-    color: var(--text-muted) !important;
-}
-
-/* ============================================================
-   OVERLAYS
-   ============================================================ */
-.theme-overlay {
-    background: var(--overlay-bg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-}
-.theme-start-overlay {
-    background: var(--start-overlay);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-.theme-sidebar {
-    background-color: var(--sidebar-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-}
-
-/* ============================================================
-   BENTO CARD TEXT (matchmaking & custom room headings)
-   ============================================================ */
-.themed-heading {
-    color: var(--text-base) !important;
-}
-.themed-desc {
-    color: var(--text-muted) !important;
-}
-
-/* ============================================================
-   INVITE LINK (group active header)
-   ============================================================ */
-.themed-invite-header {
-    background: var(--bg-chat-input) !important;
-    border-color: var(--border-default) !important;
-}
-.themed-invite-link {
-    color: var(--text-muted) !important;
-}
-.themed-invite-link:hover {
-    color: #f472b6 !important;
-}
-
-
-
-/* ============================================================
-   ANIMATION — message slide in
-   ============================================================ */
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.msg-anim {
-    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* ============================================================
-   BACKGROUND BLOBS
-   ============================================================ */
-@keyframes float-blob-1 {
-    0%   { transform: translate(0, 0) scale(1); }
-    33%  { transform: translate(40px, -60px) scale(1.1); }
-    66%  { transform: translate(-30px, 30px) scale(0.9); }
-    100% { transform: translate(0, 0) scale(1); }
-}
-@keyframes float-blob-2 {
-    0%   { transform: translate(0, 0) scale(1); }
-    50%  { transform: translate(-50px, 50px) scale(1.15); }
-    100% { transform: translate(0, 0) scale(1); }
-}
-.blob-1 { animation: float-blob-1 25s infinite ease-in-out; opacity: var(--blob-opacity); }
-.blob-2 { animation: float-blob-2 30s infinite ease-in-out; opacity: var(--blob-opacity); }
-
-/* ============================================================
-   VIDEO CONTAINER
+   VIDEO LAYOUT
    ============================================================ */
 #video-container {
-    width: 100%; height: 40vh; overflow: hidden;
-    display: none; border-radius: 20px;
-    border: 1px solid var(--border-default);
-    margin-bottom: 1rem;
+    width: 100%;
+    height: 40vh;
+    overflow: hidden;
+    display: none;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #101921;
+    margin-bottom: 0;
 }
 @media (min-width: 1024px) {
     #video-container { height: 380px; }
 }
-.remote-wrapper {
-    width: 100%; height: 100%;
-    display: flex; justify-content: center; align-items: center;
-    background: #000;
-}
-#remote-video { object-fit: contain; }
 
-/* LOCAL VIDEO pip */
 .local-wrapper {
-    width: 25%; max-width: 200px; min-width: 100px; height: auto;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
-    border: 1px solid var(--border-default);
-    background: #111; transition: width 0.3s ease;
-    border-radius: 14px; overflow: hidden;
-    cursor: grab; touch-action: none;
+    width: 25%;
+    max-width: 160px;
+    min-width: 90px;
+    height: auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    border: 1px solid #242f3d;
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
 }
-.local-wrapper:active { cursor: grabbing; }
 
 /* ============================================================
-   PULSE RING (incoming call button)
+   INCOMING CALL OVERLAY
    ============================================================ */
-.pulse-ring { position: relative; }
-.pulse-ring::before {
-    content: ''; position: absolute; left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: inherit; border-radius: 50%;
-    z-index: -1;
-    animation: pulse-ring-anim 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
-@keyframes pulse-ring-anim {
-    0%   { transform: scale(0.95); box-shadow: 0 0 0 0   rgba(34,197,94,0.7); }
-    70%  { transform: scale(1);    box-shadow: 0 0 0 15px rgba(34,197,94,0);   }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0   rgba(34,197,94,0);   }
+.theme-overlay {
+    background: #0e1621;
 }
 
-#video-container.full-height {
-    height: 100% !important;
-    max-height: 100% !important;
-    border-radius: 0;
-    margin-bottom: 0;
-    border: none;
-    flex-grow: 1;
+.theme-start-overlay {
+    background: #0e1621;
 }

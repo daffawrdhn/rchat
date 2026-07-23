@@ -125,6 +125,10 @@ function initSocket() {
             myNickname = data.nickname;
             myFlag = data.flag || '🏳️';
             document.getElementById('sidebar-nickname').innerText = myNickname + ' ' + myFlag;
+            const avatarCharEl = document.getElementById('sidebar-avatar-char');
+            if (avatarCharEl && myNickname) {
+                avatarCharEl.innerText = myNickname.charAt(0).toUpperCase();
+            }
         }
         else if (data.status === 'stats') {
             countVal.innerText = data.count;

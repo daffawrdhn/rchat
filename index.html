@@ -180,9 +180,9 @@
         <div class="drawer-content flex flex-col h-[var(--app-height)]">
             
             <!-- Mobile Header Bar -->
-            <div class="navbar themed-navbar border-b lg:hidden min-h-[60px] px-4">
+            <div class="navbar bg-[#17212b] border-b border-[#101921] lg:hidden min-h-[60px] px-4">
                 <div class="flex-none">
-                    <label for="my-drawer-2" class="btn btn-square btn-ghost themed-chat-title">
+                    <label for="my-drawer-2" class="btn btn-square btn-ghost text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             class="inline-block w-6 h-6 stroke-current">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
@@ -191,33 +191,33 @@
                     </label>
                 </div>
                 <div class="flex-1 px-2">
-                    <span class="text-xl font-black tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">XOXO</span>
+                    <span class="text-lg font-bold text-white tracking-normal">XOXO Chat</span>
                 </div>
                 <div class="flex-none">
-                    <div class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold py-2.5 px-3 flex items-center gap-1.5 shadow-sm">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <div class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold py-2 px-2.5 flex items-center gap-1 shadow-sm">
+                        <span class="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></span>
                         <span><span id="mobile-count">0</span> Online</span>
                     </div>
                 </div>
             </div>
 
             <!-- Bento Chat box Container -->
-            <div class="flex-grow p-3 md:p-6 lg:pl-3 flex flex-col h-[calc(var(--app-height)-60px)] lg:h-full box-border relative overflow-hidden">
+            <div class="flex-grow flex flex-col h-[calc(var(--app-height)-60px)] lg:h-full box-border relative overflow-hidden">
                 
-                <div id="chat-card" class="flex-grow glass-panel rounded-[32px] flex flex-col relative overflow-hidden h-full">
+                <div id="chat-card" class="flex-grow bg-[#0e1621] flex flex-col relative overflow-hidden h-full">
                     
-                    <!-- Frosted Glass Chat Header -->
-                    <div class="absolute top-0 w-full z-20 themed-chat-header border-b px-6 py-4 flex justify-between items-center">
+                    <!-- Telegram Chat Header -->
+                    <div class="absolute top-0 w-full z-20 themed-chat-header border-b px-5 py-3 flex justify-between items-center bg-[#17212b] border-[#101921]">
                         <div>
-                            <h2 id="chat-title" class="text-xl font-extrabold tracking-tight themed-chat-title">Random Chat</h2>
-                            <div id="status-wrapper" class="flex items-center gap-2 mt-1">
-                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-warning animate-pulse"></span>
-                                <span id="status-bar" class="text-[10px] font-bold tracking-wider themed-chat-status uppercase">Initializing...</span>
+                            <h2 id="chat-title" class="text-[16px] font-bold tracking-tight themed-chat-title text-white">Random Chat</h2>
+                            <div id="status-wrapper" class="flex items-center gap-2 mt-0.5">
+                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-[#7f91a4]"></span>
+                                <span id="status-bar" class="text-xs text-[#7f91a4] font-normal tracking-normal themed-chat-status">Initializing...</span>
                             </div>
                         </div>
                         <!-- Next Stranger button — right side of header (only visible in random-chat-view) -->
                         <button id="btn-next-header" onclick="nextPartner()"
-                            class="hidden items-center gap-2 btn btn-sm bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-full border-none shadow-lg shadow-rose-500/25 px-4 transition-all duration-200 hover:scale-105 active:scale-95">
+                            class="hidden items-center gap-2 btn btn-sm bg-[#2481cc] hover:bg-[#1a71b3] text-white font-bold rounded-full border-none shadow px-4 transition-all duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                             </svg>
@@ -275,15 +275,15 @@
                             <div class="divider opacity-30 text-xs">Connected to XOXO Chat</div>
                         </div>
 
-                        <!-- Chat Action / Start Button Overlay (Bento-style card) -->
-                        <div id="start-overlay" class="absolute inset-0 z-10 flex items-center justify-center p-6 theme-start-overlay pt-[72px]">
-                            <div class="glass-panel p-8 max-w-sm w-full text-center rounded-3xl shadow-2xl flex flex-col gap-5">
-                                <div id="start-icon" class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                        <!-- Chat Action / Start Button Overlay (Telegram style) -->
+                        <div id="start-overlay" class="absolute inset-0 z-10 flex items-center justify-center p-6 bg-[#0e1621] pt-[72px]">
+                            <div class="bg-[#17212b] border border-[#101921] p-8 max-w-sm w-full text-center rounded-2xl shadow-xl flex flex-col gap-5">
+                                <div id="start-icon" class="w-16 h-16 rounded-full bg-[#2481cc]/15 text-[#2481cc] flex items-center justify-center text-3xl mx-auto">
                                     💬
                                 </div>
                                 <div>
-                                    <h3 id="start-heading" class="text-xl font-bold themed-heading mb-1">Stranger Matchmaking</h3>
-                                    <p id="start-desc" class="text-xs themed-desc leading-relaxed">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
+                                    <h3 id="start-heading" class="text-lg font-bold themed-heading mb-1 text-white">Stranger Matchmaking</h3>
+                                    <p id="start-desc" class="text-xs themed-desc leading-relaxed text-[#7f91a4]">Match randomly, type secretly, or share video calls with stranger completely anonymously.</p>
                                 </div>
                                 <!-- Gender & Mode Preferences Selection -->
                                 <div class="flex flex-col gap-4 text-left w-full border-t border-white/5 pt-4">
@@ -336,7 +336,7 @@
                                     </div>
                                 </div>
                                 <button id="btn-start" onclick="startRandomChat()"
-                                    class="btn bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold tracking-wide rounded-full border-none w-full shadow-lg shadow-indigo-500/20">
+                                    class="btn bg-[#2481cc] hover:bg-[#1a71b3] text-white font-bold tracking-wide rounded-full border-none w-full shadow">
                                     Start Searching
                                 </button>
                             </div>
@@ -345,43 +345,43 @@
                         <!-- Controls Panel (Cancel) -->
                         <div class="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 w-full max-w-xs flex gap-2 px-4 pointer-events-auto">
                             <button id="btn-stop" onclick="stopRandomChat()"
-                                class="btn glass-panel text-error hover:bg-error/10 border border-error/20 w-full hidden rounded-full font-bold shadow-lg shadow-error/5">
+                                class="btn bg-error/15 text-error hover:bg-error/25 border-none w-full hidden rounded-full font-bold shadow">
                                 Cancel Search
                             </button>
                         </div>
 
                         <!-- Chat Input Box -->
-                        <div id="random-input-area" class="p-4 themed-input-bar border-t pb-6 lg:pb-4 hidden">
+                        <div id="random-input-area" class="p-3 bg-[#17212b] border-t border-[#101921] pb-6 lg:pb-4 hidden">
                             <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
-                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-indigo-400 hover:bg-indigo-500/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Share Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </button>
-                                <button id="record-btn-random" onclick="toggleRecording('random')" class="btn btn-circle btn-ghost text-indigo-400 hover:bg-indigo-500/10 text-lg">
+                                <button id="record-btn-random" onclick="toggleRecording('random')" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5 text-lg" title="Voice Message">
                                     🎤
                                 </button>
                                 <button id="btn-call" onclick="startCall(false)"
-                                    class="btn btn-circle btn-ghost text-emerald-400 hover:bg-emerald-500/10" title="Video Call">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Video Call">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
                                 </button>
                                 <button id="btn-voice-call" onclick="startCall(true)"
-                                    class="btn btn-circle btn-ghost text-amber-400 hover:bg-amber-500/10" title="Voice Call">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Voice Call">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                 </button>
                                 <button id="btn-hangup" onclick="endCall()"
                                     class="btn btn-circle btn-error text-white hidden shadow-lg shadow-error/20">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
@@ -394,11 +394,16 @@
                                         <div tabindex="0" role="button"
                                             class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
                                         <div tabindex="0"
-                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl glass-panel mb-2">
+                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-[#17212b] border border-[#101921] mb-2">
                                             <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
                                         </div>
                                     </div>
                                 </div>
+                                <button onclick="sendMessage('random')" class="btn btn-circle bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 pl-0.5">
+                                        <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -408,16 +413,16 @@
                         <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-6 space-y-4 pb-4">
                             <div class="divider opacity-30 text-xs">Public Lounge Connected</div>
                         </div>
-                        <div class="p-4 themed-input-bar border-t pb-6 lg:pb-4">
+                        <div class="p-3 bg-[#17212b] border-t border-[#101921] pb-6 lg:pb-4">
                             <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
-                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-purple-400 hover:bg-purple-500/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Share Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </button>
-                                <button id="record-btn-public" onclick="toggleRecording('public')" class="btn btn-circle btn-ghost text-purple-400 hover:bg-purple-500/10 text-lg">
+                                <button id="record-btn-public" onclick="toggleRecording('public')" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5 text-lg" title="Voice Message">
                                     🎤
                                 </button>
                                 <div class="relative flex-grow min-w-0">
@@ -429,16 +434,14 @@
                                         <div tabindex="0" role="button"
                                             class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
                                         <div tabindex="0"
-                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl glass-panel mb-2">
+                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-[#17212b] border border-[#101921] mb-2">
                                             <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <button onclick="sendMessage('public')" class="btn btn-circle bg-secondary border-none hover:brightness-110 text-white shadow-lg shadow-secondary/25">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90"
-                                        viewBox="0 0 20 20" fill="currentColor">
-                                        <path
-                                            d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                <button onclick="sendMessage('public')" class="btn btn-circle bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 pl-0.5">
+                                        <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
                                     </svg>
                                 </button>
                             </div>
@@ -449,19 +452,19 @@
                     <div id="group-chat-view" class="flex flex-col h-full pt-[72px] hidden">
                         
                         <!-- Setup Room / Enter Room Code -->
-                        <div id="group-idle" class="flex flex-col items-center justify-center h-full text-center p-6">
-                            <div class="glass-panel p-8 max-w-sm w-full rounded-3xl shadow-2xl flex flex-col gap-5">
-                                <div class="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                        <div id="group-idle" class="flex flex-col items-center justify-center h-full text-center p-6 bg-[#0e1621]">
+                            <div class="bg-[#17212b] border border-[#101921] p-8 max-w-sm w-full text-center rounded-2xl shadow-xl flex flex-col gap-5">
+                                <div class="w-16 h-16 rounded-full bg-[#2481cc]/15 text-[#2481cc] flex items-center justify-center text-3xl mx-auto">
                                     🔒
                                 </div>
                                 <div>
-                                    <h2 class="text-2xl font-extrabold themed-heading tracking-tight mb-1">Custom Room</h2>
-                                    <p class="text-xs themed-desc leading-relaxed">Create or join a private group room. Chats are end-to-end encrypted and auto-delete after 5 mins of inactivity.</p>
+                                    <h2 class="text-lg font-bold themed-heading tracking-tight mb-1 text-white">Custom Room</h2>
+                                    <p class="text-xs themed-desc leading-relaxed text-[#7f91a4]">Create or join a private group room. Chats are end-to-end encrypted and auto-delete after 5 mins of inactivity.</p>
                                 </div>
                                 <div class="w-full flex flex-col gap-2.5">
                                     <input type="text" id="room-code-input" placeholder="Enter Room Code..." class="input input-bordered w-full rounded-full glass-input text-center text-sm font-semibold focus:outline-none" />
                                     <button onclick="joinCustomRoom()"
-                                        class="btn bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold tracking-wide rounded-full border-none w-full shadow-lg shadow-pink-500/25 mt-1">
+                                        class="btn bg-[#2481cc] hover:bg-[#1a71b3] text-white font-bold tracking-wide rounded-full border-none w-full shadow mt-1">
                                         Join / Create Room
                                     </button>
                                 </div>
@@ -472,14 +475,14 @@
                         <div id="group-active" class="flex flex-col h-full hidden">
                             
                             <!-- Invite Header -->
-                            <div class="px-6 py-2.5 themed-invite-header border-b flex justify-between items-center gap-4">
+                            <div class="px-5 py-2.5 bg-[#17212b] border-b border-[#101921] flex justify-between items-center gap-4">
                                 <div class="flex items-center gap-2 overflow-hidden">
-                                    <span class="badge bg-pink-500/10 border border-pink-500/30 text-pink-400 text-[10px] font-bold py-2 shadow-sm whitespace-nowrap">Invite Link</span>
-                                    <div class="text-xs themed-invite-link truncate select-all cursor-pointer transition-colors font-medium"
+                                    <span class="badge bg-[#2481cc]/15 border border-[#2481cc]/30 text-[#2481cc] text-[10px] font-bold py-2 shadow-sm whitespace-nowrap">Invite Link</span>
+                                    <div class="text-xs text-[#7f91a4] truncate select-all cursor-pointer transition-colors font-medium hover:text-[#2481cc]"
                                         id="group-invite-link" onclick="copyInviteLink()">...</div>
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
-                                    <button onclick="copyInviteLink()" class="btn btn-ghost btn-xs btn-circle text-pink-400 hover:bg-pink-500/10" title="Copy Invite Link">
+                                    <button onclick="copyInviteLink()" class="btn btn-ghost btn-xs btn-circle text-[#7f91a4] hover:bg-white/5" title="Copy Invite Link">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -501,16 +504,16 @@
                             </div>
 
                             <!-- Group Chat Inputs -->
-                            <div class="p-4 themed-input-bar border-t pb-6 lg:pb-4">
+                            <div class="p-3 bg-[#17212b] border-t border-[#101921] pb-6 lg:pb-4">
                                 <div class="flex gap-2 items-center max-w-4xl mx-auto w-full">
-                                    <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-pink-400 hover:bg-pink-500/10">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                    <button onclick="triggerUpload()" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5" title="Share Image">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </button>
-                                    <button id="record-btn-group" onclick="toggleRecording('group')" class="btn btn-circle btn-ghost text-pink-400 hover:bg-pink-500/10 text-lg">
+                                    <button id="record-btn-group" onclick="toggleRecording('group')" class="btn btn-circle btn-ghost text-[#7f91a4] hover:bg-white/5 text-lg" title="Voice Message">
                                         🎤
                                     </button>
                                     <div class="relative flex-grow min-w-0">
@@ -523,16 +526,14 @@
                                             <div tabindex="0" role="button"
                                                 class="btn btn-circle btn-ghost btn-xs text-lg opacity-60 hover:opacity-100">😊</div>
                                             <div tabindex="0"
-                                                class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl glass-panel mb-2">
+                                                class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-[#17212b] border border-[#101921] mb-2">
                                                 <div class="grid grid-cols-5 gap-1" id="emoji-grid-group"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <button onclick="sendMessage('group')" class="btn btn-circle bg-pink-600 border-none hover:bg-pink-700 text-white shadow-lg shadow-pink-600/25">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path
-                                                d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                    <button onclick="sendMessage('group')" class="btn btn-circle bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 pl-0.5">
+                                            <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
                                         </svg>
                                     </button>
                                 </div>
@@ -545,94 +546,74 @@
             </div>
         </div>
 
-        <!-- Drawer side: Bento Grid Sidebar Menu -->
-        <div class="drawer-side z-50 lg:bg-transparent">
+        <!-- Drawer side: Telegram-Style Sidebar Menu -->
+        <div class="drawer-side z-50">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
             
-            <div class="w-80 lg:w-96 min-h-full theme-sidebar lg:bg-transparent backdrop-blur-2xl lg:backdrop-blur-none p-4 lg:p-6 lg:pl-6 lg:pr-3 flex flex-col gap-4 box-border z-10 relative">
+            <div class="w-72 md:w-80 min-h-full bg-[#17212b] border-r border-[#101921] flex flex-col box-border z-10 relative">
                 
-                <!-- Bento Card 1: Branding & Stats -->
-                <div class="glass-panel p-5 rounded-[24px] flex flex-col gap-3 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h1 class="text-3xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 font-sans">XOXO</h1>
-                            <p class="text-[9px] themed-muted font-bold tracking-widest uppercase mt-0.5">Chat with stranger</p>
+                <!-- Telegram-Style User Profile Header -->
+                <div class="bg-gradient-to-r from-[#2a7bb0] to-[#2481cc] p-5 text-white flex flex-col gap-3 relative select-none">
+                    <div class="flex justify-between items-start">
+                        <div class="avatar placeholder shadow-md">
+                            <div class="bg-[#1f2c3a] text-white rounded-full w-14 h-14 flex items-center justify-center font-bold text-2xl border-2 border-white/20" id="sidebar-avatar-char">
+                                U
+                            </div>
                         </div>
-                        <div class="badge bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] px-2.5 py-3 font-extrabold flex items-center gap-1.5 shadow-lg shadow-emerald-500/5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span><span id="count-val">0</span> Online</span>
-                        </div>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="font-bold text-[16px] truncate" id="sidebar-nickname">...</p>
+                        <p class="text-xs opacity-75">online</p>
                     </div>
                 </div>
 
-                <!-- Bento Card 2: Modes / Navigation -->
-                <div class="glass-panel p-4 rounded-[24px] flex flex-col gap-2 flex-grow">
-                    <span class="text-[10px] font-extrabold tracking-widest text-indigo-400/80 uppercase px-2 mb-1.5">Navigation</span>
-                    
+                <!-- Navigation List -->
+                <div class="flex flex-col flex-grow py-2">
                     <a onclick="switchMode('random')" id="nav-random"
-                        class="glass-card active flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
-                        <div class="w-9.5 h-9.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                            </svg>
-                        </div>
+                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-[#202b36] cursor-pointer transition-colors text-white/80 active glass-nav-item">
+                        <span class="text-xl">💬</span>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm">Meet Random</span>
-                            <span class="text-[10px] opacity-40">Text, Video, or Voice</span>
+                            <span class="font-semibold text-sm text-[#f5f6f7]">Meet Random</span>
+                            <span class="text-xs text-[#7f91a4]">Text, Video, or Voice</span>
                         </div>
-                        <span id="badge-random" class="badge badge-primary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                        <span id="badge-random" class="badge bg-[#2481cc] border-none text-white text-[10px] ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
 
                     <a onclick="switchMode('public')" id="nav-public"
-                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
-                        <div class="w-9.5 h-9.5 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
+                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-[#202b36] cursor-pointer transition-colors text-white/80 glass-nav-item">
+                        <span class="text-xl">👥</span>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm">Public Lounge</span>
-                            <span class="text-[10px] opacity-40">Global public lobby</span>
+                            <span class="font-semibold text-sm text-[#f5f6f7]">Public Lounge</span>
+                            <span class="text-xs text-[#7f91a4]">Global public lobby</span>
                         </div>
-                        <span id="badge-public" class="badge badge-secondary badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                        <span id="badge-public" class="badge bg-[#2481cc] border-none text-white text-[10px] ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
 
                     <a onclick="switchMode('group')" id="nav-group"
-                        class="glass-card flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer glass-nav-item">
-                        <div class="w-9.5 h-9.5 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
+                        class="flex items-center gap-4 px-5 py-3.5 hover:bg-[#202b36] cursor-pointer transition-colors text-white/80 glass-nav-item">
+                        <span class="text-xl">🔒</span>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm">Private Room</span>
-                            <span class="text-[10px] opacity-40">Private group code</span>
+                            <span class="font-semibold text-sm text-[#f5f6f7]">Private Room</span>
+                            <span class="text-xs text-[#7f91a4]">Private group code</span>
                         </div>
-                        <span id="badge-group" class="badge badge-accent badge-sm ml-auto scale-0 transform transition-transform duration-300">0</span>
+                        <span id="badge-group" class="badge bg-[#2481cc] border-none text-white text-[10px] ml-auto scale-0 transform transition-transform duration-300">0</span>
                     </a>
                 </div>
 
-                <!-- Bento Card 3: User Details & Theme Toggle -->
-                <div class="glass-panel p-4 rounded-[24px] flex flex-col gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="avatar placeholder">
-                            <div class="bg-gradient-to-tr from-indigo-500 to-purple-600 text-white rounded-xl w-10 h-10 flex items-center justify-center font-bold text-lg">
-                                👤
-                            </div>
-                        </div>
-                        <div class="overflow-hidden">
-                            <p class="text-[9px] themed-muted font-extrabold tracking-wider uppercase">Logged in as</p>
-                            <p class="font-extrabold truncate text-indigo-400 text-sm" id="sidebar-nickname">...</p>
-                        </div>
+                <!-- Active Online Statistics & Legal Links at Bottom -->
+                <div class="p-4 border-t border-[#101921] flex flex-col gap-3">
+                    <div class="flex justify-between items-center text-xs text-[#7f91a4]">
+                        <span>Users online:</span>
+                        <span class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold px-2 py-2 flex items-center gap-1 shadow-sm">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span><span id="count-val">0</span> Online</span>
+                        </span>
                     </div>
-                </div>
-
-                <!-- Footer Navigation Links -->
-                <div class="flex justify-center gap-4 text-[11px] opacity-50 mt-1 font-bold">
-                    <a href="privacy.html" target="_blank" class="hover:text-primary hover:opacity-100 transition-colors">Privacy Policy</a>
-                    <span>•</span>
-                    <a href="terms.html" target="_blank" class="hover:text-primary hover:opacity-100 transition-colors">Terms of Service</a>
+                    <div class="flex justify-center gap-4 text-[11px] text-[#7f91a4] opacity-80 font-semibold">
+                        <a href="privacy.html" target="_blank" class="hover:text-[#2481cc] transition-colors">Privacy Policy</a>
+                        <span>•</span>
+                        <a href="terms.html" target="_blank" class="hover:text-[#2481cc] transition-colors">Terms of Service</a>
+                    </div>
                 </div>
 
             </div>
