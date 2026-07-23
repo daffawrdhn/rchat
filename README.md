@@ -208,9 +208,9 @@ To allow WebRTC video and voice streams to connect across cellular networks or s
 
 The client configuration in [script.js](file:///C:/Users/Think/Documents/www/rchat/script.js) matches the credentials below:
 *   **STUN Server:** `stun:stun.l.google.com:19302` (Google Public STUN)
-*   **TURN Server:** `turn:20.2.138.225:3478`
-*   **Username:** `johndoe`
-*   **Credential:** `johndoe-password`
+*   **TURN Server:** `turn:<YOUR_VPS_IP>:3478`
+*   **Username:** `<YOUR_TURN_USERNAME>`
+*   **Credential:** `<YOUR_TURN_PASSWORD>`
 
 #### COTURN Installation on Ubuntu VPS:
 1. Install coturn package:
@@ -236,7 +236,7 @@ The client configuration in [script.js](file:///C:/Users/Think/Documents/www/rch
    lt-cred-mech
    
    # Static User Credentials (matches script.js)
-   user=johndoe:johndoe-password
+   user=<YOUR_TURN_USERNAME>:<YOUR_TURN_PASSWORD>
    
    # Realm (use your domain name)
    realm=yourdomain.com
