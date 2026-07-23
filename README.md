@@ -203,9 +203,58 @@ sudo systemctl restart nginx
 
 ---
 
-### 3. Firewall Security & VPS Manager Rules
+### 3. WebRTC STUN/TURN (COTURN) Setup
+To allow WebRTC video and voice streams to connect across cellular networks or symmetric firewalls, a TURN server is required. This project uses **COTURN** configured on port `3478` of your VPS.
 
-It is critical to block direct public access to port `8080` (where PHP is listening). Users must connect only through HTTPS (`443`) and WebSocket proxying (`wss://`). Directly exposing `8080` invites DDoS attacks and bypasses SSL restrictions.
+The client configuration in [script.js](file:///C:/Users/Think/Documents/www/rchat/script.js) matches the credentials below:
+*   **STUN Server:** `stun:stun.l.google.com:19302` (Google Public STUN)
+*   **TURN Server:** `turn:20.2.138.225:3478`
+*   **Username:** `johndoe`
+*   **Credential:** `johndoe-password`
+
+#### COTURN Installation on Ubuntu VPS:
+1. Install coturn package:
+   ```bash
+   sudo apt update
+   sudo apt install coturn
+   ```
+2. Enable coturn service on startup:
+   Edit `/etc/default/coturn` and uncomment/set:
+   ```ini
+   TURNSERVER_ENABLED=1
+   ```
+3. Configure the TURN server:
+   Edit `/etc/turnserver.conf` and append/modify:
+   ```ini
+   # Listen port
+   listening-port=3478
+   
+   # Enable fingerprinting
+   fingerprint
+   
+   # Use long-term credential mechanism
+   lt-cred-mech
+   
+   # Static User Credentials (matches script.js)
+   user=johndoe:johndoe-password
+   
+   # Realm (use your domain name)
+   realm=yourdomain.com
+   
+   # Log setting
+   simple-log
+   ```
+4. Start COTURN daemon:
+   ```bash
+   sudo systemctl restart coturn
+   sudo systemctl enable coturn
+   ```
+
+---
+
+### 4. Firewall Security & VPS Manager Rules
+
+It is critical to block direct public access to port `8080` (where PHP is listening), while exposing the web ports (`80`, `443`) and the WebRTC TURN port (`3478` on both TCP and UDP).
 
 #### A. OS Level Firewall (`UFW`)
 Configure `UFW` to restrict incoming connections:
@@ -216,6 +265,10 @@ sudo ufw allow 22/tcp
 # Allow Web traffic
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
+
+# Allow TURN/COTURN traffic
+sudo ufw allow 3478/tcp
+sudo ufw allow 3478/udp
 
 # Block external access to port 8080
 sudo ufw deny 8080/tcp
@@ -237,6 +290,7 @@ Always configure your cloud provider's network firewall (Security Group / Inboun
 | `22` | TCP | `0.0.0.0/0` (or your IP) | SSH Remote Shell Access | **ALLOW** |
 | `80` | TCP | `0.0.0.0/0` | HTTP Web traffic (Redirects) | **ALLOW** |
 | `443` | TCP | `0.0.0.0/0` | HTTPS & WSS Proxy traffic | **ALLOW** |
+| `3478` | TCP & UDP | `0.0.0.0/0` | COTURN STUN/TURN service | **ALLOW** |
 | `8080` | TCP | `0.0.0.0/0` | Direct backend port | **BLOCK/REMOVE** |
 
 > [!WARNING]
