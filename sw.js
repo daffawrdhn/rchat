@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.25-gender-symbols';
+const CACHE_NAME = 'xoxo-v1.0.26-remove-user-gender-any';
 const urlsToCache = [
     './',
     './index.html',

@@ -587,7 +587,7 @@ function startRandomChat() {
     const mode = document.querySelector('.match-mode-btn.bg-gradient-to-br')?.getAttribute('data-value') || 'random';
     currentMode = mode;
 
-    const gender = document.querySelector('.user-gender-btn.bg-white\\/15')?.getAttribute('data-value') || 'any';
+    const gender = document.querySelector('.user-gender-btn.bg-white\\/15')?.getAttribute('data-value') || 'male';
     const targetGender = document.querySelector('.target-gender-btn.bg-white\\/15')?.getAttribute('data-value') || 'any';
 
     // Save to localStorage
@@ -1213,7 +1213,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Restore Gender Preferences
-    const savedUserGender = localStorage.getItem('user_gender') || 'any';
+    let savedUserGender = localStorage.getItem('user_gender');
+    if (savedUserGender === 'any' || !savedUserGender) {
+        savedUserGender = 'male';
+    }
     const userGenderBtn = document.querySelector(`.user-gender-btn[data-value="${savedUserGender}"]`);
     if (userGenderBtn) userGenderBtn.click();
 
