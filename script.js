@@ -523,7 +523,8 @@ function logMessage(container, type, name, msg, msgType = 'text') {
     const isMe = type === 'you';
     const align = isMe ? 'chat-end' : 'chat-start';
     const bubbleColor = isMe ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content';
-    const avatar = isMe ? '😎' : (type === 'stranger' ? '🕵️' : '👤');
+    const initial = name ? name.charAt(0).toUpperCase() : '?';
+    const avatarBg = isMe ? 'bg-[#2481cc]' : 'bg-[#707579]';
 
     let contentHtml = '';
     if (msgType === 'image') {
@@ -560,7 +561,11 @@ function logMessage(container, type, name, msg, msgType = 'text') {
     const receipt = isMe ? `<span class="read-receipt text-xs opacity-50 ml-2">✓</span>` : '';
     const html = `
     <div class="chat ${align} msg-anim">
-        <div class="chat-image avatar placeholder"><div class="bg-neutral-focus text-neutral-content rounded-full w-8"><span>${avatar}</span></div></div>
+        <div class="chat-image avatar placeholder">
+            <div class="${avatarBg} text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-xs select-none">
+                <span>${initial}</span>
+            </div>
+        </div>
         <div class="chat-header text-xs opacity-50 mb-1 ml-1">${name} ${receipt}</div>
         <div class="chat-bubble ${bubbleColor} shadow-md text-sm break-words">${contentHtml}</div>
     </div>`;

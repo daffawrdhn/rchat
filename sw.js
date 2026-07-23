@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.31-fix-view-once-image-race-condition';
+const CACHE_NAME = 'xoxo-v1.0.32-svg-icons-complete-redesign';
 const urlsToCache = [
     './',
     './index.html',
