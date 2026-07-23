@@ -1,40 +1,248 @@
-# XOXO - Random Chat & Video Call App 👻
+# XOXO Chat 💬 - Telegram-Style Anonymous Chat Platform
 
-![Project Status](https://img.shields.io/badge/Status-Active-success)
-![License](https://img.shields.io/badge/License-MIT-blue)
-![Tech](https://img.shields.io/badge/Tech-PHP%20Ratchet%20%7C%20WebRTC%20%7C%20Tailwind-purple)
+[![Project Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)](https://github.com/daffawrdhn/rchat)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![Tech Stack](https://img.shields.io/badge/PHP-8.x-purple?style=for-the-badge&logo=php)](https://www.php.net/)
+[![WebSocket](https://img.shields.io/badge/WebSocket-Ratchet-orange?style=for-the-badge)](http://socketo.me/)
+[![WebRTC](https://img.shields.io/badge/WebRTC-Enabled-dodgerblue?style=for-the-badge&logo=webrtc)](https://webrtc.org/)
 
-**XOXO** is a modern, responsive, and anonymous random chat application. It features real-time text messaging, image sharing, and robust Picture-in-Picture (PiP) video calling. The backend is powered by **PHP** using the **Ratchet** WebSocket library.
+**XOXO Chat** is a lightweight, high-performance, and anonymous real-time communications platform designed 1:1 with the clean aesthetics of the **Telegram Light Theme**. It operates with a **Zero Storage Architecture** where all chat buffers are volatile and maintained only in memory to protect user anonymity and privacy.
 
-## ✨ Key Features
+---
 
-### 💬 Chat Experience
--   **Random Matchmaking:** Connect with strangers instantly.
--   **Image Sharing:** Compress and send images directly in chat.
--   **Typing Indicators:** See when the stranger is typing.
--   **Emojis:** Built-in emoji picker.
+## 🚀 Key Features
 
-### 📹 Video Calls (WebRTC)
--   **Picture-in-Picture Overlay:** Drag and drop your video preview.
--   **Tap-to-Resize:** Toggle local video size (Small/Medium/Default).
--   **No-Crop Display:** Smart aspect ratio handling.
--   **Mirror Mode:** Local video is mirrored for a natural feel.
+### 📡 Real-Time Channels
+*   **Stranger Matchmaking:** Instantly match randomly with users. Includes gender preference filters (Male/Female) with automatic counterpart selection.
+*   **Public Lounge:** A global shared chatroom containing a live online participant counter.
+*   **Private Rooms:** Secure group chats created via unique room codes. Messages are encrypted in transit and rooms automatically expire and delete after 5 minutes of inactivity.
+
+### 🖼️ Advanced Media & Audio
+*   **View-Once Photos:** Received media is blurred with a "View Once" lock. A single click opens the preview modal in full screen; closing the modal immediately destroys the media node from the browser DOM.
+*   **Persistent Sender Preview:** Senders can view their uploaded media multiple times without deletion.
+*   **Voice Messaging:** Integrated audio recorder that encodes voice notes and delivers compressed streams instantly to peers.
+
+### 📹 WebRTC Calls
+*   **Video & Voice Calls:** Secure peer-to-peer signalling for voice/video.
+*   **Aspect-Ratio-Friendly Display:** Smart layouts that prevent cropping or distorting remote feeds.
+*   **Picture-in-Picture (PiP):** Drag-and-drop local preview window.
+*   **Tap-to-Resize:** Toggle local video view dimensions (Small / Medium / Large).
+*   **Mirror Mode:** Mirrored local video display for natural eye contact.
+
+### ⚡ PWA & UX Polishing
+*   **Typing Indicators:** Visual cues when a chat partner is typing.
+*   **PWA Installable:** Installable as a Progressive Web App with caching (`sw.js`) for instant loading.
+*   **Icon System:** Clean vector-drawn SVG icons instead of raw emojis for a high-fidelity interface.
+
+---
+
+## 🛠️ Technology Stack
+*   **Frontend:** HTML5 (semantic layout), Vanilla CSS (Telegram design system), Tailwind CSS (utilities), Vanilla ES6 JavaScript.
+*   **Backend:** PHP 8.x, Ratchet WebSocket Client (`cboden/ratchet`).
+*   **Dependencies:** Composer (dependency management).
+
+---
 
 ## 📂 Directory Structure
-
-Based on your current project setup:
-
 ```text
 rchat/
 ├── src/
-│   └── Chat.php          # WebSocket Logic Class (Ratchet)
-├── vendor/               # PHP Dependencies (Composer libraries)
-├── index.html            # Main Chat Application
-├── main_index.html       # Landing Page (1year.site)
-├── script.js             # Frontend Logic (WebRTC + WebSocket)
-├── styles.css            # Styling
-├── server.php            # PHP WebSocket Server Entry Point
-├── composer.json         # Dependency Configuration
-├── sw.js                 # Service Worker (PWA)
-├── manifest.json         # PWA Manifest
-└── .htaccess             # Apache Configuration
+│   └── Chat.php          # WebSocket handler logic class (PHP Ratchet)
+├── vendor/               # Third-party dependencies (Composer)
+├── index.html            # Main Telegram-Style single page interface
+├── main_index.html       # Public landing landing page
+├── script.js             # Frontend controller (WebSocket, WebRTC, UI logic)
+├── styles.css            # Custom layout rules & theme tokens
+├── server.php            # WebSocket runner script (CLI entry point)
+├── composer.json         # PHP project dependency configuration
+├── sw.js                 # Service worker definition (PWA cache)
+├── manifest.json         # PWA Manifest configuration
+└── .htaccess             # Apache rewrite rules
+```
+
+---
+
+## ⚙️ Local Installation & Development
+
+### 1. Prerequisites
+Make sure you have PHP 8.x and Composer installed on your development machine.
+
+### 2. Install Dependencies
+Run composer inside the project directory:
+```bash
+composer install
+```
+
+### 3. Run WebSocket Server
+Fire up the WebSocket server on your local environment (defaults to port `8080`):
+```bash
+php server.php
+```
+
+### 4. Serve the Web Files
+Open your browser and navigate to the project directory served by your web server (e.g. Apache, Nginx, or PHP CLI Server):
+```bash
+# Example using PHP built-in server
+php -S localhost:8000
+```
+Open `http://localhost:8000/index.html` in your web browser.
+
+---
+
+## 🛡️ Production VPS Deployment Guide
+
+For a production deployment, WebRTC and camera/mic access **require an SSL connection (HTTPS/WSS)**. 
+
+### 1. Systemd Service (Process Daemon)
+To keep the WebSocket server running continuously in the background, configure a systemd daemon on your VPS.
+
+Create service file:
+```bash
+sudo nano /etc/systemd/system/xoxo-server.service
+```
+
+Add the following configuration:
+```ini
+[Unit]
+Description=WebSocket XOXO Chat Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/rchat
+ExecStart=/usr/bin/php server.php
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start the service daemon:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable xoxo-server.service
+sudo systemctl start xoxo-server.service
+```
+
+Check the server logs and status:
+```bash
+sudo systemctl status xoxo-server
+```
+
+---
+
+### 2. Web Server Proxy Configuration
+
+To prevent exposing port `8080` directly and to enable SSL (`wss://`), proxy the WebSocket connection through your web server.
+
+#### A. Apache Configuration (`VirtualHost`)
+Enable proxy modules:
+```bash
+sudo a2enmod proxy proxy_http proxy_wstunnel rewrite ssl
+```
+
+Modify your Apache config (under `<VirtualHost *:443>`):
+```apache
+<VirtualHost *:443>
+    ServerName yourdomain.com
+    DocumentRoot /var/www/rchat
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/yourdomain.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/yourdomain.com/privkey.pem
+
+    # Proxy WebSocket /ws traffic to local Ratchet server
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule ^/ws/(.*) ws://127.0.0.1:8080/$1 [P,L]
+
+    ProxyPass /ws ws://127.0.0.1:8080/
+    ProxyPassReverse /ws ws://127.0.0.1:8080/
+</VirtualHost>
+```
+
+#### B. Nginx Configuration (`server`)
+```nginx
+server {
+    listen 443 ssl;
+    server_name yourdomain.com;
+    root /var/www/rchat;
+
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy WebSocket traffic
+    location /ws {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+}
+```
+
+Restart your web server:
+```bash
+# For Apache
+sudo systemctl restart apache2
+
+# For Nginx
+sudo systemctl restart nginx
+```
+
+---
+
+### 3. Firewall Security & VPS Manager Rules
+
+It is critical to block direct public access to port `8080` (where PHP is listening). Users must connect only through HTTPS (`443`) and WebSocket proxying (`wss://`). Directly exposing `8080` invites DDoS attacks and bypasses SSL restrictions.
+
+#### A. OS Level Firewall (`UFW`)
+Configure `UFW` to restrict incoming connections:
+```bash
+# Allow SSH access
+sudo ufw allow 22/tcp
+
+# Allow Web traffic
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# Block external access to port 8080
+sudo ufw deny 8080/tcp
+
+# Enable Firewall
+sudo ufw enable
+```
+
+Verify firewall status:
+```bash
+sudo ufw status verbose
+```
+
+#### B. Cloud VPS Provider Firewalls (AWS SG, DigitalOcean, Hetzner, etc.)
+Always configure your cloud provider's network firewall (Security Group / Inbound Rules) to match this configuration:
+
+| Inbound Port | Protocol | Source | Description | Action |
+|---|---|---|---|---|
+| `22` | TCP | `0.0.0.0/0` (or your IP) | SSH Remote Shell Access | **ALLOW** |
+| `80` | TCP | `0.0.0.0/0` | HTTP Web traffic (Redirects) | **ALLOW** |
+| `443` | TCP | `0.0.0.0/0` | HTTPS & WSS Proxy traffic | **ALLOW** |
+| `8080` | TCP | `0.0.0.0/0` | Direct backend port | **BLOCK/REMOVE** |
+
+> [!WARNING]
+> Do NOT open port `8080` in your Cloud firewall. Doing so opens a raw unencrypted WebSocket gateway bypassing Apache/Nginx reverse proxying.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
