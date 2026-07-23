@@ -84,13 +84,6 @@ function playAudio(type) {
     }
 }
 
-// Emojis
-const emojis = ['😀', '😂', '😍', '😭', '😎', '😡', '💀', '👻', '👍', '👎', '👋', '🔥', '❤️', '💔', '💩'];
-const renderEmojis = (id, ctx) => document.getElementById(id).innerHTML = emojis.map(e => `<button class="btn btn-ghost btn-sm text-xl hover:bg-base-content/10" onclick="insertEmoji('${e}', '${ctx}')">${e}</button>`).join('');
-renderEmojis('emoji-grid-random', 'random');
-renderEmojis('emoji-grid-public', 'public');
-renderEmojis('emoji-grid-group', 'group');
-
 function initSocket() {
     // CHANGE THIS URL TO YOUR WEBSOCKET SERVER
     const socketUrl = 'wss://chat.1year.site/ws';
@@ -686,10 +679,6 @@ function handleInput(e, ctx) {
     } else {
         sendTypingSignal(ctx);
     }
-}
-function insertEmoji(e, ctx) {
-    const el = (ctx === 'random' || ctx === 'video') ? randomInput : (ctx === 'public' ? publicInput : groupInput);
-    el.value += e; el.focus();
 }
 
 function triggerUpload() { document.getElementById('img-upload').click(); }

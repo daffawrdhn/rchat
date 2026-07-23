@@ -402,20 +402,9 @@
                                 </button>
                                 <div class="relative flex-grow w-full min-w-0">
                                     <input type="text" id="random-msg-input" name="chat-message-random" enterkeyhint="send" autocorrect="on" spellcheck="true"
-                                        class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
+                                        class="input input-bordered w-full rounded-full px-5 glass-input focus:outline-none"
                                         placeholder="Type a message..." onkeypress="handleInput(event, 'random')"
                                         onkeyup="sendTypingSignal()" autocomplete="off">
-                                    <div class="dropdown dropdown-top dropdown-end absolute right-1.5 top-1/2 -translate-y-1/2">
-                                        <div tabindex="0" role="button" class="w-9 h-9 flex items-center justify-center rounded-full text-[#707579] hover:bg-slate-100 transition-colors" title="Select Emoji">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm6.75 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Z" />
-                                            </svg>
-                                        </div>
-                                        <div tabindex="0"
-                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-white border border-[#dfe5ec] mb-2">
-                                            <div class="grid grid-cols-5 gap-1" id="emoji-grid-random"></div>
-                                        </div>
-                                    </div>
                                 </div>
                                 <button onclick="sendMessage('random')" class="w-10 h-10 flex items-center justify-center rounded-full bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 transform translate-x-[1px]">
@@ -445,20 +434,9 @@
                                 </button>
                                 <div class="relative flex-grow min-w-0">
                                     <input type="text" id="public-msg-input" name="chat-message-public" enterkeyhint="send" autocorrect="on" spellcheck="true"
-                                        class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
+                                        class="input input-bordered w-full rounded-full px-5 glass-input focus:outline-none"
                                         placeholder="Message everyone in public lobby..." onkeypress="handleInput(event, 'public')"
                                         autocomplete="off">
-                                    <div class="dropdown dropdown-top dropdown-end absolute right-1.5 top-1/2 -translate-y-1/2">
-                                        <div tabindex="0" role="button" class="w-9 h-9 flex items-center justify-center rounded-full text-[#707579] hover:bg-slate-100 transition-colors" title="Select Emoji">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm6.75 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Z" />
-                                            </svg>
-                                        </div>
-                                        <div tabindex="0"
-                                            class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-white border border-[#dfe5ec] mb-2">
-                                            <div class="grid grid-cols-5 gap-1" id="emoji-grid-public"></div>
-                                        </div>
-                                    </div>
                                 </div>
                                 <button onclick="sendMessage('public')" class="w-10 h-10 flex items-center justify-center rounded-full bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 transform translate-x-[1px]">
@@ -541,21 +519,9 @@
                                     </button>
                                     <div class="relative flex-grow min-w-0">
                                         <input type="text" id="group-msg-input" name="chat-message-group" enterkeyhint="send" autocorrect="on" spellcheck="true"
-                                            class="input input-bordered w-full rounded-full pl-5 pr-12 glass-input focus:outline-none"
+                                            class="input input-bordered w-full rounded-full px-5 glass-input focus:outline-none"
                                             placeholder="Message group..." onkeypress="handleInput(event, 'group')"
                                             onkeyup="sendTypingSignal('group')" autocomplete="off">
-                                        <div
-                                            class="dropdown dropdown-top dropdown-end absolute right-1.5 top-1/2 -translate-y-1/2">
-                                            <div tabindex="0" role="button" class="w-9 h-9 flex items-center justify-center rounded-full text-[#707579] hover:bg-slate-100 transition-colors" title="Select Emoji">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm6.75 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Z" />
-                                                </svg>
-                                            </div>
-                                            <div tabindex="0"
-                                                class="dropdown-content z-[30] card card-compact w-64 p-2 shadow-2xl bg-white border border-[#dfe5ec] mb-2">
-                                                <div class="grid grid-cols-5 gap-1" id="emoji-grid-group"></div>
-                                            </div>
-                                        </div>
                                     </div>
                                     <button onclick="sendMessage('group')" class="w-10 h-10 flex items-center justify-center rounded-full bg-[#2481cc] hover:bg-[#1a71b3] text-white border-none shrink-0 shadow">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 transform translate-x-[1px]">

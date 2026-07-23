@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.32-svg-icons-complete-redesign';
+const CACHE_NAME = 'xoxo-v1.0.33-remove-emoji-pickers';
 const urlsToCache = [
     './',
     './index.html',
