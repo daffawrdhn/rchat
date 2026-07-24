@@ -13,9 +13,15 @@ class Chat implements MessageComponentInterface
     protected $groupActivity; // ['groupId' => timestamp]
     protected $redis;
     protected $ipConnections; // ['ip' => count]
+    protected $config;
 
-    public function __construct()
+    public function __construct(array $config = [])
     {
+        if (empty($config)) {
+            $config = require __DIR__ . '/../config.php';
+        }
+        $this->config = $config;
+
         $this->clients = new \SplObjectStorage;
         $this->waitingQueue = [];
         $this->pairs = [];
@@ -25,7 +31,7 @@ class Chat implements MessageComponentInterface
 
         try {
             $this->redis = new \Redis();
-            $this->redis->connect('127.0.0.1', 6379);
+            $this->redis->connect($this->config['redis_host'], $this->config['redis_port']);
         } catch (\Exception $e) {
             echo "Redis connection error: " . $e->getMessage() . "\n";
             $this->redis = null;
@@ -38,7 +44,7 @@ class Chat implements MessageComponentInterface
         $conn->clientIp = $ip;
 
         $ipCount = isset($this->ipConnections[$ip]) ? $this->ipConnections[$ip] : 0;
-        if ($ipCount >= 5) {
+        if ($ipCount >= $this->config['ip_connection_limit']) {
             echo "Connection rejected: IP $ip exceeded limit ($ipCount)\n";
             $conn->send(json_encode([
                 'status' => 'system',
@@ -88,8 +94,8 @@ class Chat implements MessageComponentInterface
             $currentTime = microtime(true);
             $timeDiff = $currentTime - $from->lastMsgTime;
 
-            // Limit: 1 message every 0.5 seconds
-            if ($timeDiff < 0.5) {
+            // Limit: 1 message every dynamic cooldown seconds
+            if ($timeDiff < $this->config['anti_spam_cooldown']) {
                 $from->spamWarnings++;
                 if ($from->spamWarnings > 3) {
                     $from->send(json_encode(['status' => 'system', 'msg' => 'You are typing too fast! Slow down.']));

@@ -10,16 +10,18 @@ use Ratchet\WebSocket\WsServer;
 use Ratchet\Http\OriginCheck;
 use MyApp\Chat;
 
-$chat = new Chat();
-$ws = new WsServer($chat);
-$checkedApp = new OriginCheck($ws, ['chat.1year.site']);
+$config = require __DIR__ . '/config.php';
 
-// Running on port 8080
+$chat = new Chat($config);
+$ws = new WsServer($chat);
+$checkedApp = new OriginCheck($ws, $config['ws_allowed_origins']);
+
+// Running on port from environment config
 $server = IoServer::factory(
     new HttpServer(
         $checkedApp
     ),
-    8080
+    $config['ws_port']
 );
 
 // Timer for 5 minute inactivity cleanup
@@ -27,10 +29,10 @@ $server->loop->addPeriodicTimer(60, function () use ($chat) {
     $chat->cleanupInactiveGroups();
 });
 
-echo "Server started on port 8080...\n";
+echo "Server started on port {$config['ws_port']}...\n";
 echo "Features Active:\n";
-echo "- Anti-Spam (0.5s limit)\n";
-echo "- IP Connection Limiting (Max 5 per IP)\n";
+echo "- Anti-Spam ({$config['anti_spam_cooldown']}s limit)\n";
+echo "- IP Connection Limiting (Max {$config['ip_connection_limit']} per IP)\n";
 echo "- Video Call Support (Signaling)\n";
 echo "- Compressed Image Support (Base64)\n";
 echo "- Live User Counter\n";

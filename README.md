@@ -58,6 +58,9 @@ rchat/
 ├── composer.json         # PHP project dependency configuration
 ├── sw.js                 # Service worker definition (PWA cache)
 ├── manifest.json         # PWA Manifest configuration
+├── config.php            # Dynamic configuration registry (reads .env)
+├── config-env.php        # Dynamic frontend config script exporter
+├── .env.example          # Template environment configurations
 ├── robots.txt            # Crawling directives for search indexing
 ├── sitemap.xml           # Structured XML sitemap for crawlers
 └── .htaccess             # Apache rewrite rules

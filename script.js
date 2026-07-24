@@ -85,8 +85,16 @@ function playAudio(type) {
 }
 
 function initSocket() {
-    // CHANGE THIS URL TO YOUR WEBSOCKET SERVER
-    const socketUrl = 'wss://chat.1year.site/ws';
+    // Dynamic URL detection with environment override
+    const socketUrl = window.XOXO_CONFIG?.wsUrl || (function() {
+        const isHttps = window.location.protocol === 'https:';
+        const wsProtocol = isHttps ? 'wss:' : 'ws:';
+        const host = window.location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1') {
+            return `${wsProtocol}//${host}:8080/ws`;
+        }
+        return `${wsProtocol}//${window.location.host}/ws`;
+    })();
     conn = new WebSocket(socketUrl);
 
     conn.onopen = function () {

@@ -2,3 +2,4 @@
 /config/development/
 /node_modules/
 /vendor/
+.env
