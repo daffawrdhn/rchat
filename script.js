@@ -261,7 +261,8 @@ function updateStatus(text, type) {
     statusDot.className = `w-2 h-2 rounded-full ${type === 'success' ? 'bg-success shadow-[0_0_10px_#22c55e]' : 'bg-error'}`;
 }
 function setChatTitle(title) {
-    chatTitle.innerText = `XOXO Chat - ${title}`;
+    const brand = window.XOXO_CONFIG?.appName || 'XOXO Chat';
+    chatTitle.innerText = `${brand} - ${title}`;
 }
 function updateBadges() {
     const bRandom = document.getElementById('badge-random');

@@ -97,7 +97,7 @@ class Chat implements MessageComponentInterface
             // Limit: 1 message every dynamic cooldown seconds
             if ($timeDiff < $this->config['anti_spam_cooldown']) {
                 $from->spamWarnings++;
-                if ($from->spamWarnings > 3) {
+                if ($from->spamWarnings > $this->config['spam_warn_threshold']) {
                     $from->send(json_encode(['status' => 'system', 'msg' => 'You are typing too fast! Slow down.']));
                 }
                 return;

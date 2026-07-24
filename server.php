@@ -29,10 +29,13 @@ $server->loop->addPeriodicTimer(60, function () use ($chat) {
     $chat->cleanupInactiveGroups();
 });
 
-echo "Server started on port {$config['ws_port']}...\n";
+echo "{$config['app_name']} WebSocket Server [{$config['app_env']}]\n";
+echo "Listening on port {$config['ws_port']}...\n";
+echo "App URL: {$config['app_url']}\n";
 echo "Features Active:\n";
-echo "- Anti-Spam ({$config['anti_spam_cooldown']}s limit)\n";
+echo "- Anti-Spam ({$config['anti_spam_cooldown']}s cooldown, warn after {$config['spam_warn_threshold']} violations)\n";
 echo "- IP Connection Limiting (Max {$config['ip_connection_limit']} per IP)\n";
+echo "- Group Inactivity Timeout ({$config['group_inactivity_timeout']}s)\n";
 echo "- Video Call Support (Signaling)\n";
 echo "- Compressed Image Support (Base64)\n";
 echo "- Live User Counter\n";
