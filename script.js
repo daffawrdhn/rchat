@@ -258,7 +258,13 @@ function initSocket() {
 // --- UI UTILS ---
 function updateStatus(text, type) {
     statusBar.innerText = text;
-    statusDot.className = `w-2 h-2 rounded-full ${type === 'success' ? 'bg-success shadow-[0_0_10px_#22c55e]' : 'bg-error'}`;
+    if (type === 'success') {
+        statusDot.className = 'w-2 h-2 rounded-full bg-success shadow-[0_0_10px_#22c55e]';
+    } else if (type === 'warning') {
+        statusDot.className = 'w-2 h-2 rounded-full bg-warning shadow-[0_0_10px_#eab308]';
+    } else {
+        statusDot.className = 'w-2 h-2 rounded-full bg-error shadow-[0_0_6px_#ef4444]';
+    }
 }
 function setChatTitle(title) {
     const modeEl = document.getElementById('chat-mode-title');

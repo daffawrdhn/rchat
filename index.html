@@ -238,10 +238,7 @@
                     <div data-testid="chat-header" class="absolute top-0 w-full z-20 themed-chat-header border-b px-5 py-3 flex justify-between items-center bg-white border-[#dfe5ec] chat-header-container">
                         <div class="header-text-group">
                             <h2 id="chat-title" class="text-[16px] font-bold tracking-tight themed-chat-title text-slate-900"><span id="chat-brand-prefix" class="hidden lg:inline">XOXO Chat - </span><span id="chat-mode-title">Meet Random</span></h2>
-                            <div id="status-wrapper" class="flex items-center gap-2 mt-0.5 status-meta-wrapper">
-                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-[#707579] status-indicator-dot"></span>
-                                <span id="status-bar" class="text-xs text-[#707579] font-normal tracking-normal themed-chat-status status-text-bar">Initializing...</span>
-                            </div>
+
                         </div>
                         <!-- Next Stranger button — right side of header (only visible in random-chat-view) -->
                         <button id="btn-next-header" onclick="nextPartner()"
@@ -583,7 +580,10 @@
                     </div>
                     <div class="overflow-hidden">
                         <p class="font-bold text-[16px] truncate" id="sidebar-nickname">...</p>
-                        <p class="text-xs opacity-75">online</p>
+                        <div id="status-wrapper" class="flex items-center gap-2 mt-0.5">
+                            <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+                            <span id="status-bar" class="text-xs text-white/80 font-normal tracking-normal">Initializing...</span>
+                        </div>
                     </div>
                 </div>
 
