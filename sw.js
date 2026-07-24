@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.42-hide-brand-prefix-on-mobile';
+const CACHE_NAME = 'xoxo-v1.0.43-remove-redis-use-env-meta';
 const urlsToCache = [
     './',
     './index.html',

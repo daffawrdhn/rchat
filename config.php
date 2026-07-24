@@ -32,10 +32,6 @@ return [
     'ws_public_url'           => getenv('WS_PUBLIC_URL')        ?: 'wss://chat.1year.site/ws',
     'ws_allowed_origins'      => explode(',', getenv('WS_ALLOWED_ORIGINS') ?: 'chat.1year.site,localhost,127.0.0.1'),
 
-    // Redis
-    'redis_host'              => getenv('REDIS_HOST') ?: '127.0.0.1',
-    'redis_port'              => (int)(getenv('REDIS_PORT') ?: 6379),
-
     // Bot Prevention & Safety
     'ip_connection_limit'     => (int)(getenv('IP_CONNECTION_LIMIT')   ?: 5),
     'anti_spam_cooldown'      => (float)(getenv('ANTI_SPAM_COOLDOWN')  ?: 0.5),

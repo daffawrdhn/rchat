@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XOXO - Chat with Stranger Anonymously</title>
-    <meta name="description" content="Connect with random strangers instantly on XOXO. Start free text, voice, and video chats anonymously without registration. Secure P2P matchmaking.">
+    <title>XOXO Chat - Chat with Stranger Anonymously</title>
+    <meta name="description" content="Connect with random strangers instantly on XOXO Chat. Start free text, voice, and video chats anonymously without registration. Secure P2P matchmaking.">
     <meta name="keywords" content="anonymous chat, chat with stranger, webRTC chat, free stranger video call, random voice chat, P2P chat online">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://chat.1year.site/">
+    <link rel="canonical" href="https://chat.1year.site/" id="meta-canonical">
     
     <!-- Open Graph / Social Sharing -->
-    <meta property="og:title" content="XOXO - Chat with Stranger Anonymously">
-    <meta property="og:description" content="Talk to random people online instantly. Secure, anonymous, and registration-free text, voice, and video chat rooms.">
-    <meta property="og:url" content="https://chat.1year.site/">
+    <meta property="og:title" content="XOXO Chat - Chat with Stranger Anonymously" id="meta-og-title">
+    <meta property="og:description" content="Talk to random people online instantly. Secure, anonymous, and registration-free text, voice, and video chat rooms." id="meta-og-desc">
+    <meta property="og:url" content="https://chat.1year.site/" id="meta-og-url">
     <meta property="og:type" content="website">
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2225%22 fill=%22%232481cc%22/><path d=%22M50 25c-15.5 0-28 11-28 24.5 0 7.7 4 14.6 10.4 19.2L27 77l12.7-6.3c3.2.9 6.7 1.3 10.3 1.3 15.5 0 28-11 28-24.5S65.5 25 50 25z%22 fill=%22%23ffffff%22/></svg>">
@@ -78,6 +78,24 @@
     </script>
 
     <script src="config-env.php"></script>
+    <script>
+        // Patch <head> meta tags dynamically from .env values via window.XOXO_CONFIG
+        (function () {
+            const cfg = window.XOXO_CONFIG || {};
+            const name    = cfg.appName    || 'XOXO Chat';
+            const tagline = cfg.appTagline || 'Chat with Stranger Anonymously';
+            const url     = cfg.appUrl     || 'https://chat.1year.site/';
+            const fullTitle = name + ' - ' + tagline;
+
+            document.title = fullTitle;
+
+            const set = (id, attr, val) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, val); };
+            set('meta-og-title',  'content', fullTitle);
+            set('meta-og-desc',   'content', 'Talk to random people online instantly on ' + name + '. Secure, anonymous, registration-free text, voice, and video chat rooms.');
+            set('meta-og-url',    'content', url);
+            set('meta-canonical', 'href',    url);
+        })();
+    </script>
     <link rel="stylesheet" href="styles.css">
 </head>
 
