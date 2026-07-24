@@ -30,6 +30,7 @@ $server->loop->addPeriodicTimer(60, function () use ($chat) {
 echo "Server started on port 8080...\n";
 echo "Features Active:\n";
 echo "- Anti-Spam (0.5s limit)\n";
+echo "- IP Connection Limiting (Max 5 per IP)\n";
 echo "- Video Call Support (Signaling)\n";
 echo "- Compressed Image Support (Base64)\n";
 echo "- Live User Counter\n";

@@ -12,6 +12,7 @@ class Chat implements MessageComponentInterface
     protected $groups; // ['groupId' => [client1, client2, ...]]
     protected $groupActivity; // ['groupId' => timestamp]
     protected $redis;
+    protected $ipConnections; // ['ip' => count]
 
     public function __construct()
     {
@@ -20,6 +21,7 @@ class Chat implements MessageComponentInterface
         $this->pairs = [];
         $this->groups = [];
         $this->groupActivity = [];
+        $this->ipConnections = [];
 
         try {
             $this->redis = new \Redis();
@@ -32,6 +34,25 @@ class Chat implements MessageComponentInterface
 
     public function onOpen(ConnectionInterface $conn)
     {
+        $ip = $this->getClientIp($conn);
+        $conn->clientIp = $ip;
+
+        $ipCount = isset($this->ipConnections[$ip]) ? $this->ipConnections[$ip] : 0;
+        if ($ipCount >= 5) {
+            echo "Connection rejected: IP $ip exceeded limit ($ipCount)\n";
+            $conn->send(json_encode([
+                'status' => 'system',
+                'msg' => 'Too many connections from your IP address. Please close other tabs.'
+            ]));
+            $conn->close();
+            return;
+        }
+
+        if (!isset($this->ipConnections[$ip])) {
+            $this->ipConnections[$ip] = 0;
+        }
+        $this->ipConnections[$ip]++;
+
         // Initialize Anti-Spam & User Data
         $conn->nickname = $this->generateNickname();
         $conn->lastMsgTime = 0;
@@ -444,6 +465,13 @@ class Chat implements MessageComponentInterface
 
     public function onClose(ConnectionInterface $conn)
     {
+        if (isset($conn->clientIp) && isset($this->ipConnections[$conn->clientIp])) {
+            $this->ipConnections[$conn->clientIp]--;
+            if ($this->ipConnections[$conn->clientIp] <= 0) {
+                unset($this->ipConnections[$conn->clientIp]);
+            }
+        }
+
         $this->cleanupRandomChat($conn);
         $this->cleanupGroupChat($conn);
         $this->clients->detach($conn);
@@ -469,5 +497,30 @@ class Chat implements MessageComponentInterface
         foreach ($this->clients as $client) {
             $client->send($data);
         }
+    }
+
+    private function getClientIp(ConnectionInterface $conn)
+    {
+        $headers = [
+            'CF-Connecting-IP',
+            'X-Forwarded-For',
+            'X-Real-IP',
+            'Client-IP'
+        ];
+
+        if (isset($conn->httpRequest)) {
+            foreach ($headers as $header) {
+                $value = $conn->httpRequest->getHeader($header);
+                if (!empty($value)) {
+                    $ipList = explode(',', $value[0]);
+                    $ip = trim($ipList[0]);
+                    if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                        return $ip;
+                    }
+                }
+            }
+        }
+
+        return $conn->remoteAddress ?? '127.0.0.1';
     }
 }
