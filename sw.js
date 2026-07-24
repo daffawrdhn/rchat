@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.41-brand-in-chat-header';
+const CACHE_NAME = 'xoxo-v1.0.42-hide-brand-prefix-on-mobile';
 const urlsToCache = [
     './',
     './index.html',

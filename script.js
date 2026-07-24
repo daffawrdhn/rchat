@@ -261,8 +261,11 @@ function updateStatus(text, type) {
     statusDot.className = `w-2 h-2 rounded-full ${type === 'success' ? 'bg-success shadow-[0_0_10px_#22c55e]' : 'bg-error'}`;
 }
 function setChatTitle(title) {
-    const brand = window.XOXO_CONFIG?.appName || 'XOXO Chat';
-    chatTitle.innerText = `${brand} - ${title}`;
+    const modeEl = document.getElementById('chat-mode-title');
+    const brandEl = document.getElementById('chat-brand-prefix');
+    if (modeEl) modeEl.innerText = title;
+    // Keep brand prefix text in sync with APP_NAME from config
+    if (brandEl) brandEl.innerText = (window.XOXO_CONFIG?.appName || 'XOXO Chat') + ' - ';
 }
 function updateBadges() {
     const bRandom = document.getElementById('badge-random');
