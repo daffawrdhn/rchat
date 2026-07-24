@@ -1228,17 +1228,46 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.addEventListener('cancel', (event) => {
             event.preventDefault();
         });
+    } else {
+        initSocket();
     }
 });
 
 function acceptTerms() {
-    if (!conn || conn.readyState !== WebSocket.OPEN) {
-        window.location.href = 'https://google.com';
-        return;
-    }
     sessionStorage.setItem('terms_accepted', 'true');
-    document.getElementById('agreement_modal').close();
-    console.log("Terms accepted.");
+    initSocket();
+
+    conn.onopen = function () {
+        document.getElementById('agreement_modal').close();
+        updateStatus("Connected", "success");
+        conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
+        conn.send(JSON.stringify({ action: 'set_profile' }));
+        if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') {
+            btnStart.classList.remove('hidden');
+            btnStop.classList.add('hidden');
+            randomInputArea.classList.add('hidden');
+            const startOverlay = document.getElementById('start-overlay');
+            if (startOverlay) startOverlay.classList.remove('hidden');
+        }
+    };
+
+    conn.onerror = function () {
+        window.location.href = 'https://google.com';
+    };
+
+    conn.onclose = function () {
+        updateStatus("Disconnected", "error");
+        setTimeout(initSocket, 3000);
+        setRandomUI('disconnected');
+        endCall(true);
+    };
+
+    setTimeout(function () {
+        if (conn.readyState !== WebSocket.OPEN) {
+            document.getElementById('agreement_modal').close();
+            window.location.href = 'https://google.com';
+        }
+    }, 5000);
 }
 
 function showVideoTip() {
@@ -1267,8 +1296,6 @@ function checkIOSInstall() {
     }
 }
 setTimeout(checkIOSInstall, 2000);
-
-initSocket();
 
 // --- NATIVE CRYPTO FUNCTIONS (SUBTLECRYPTO) ---
 async function sha256(message) {
