@@ -121,29 +121,26 @@
         </form>
     </dialog>
 
-    <dialog id="agreement_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-lg">
-        <div class="modal-box glass-panel shadow-2xl p-6 rounded-3xl">
-            <h3 class="font-extrabold text-2xl text-error flex items-center gap-3 tracking-tight">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    <dialog id="agreement_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
+        <div class="modal-box bg-white border border-[#dfe5ec] shadow-2xl p-6 rounded-2xl">
+            <h3 class="font-extrabold text-xl text-[#2481cc] flex items-center gap-2.5 tracking-tight">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                 </svg>
-                Terms & Conditions
+                Community Agreement
             </h3>
-            <div class="py-5 space-y-4 text-sm opacity-80">
-                <p>Welcome to <span class="font-bold text-primary">XOXO - Chat with stranger</span>.</p>
-                <p>Before proceeding, you must agree to the following conditions:</p>
-                <ul class="list-disc list-inside space-y-2 font-medium bg-current/5 p-4 rounded-2xl border border-current/10">
-                    <li>You are <span class="text-error font-bold">at least 18 years of age</span>.</li>
-                    <li>You will respect other users (no harassment/insults).</li>
+            <div class="py-4 space-y-3.5 text-xs text-[#000000] leading-relaxed">
+                <p>Welcome to <span class="font-bold text-[#2481cc]">XOXO Chat</span>. To keep our community safe and clean, you must accept our guidelines before starting:</p>
+                <ul class="list-disc list-inside space-y-2 font-semibold bg-[#f1f5f9] p-4 rounded-xl border border-[#dfe5ec] text-[#707579]">
+                    <li>You are <span class="text-[#2481cc] font-bold">18 years of age or older</span>.</li>
+                    <li>You will respect other strangers (no insults/harassment).</li>
                     <li>You will not stream or share illegal content.</li>
                 </ul>
-                <p class="text-[11px] opacity-60">Violation of these terms will lead to an immediate ban.</p>
+                <p class="text-[10px] text-[#707579] opacity-80">By agreeing, you confirm compliance. Violating rules leads to permanent bans.</p>
             </div>
-            <div class="modal-action flex flex-col gap-2 mt-4">
-                <button onclick="acceptTerms()" class="btn btn-error w-full text-white rounded-full font-bold shadow-lg shadow-error/25">I am 18+ and I Agree</button>
-                <button onclick="window.location.href='https://google.com'" class="btn btn-ghost w-full rounded-full">Exit</button>
+            <div class="modal-action flex flex-col gap-2 mt-2">
+                <button onclick="acceptTerms()" class="btn bg-[#2481cc] hover:bg-[#1a71b3] w-full text-white rounded-full font-bold border-none shadow">I Agree, Start Chatting</button>
+                <button onclick="window.location.href='https://google.com'" class="btn btn-ghost w-full rounded-full text-[#707579] hover:bg-slate-100">Exit</button>
             </div>
         </div>
     </dialog>

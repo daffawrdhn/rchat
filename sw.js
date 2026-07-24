@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.36-svg-vector-favicon';
+const CACHE_NAME = 'xoxo-v1.0.37-redesign-welcome-and-policies';
 const urlsToCache = [
     './',
     './index.html',
