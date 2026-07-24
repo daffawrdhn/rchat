@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.43-remove-redis-use-env-meta';
+const CACHE_NAME = 'xoxo-v1.0.44';
 const urlsToCache = [
     './',
     './index.html',

@@ -7,14 +7,14 @@ require __DIR__ . '/src/Chat.php';
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
-use Ratchet\Http\OriginCheck;
 use MyApp\Chat;
+use MyApp\SafeOriginCheck;
 
 $config = require __DIR__ . '/config.php';
 
 $chat = new Chat($config);
 $ws = new WsServer($chat);
-$checkedApp = new OriginCheck($ws, $config['ws_allowed_origins']);
+$checkedApp = new SafeOriginCheck($ws, $config['ws_allowed_origins']);
 
 // Running on port from environment config
 $server = IoServer::factory(
