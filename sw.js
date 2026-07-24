@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xoxo-v1.0.37-redesign-welcome-and-policies';
+const CACHE_NAME = 'xoxo-v1.0.40-sidebar-xoxo-chat-title-inside-card';
 const urlsToCache = [
     './',
     './index.html',
