@@ -532,6 +532,10 @@ function escapeHTML(str) {
     }[tag]));
 }
 
+function isNearBottom(el) {
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+}
+
 function logMessage(container, type, name, msg, msgType = 'text') {
     const isMe = type === 'you';
     const align = isMe ? 'chat-end' : 'chat-start';
@@ -583,13 +587,17 @@ function logMessage(container, type, name, msg, msgType = 'text') {
         <div class="chat-bubble ${bubbleColor} shadow-md text-sm break-words">${contentHtml}</div>
     </div>`;
     container.insertAdjacentHTML('beforeend', html);
-    container.scrollTop = container.scrollHeight;
+    if (isMe || isNearBottom(container)) {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 function logSystem(container, msg) {
     const html = `<div class="flex items-center justify-center my-4 opacity-60 msg-anim"><span class="text-xs bg-base-200 px-3 py-1 rounded-full border border-base-content/5">${msg}</span></div>`;
     container.insertAdjacentHTML('beforeend', html);
-    container.scrollTop = container.scrollHeight;
+    if (isNearBottom(container)) {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 // --- ACTIONS ---
