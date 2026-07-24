@@ -217,12 +217,13 @@
                 <div id="chat-card" class="flex-grow bg-[#e7ebf0] flex flex-col relative overflow-hidden h-full">
                     
                     <!-- Telegram Chat Header -->
-                    <div class="absolute top-0 w-full z-20 themed-chat-header border-b px-5 py-3 flex justify-between items-center bg-white border-[#dfe5ec]">
-                        <div>
+                    <div class="absolute top-0 w-full z-20 themed-chat-header border-b px-5 py-3 flex justify-between items-center bg-white border-[#dfe5ec] chat-header-container">
+                        <div class="header-text-group">
+                            <span class="brand-title-header text-[10px] font-extrabold text-[#2481cc] tracking-wider uppercase block mb-0.5">XOXO Chat</span>
                             <h2 id="chat-title" class="text-[16px] font-bold tracking-tight themed-chat-title text-slate-900">Random Chat</h2>
-                            <div id="status-wrapper" class="flex items-center gap-2 mt-0.5">
-                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-[#707579]"></span>
-                                <span id="status-bar" class="text-xs text-[#707579] font-normal tracking-normal themed-chat-status">Initializing...</span>
+                            <div id="status-wrapper" class="flex items-center gap-2 mt-0.5 status-meta-wrapper">
+                                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-[#707579] status-indicator-dot"></span>
+                                <span id="status-bar" class="text-xs text-[#707579] font-normal tracking-normal themed-chat-status status-text-bar">Initializing...</span>
                             </div>
                         </div>
                         <!-- Next Stranger button — right side of header (only visible in random-chat-view) -->
@@ -556,7 +557,6 @@
                 
                 <!-- Telegram-Style User Profile Header -->
                 <div class="bg-gradient-to-r from-[#5b95c6] to-[#4682b4] p-5 text-white flex flex-col gap-3 relative select-none">
-                    <span class="hidden lg:block text-lg font-black tracking-wide text-white mb-1">XOXO Chat</span>
                     <div class="flex justify-between items-start">
                         <div class="avatar placeholder shadow-sm">
                             <div class="bg-white/20 text-white rounded-full w-14 h-14 flex items-center justify-center font-bold text-2xl border-2 border-white/30" id="sidebar-avatar-char">
