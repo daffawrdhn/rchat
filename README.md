@@ -29,10 +29,11 @@
 *   **Tap-to-Resize:** Toggle local video view dimensions (Small / Medium / Large).
 *   **Mirror Mode:** Mirrored local video display for natural eye contact.
 
-### ⚡ PWA & UX Polishing
+### ⚡ PWA, UX & SEO Polishing
 *   **Typing Indicators:** Visual cues when a chat partner is typing.
 *   **PWA Installable:** Installable as a Progressive Web App with caching (`sw.js`) for instant loading.
 *   **Icon System:** Clean vector-drawn SVG icons instead of raw emojis for a high-fidelity interface.
+*   **SEO Optimized:** Out-of-the-box SEO configuration including canonical URLs, human-written meta keywords/descriptions, social Open Graph tags, `robots.txt`, and XML sitemaps for Google indexing.
 
 ---
 
@@ -57,6 +58,8 @@ rchat/
 ├── composer.json         # PHP project dependency configuration
 ├── sw.js                 # Service worker definition (PWA cache)
 ├── manifest.json         # PWA Manifest configuration
+├── robots.txt            # Crawling directives for search indexing
+├── sitemap.xml           # Structured XML sitemap for crawlers
 └── .htaccess             # Apache rewrite rules
 ```
 
