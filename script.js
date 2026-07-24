@@ -1232,6 +1232,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function acceptTerms() {
+    if (!conn || conn.readyState !== WebSocket.OPEN) {
+        window.location.href = 'https://google.com';
+        return;
+    }
     sessionStorage.setItem('terms_accepted', 'true');
     document.getElementById('agreement_modal').close();
     console.log("Terms accepted.");
