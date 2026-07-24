@@ -160,7 +160,7 @@ function initSocket() {
             let modeTitle = 'Meet Random';
             if (matchedMode === 'video') modeTitle = 'Random Video';
             else if (matchedMode === 'voice') modeTitle = 'Random Call';
-            chatTitle.innerText = `${modeTitle} (${randomPartnerName})`;
+            setChatTitle(`${modeTitle} (${randomPartnerName})`);
 
             const videoNameSpan = document.getElementById('video-partner-name');
             if (videoNameSpan) videoNameSpan.innerText = randomPartnerName;
@@ -182,7 +182,7 @@ function initSocket() {
             let modeTitle = 'Meet Random';
             if (currentMode === 'video') modeTitle = 'Random Video';
             else if (currentMode === 'voice') modeTitle = 'Random Call';
-            chatTitle.innerText = modeTitle;
+            setChatTitle(modeTitle);
 
             const videoNameSpan = document.getElementById('video-partner-name');
             if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
@@ -260,6 +260,9 @@ function updateStatus(text, type) {
     statusBar.innerText = text;
     statusDot.className = `w-2 h-2 rounded-full ${type === 'success' ? 'bg-success shadow-[0_0_10px_#22c55e]' : 'bg-error'}`;
 }
+function setChatTitle(title) {
+    chatTitle.innerText = `XOXO Chat - ${title}`;
+}
 function updateBadges() {
     const bRandom = document.getElementById('badge-random');
     const bVideo = document.getElementById('badge-video');
@@ -303,19 +306,19 @@ function updateMatchModeUI(mode) {
     const startDesc = document.getElementById('start-desc');
     
     if (mode === 'video') {
-        chatTitle.innerText = "Random Video";
+        setChatTitle('Random Video');
         if (startIcon) startIcon.innerText = "🎥";
         if (startHeading) startHeading.innerText = "Video Matchmaking";
         if (startDesc) startDesc.innerText = "Match and start high-quality video call instantly and anonymously with strangers.";
         btnStart.innerText = "Start Video Search";
     } else if (mode === 'voice') {
-        chatTitle.innerText = "Random Call";
+        setChatTitle('Random Call');
         if (startIcon) startIcon.innerText = "📞";
         if (startHeading) startHeading.innerText = "Voice Matchmaking";
         if (startDesc) startDesc.innerText = "Match and start voice calls instantly and anonymously with strangers.";
         btnStart.innerText = "Start Voice Search";
     } else {
-        chatTitle.innerText = "Meet Random";
+        setChatTitle('Meet Random');
         if (startIcon) startIcon.innerText = "💬";
         if (startHeading) startHeading.innerText = "Stranger Matchmaking";
         if (startDesc) startDesc.innerText = "Match randomly, type secretly, or share video calls with stranger completely anonymously.";
@@ -374,7 +377,7 @@ function switchMode(mode) {
         randomView.classList.add('hidden');
         publicView.classList.remove('hidden');
         groupView.classList.add('hidden');
-        chatTitle.innerText = "Public Lounge";
+        setChatTitle('Public Lounge');
         statusWrapper.classList.add('invisible');
         unreadPublic = 0; updateBadges();
         setTimeout(() => publicBox.scrollTop = publicBox.scrollHeight, 100);
@@ -382,7 +385,7 @@ function switchMode(mode) {
         randomView.classList.add('hidden');
         publicView.classList.add('hidden');
         groupView.classList.remove('hidden');
-        chatTitle.innerText = "Private Room";
+        setChatTitle('Private Room');
         statusWrapper.classList.add('invisible');
         unreadGroup = 0; updateBadges();
         setTimeout(() => groupBox.scrollTop = groupBox.scrollHeight, 100);
@@ -629,7 +632,7 @@ function stopRandomChat() {
     let modeTitle = 'Meet Random';
     if (currentMode === 'video') modeTitle = 'Random Video';
     else if (currentMode === 'voice') modeTitle = 'Random Call';
-    chatTitle.innerText = modeTitle;
+    setChatTitle(modeTitle);
 
     const videoNameSpan = document.getElementById('video-partner-name');
     if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
@@ -651,7 +654,7 @@ function nextPartner() {
     endCall();
     isSearching = true;
     randomPartnerName = 'Stranger';
-    chatTitle.innerText = currentMode === 'video' ? "Random Video" : "Random Chat";
+    setChatTitle(currentMode === 'video' ? 'Random Video' : 'Meet Random');
     const videoNameSpan = document.getElementById('video-partner-name');
     if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
     conn.send(JSON.stringify({ action: 'next' }));
