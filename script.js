@@ -388,7 +388,7 @@ function switchMode(mode) {
         publicView.classList.remove('hidden');
         groupView.classList.add('hidden');
         setChatTitle('Public Lounge');
-        statusWrapper.classList.add('invisible');
+        statusWrapper.classList.remove('invisible');
         unreadPublic = 0; updateBadges();
         setTimeout(() => publicBox.scrollTop = publicBox.scrollHeight, 100);
     } else if (mode === 'group') {
@@ -396,7 +396,7 @@ function switchMode(mode) {
         publicView.classList.add('hidden');
         groupView.classList.remove('hidden');
         setChatTitle('Private Room');
-        statusWrapper.classList.add('invisible');
+        statusWrapper.classList.remove('invisible');
         unreadGroup = 0; updateBadges();
         setTimeout(() => groupBox.scrollTop = groupBox.scrollHeight, 100);
     }
