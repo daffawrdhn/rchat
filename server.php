@@ -3,6 +3,7 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/src/Chat.php';
+require __DIR__ . '/src/SafeOriginCheck.php';
 
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
