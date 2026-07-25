@@ -398,8 +398,8 @@
                         </div>
 
                         <!-- Chat Input Box -->
-                        <div id="random-input-area" class="p-3 bg-white border-t border-[#dfe5ec] pb-6 lg:pb-4 hidden">
-                            <div class="flex gap-1.5 items-center max-w-4xl mx-auto w-full">
+                        <div id="random-input-area" class="px-3 pb-3 lg:pb-3 hidden">
+                            <div class="flex gap-1.5 items-center max-w-4xl mx-auto w-full bg-white rounded-2xl shadow-md border border-[#dfe5ec] px-4 py-2">
                                 <button onclick="triggerUpload()" class="w-10 h-10 flex items-center justify-center rounded-full text-[#707579] hover:bg-slate-100 transition-colors shrink-0" title="Share Image">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536-3.536m0 0L8.485 8.485a5.5 5.5 0 1 0 7.778 7.778l7.071-7.071a3.5 3.5 0 0 0-4.95-4.95l-7.071 7.07a1.5 1.5 0 0 0 2.122 2.12l7.071-7.07" />
@@ -427,7 +427,7 @@
                                 </button>
                                 <div class="relative flex-grow w-full min-w-0">
                                     <input type="text" id="random-msg-input" name="chat-message-random" enterkeyhint="send" autocorrect="on" spellcheck="true"
-                                        class="input input-bordered w-full rounded-full px-5 glass-input focus:outline-none"
+                                        class="input w-full rounded-full px-2 glass-input focus:outline-none border-0"
                                         placeholder="Type a message..." onkeypress="handleInput(event, 'random')"
                                         onkeyup="sendTypingSignal()" autocomplete="off">
                                 </div>
@@ -445,8 +445,8 @@
                         <div id="public-chat-box" class="flex-grow chat-scroll overflow-y-auto p-6 space-y-4 pb-4">
                             <div class="divider opacity-30 text-xs">Public Lounge Connected</div>
                         </div>
-                        <div class="p-3 bg-white border-t border-[#dfe5ec] pb-6 lg:pb-4">
-                            <div class="flex gap-1.5 items-center max-w-4xl mx-auto w-full">
+                        <div class="px-3 pb-3 lg:pb-3">
+                            <div class="flex gap-1.5 items-center max-w-4xl mx-auto w-full bg-white rounded-2xl shadow-md border border-[#dfe5ec] px-4 py-2">
                                 <button onclick="triggerUpload()" class="w-10 h-10 flex items-center justify-center rounded-full text-[#707579] hover:bg-slate-100 transition-colors shrink-0" title="Share Image">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536-3.536m0 0L8.485 8.485a5.5 5.5 0 1 0 7.778 7.778l7.071-7.071a3.5 3.5 0 0 0-4.95-4.95l-7.071 7.07a1.5 1.5 0 0 0 2.122 2.12l7.071-7.07" />
@@ -459,7 +459,7 @@
                                 </button>
                                 <div class="relative flex-grow min-w-0">
                                     <input type="text" id="public-msg-input" name="chat-message-public" enterkeyhint="send" autocorrect="on" spellcheck="true"
-                                        class="input input-bordered w-full rounded-full px-5 glass-input focus:outline-none"
+                                        class="input w-full rounded-full px-2 glass-input focus:outline-none border-0"
                                         placeholder="Message everyone in public lobby..." onkeypress="handleInput(event, 'public')"
                                         autocomplete="off">
                                 </div>
@@ -530,8 +530,8 @@
                             </div>
 
                             <!-- Group Chat Inputs -->
-                            <div class="p-3 bg-white border-t border-[#dfe5ec] pb-6 lg:pb-4">
-                                <div class="flex gap-1.5 items-center max-w-4xl mx-auto w-full">
+                            <div class="px-3 pb-3 lg:pb-3">
+                                <div class="flex gap-1.5 items-center max-w-4xl mx-auto w-full bg-white rounded-2xl shadow-md border border-[#dfe5ec] px-4 py-2">
                                     <button onclick="triggerUpload()" class="w-10 h-10 flex items-center justify-center rounded-full text-[#707579] hover:bg-slate-100 transition-colors shrink-0" title="Share Image">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536-3.536m0 0L8.485 8.485a5.5 5.5 0 1 0 7.778 7.778l7.071-7.071a3.5 3.5 0 0 0-4.95-4.95l-7.071 7.07a1.5 1.5 0 0 0 2.122 2.12l7.071-7.07" />
@@ -544,7 +544,7 @@
                                     </button>
                                     <div class="relative flex-grow min-w-0">
                                         <input type="text" id="group-msg-input" name="chat-message-group" enterkeyhint="send" autocorrect="on" spellcheck="true"
-                                            class="input input-bordered w-full rounded-full px-5 glass-input focus:outline-none"
+                                            class="input w-full rounded-full px-2 glass-input focus:outline-none border-0"
                                             placeholder="Message group..." onkeypress="handleInput(event, 'group')"
                                             onkeyup="sendTypingSignal('group')" autocomplete="off">
                                     </div>
