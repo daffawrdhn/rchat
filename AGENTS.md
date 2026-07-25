@@ -35,6 +35,7 @@ Copy `.env.example` → `.env`. All settings are loaded at runtime by `config.ph
 - `e2e_test.js` launches two headless Chromium instances via Puppeteer and tests public chat, encrypted group rooms, random matching, image upload (view-once), and voice recording. Requires the WebSocket server (`php server.php`) running **before** `npm test`.
 - `test_websocket.php` is a standalone PHP test script that connects to the running WebSocket server. Run it manually with `php test_websocket.php` while the server is up.
 - E2E tests target `https://chat.1year.site` by default — locally, change `SITE_URL` in `e2e_test.js` or patch it.
+- **Flaky test #1**: `#public-chat-view:not(.hidden)` times out ~25% of the time. Root cause: Page2's WebSocket is still in `CONNECTING` (readyState 0) after login completes, causing `page.click('#nav-public')` to fail silently. Always re-run; second pass consistently passes.
 
 ## Production deployment
 
@@ -52,3 +53,6 @@ PSR-4 autoload: `Hackertampan\Rchat\` maps to `src/`. The handler class `MyApp\C
 - Image uploads are compressed client-side to 800px JPEG at 60% quality, then sent as base64 over WebSocket. Max 500KB. Voice max 2MB.
 - `View Once` images disappear from the receiver's DOM after the preview modal is closed.
 - The `?group=<id>` URL param auto-joins a group room on load.
+- Sidebar is full-height (`min-h-full`) with `border-r`, no pill shape. Input areas are floating pill bars (`rounded-2xl shadow-md border`) across all chat modes.
+- WebSocket connects after user clicks "I Agree"; returning users (sessionStorage) auto-connect on load.
+- Connection status indicator is in the sidebar below nickname, visible in all modes.
