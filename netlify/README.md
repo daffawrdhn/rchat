@@ -2,12 +2,16 @@
 
 Client static page untuk XOXO Chat yang di-deploy ke Netlify. Terhubung ke WebSocket production (`wss://chat.1year.site/ws`).
 
-## Fitur
+## Fitur (sama persis dengan chat.1year.site)
 
-- Random chat (text)
-- Public lounge
+- Random chat (text/video/voice matching)
+- Public lounge dengan online counter
 - Private group rooms (AES-GCM encrypted)
-- Minimal & ringan (1 file HTML + CDN)
+- Image upload (view-once)
+- Voice recording
+- WebRTC video/voice call
+- PWA support (service worker)
+- Typing indicators, read receipts
 
 ## Cara Deploy ke Netlify
 
@@ -52,9 +56,15 @@ Buka `https://<random>.netlify.app` — client akan connect ke `wss://chat.1year
 
 | File | Fungsi |
 |---|---|
-| `index.html` | Client utama (HTML+CSS+JS inline) |
+| `index.html` | Main UI (sama persis dengan production) |
+| `script.js` | Frontend controller (WebSocket, WebRTC, UI logic) |
+| `styles.css` | Custom styles |
+| `config.js` | Config statis (wsUrl, appName) — menggantikan `config-env.php` |
+| `sw.js` | Service worker (cache name: `xoxo-netlify-v1.0`) |
+| `manifest.json` | PWA manifest |
+| `assets/` | Sound effects (msg, connect, disconnect) |
 | `netlify.toml` | Konfigurasi deploy Netlify (SPA redirect) |
-| `README.md` | Tutorial ini |
+
 ## Update
 
-Setelah ada perubahan di `netlify/index.html`, cukup push ke GitHub — Netlify auto-deploy.
+Setelah ada perubahan, cukup push ke `main` — Netlify auto-deploy.
