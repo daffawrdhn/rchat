@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - XOXO</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #e7ebf0;
+            color: #000000;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden relative p-4 md:p-8">
+
+    <div class="max-w-2xl mx-auto w-full bg-white border border-[#dfe5ec] p-6 md:p-10 rounded-2xl shadow-sm relative z-10 my-6">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black text-[#2481cc]">Privacy Policy</h1>
+            <p class="text-[10px] text-[#707579] font-bold tracking-widest uppercase mt-2">Zero Log, Complete Anonymity</p>
+        </div>
+
+        <div class="space-y-6 text-sm leading-relaxed text-[#000000]">
+            <div class="alert bg-[#2481cc]/10 border border-[#2481cc]/20 text-[#2481cc] rounded-xl p-4 flex gap-3">
+                <span class="text-xl">🔒</span>
+                <div>
+                    <h3 class="font-bold text-sm text-[#2481cc]">True Zero-Log Commitment</h3>
+                    <p class="text-xs text-[#707579] mt-1">We do not store, write, or log any messages, call logs, metadata, or media content. Our servers operate entirely in-memory.</p>
+                </div>
+            </div>
+
+            <section>
+                <h2 class="text-base font-bold text-[#2481cc] mb-2">1. Information We Do Not Collect</h2>
+                <p>Because XOXO is built on a <strong>Zero-Storage Architecture</strong>, we do not require, request, or store:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1.5 text-[#707579]">
+                    <li>Your real name, email address, phone number, or social profiles.</li>
+                    <li>IP addresses, browser footprints, or device registration data.</li>
+                    <li>Chat history, shared photos, or audio recordings (all base64 image data and WebRTC signal payloads are forwarded in real-time and cleared immediately from server memory).</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-base font-bold text-[#2481cc] mb-2">2. How WebRTC Video Calls Work</h2>
+                <p class="text-[#707579]">Our servers only act as a WebRTC signaling facilitator. Once a video connection is established, the stream is directly Peer-to-Peer (P2P) between your browser and the stranger's browser. Video and audio packets never pass through or get recorded by our servers.</p>
+            </section>
+
+            <section>
+                <h2 class="text-base font-bold text-[#2481cc] mb-2">3. Client-Side Encryption</h2>
+                <p class="text-[#707579]">Private chats and group rooms are secured using client-side encryption. The keys are stored locally in your browser session and are never transmitted to our servers in plaintext, protecting your conversations from interception.</p>
+            </section>
+
+            <section>
+                <h2 class="text-base font-bold text-[#2481cc] mb-2">4. Third-Party Links</h2>
+                <p class="text-[#707579]">Our website may contain links to external sites. We are not responsible for the privacy practices of external web portals.</p>
+            </section>
+        </div>
+
+        <div class="mt-8 text-center">
+            <button onclick="window.close()" class="btn bg-[#2481cc] hover:bg-[#1a71b3] text-white rounded-full px-8 font-bold border-none shadow w-full sm:w-auto">Close Window</button>
+        </div>
+    </div>
+
+    <footer class="text-center text-xs text-[#707579] opacity-60 mt-auto z-10">
+        &copy; 2026 XOXO Chat. All rights reserved.
+    </footer>
+</body>
+</html>
