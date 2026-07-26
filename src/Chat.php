@@ -65,7 +65,10 @@ class Chat implements MessageComponentInterface
 
         $conn->send(json_encode([
             'status' => 'identity',
-            'nickname' => $conn->nickname
+            'nickname' => $conn->nickname,
+            'turnUrl' => $this->config['turn_url'],
+            'turnUsername' => $this->config['turn_username'],
+            'turnPassword' => $this->config['turn_password'],
         ]));
 
         $this->broadcastUserCount();
@@ -100,7 +103,10 @@ class Chat implements MessageComponentInterface
             case 'set_profile':
                 $from->send(json_encode([
                     'status' => 'identity',
-                    'nickname' => $from->nickname
+                    'nickname' => $from->nickname,
+                    'turnUrl' => $this->config['turn_url'],
+                    'turnUsername' => $this->config['turn_username'],
+                    'turnPassword' => $this->config['turn_password'],
                 ]));
                 break;
 
@@ -258,6 +264,11 @@ class Chat implements MessageComponentInterface
         }
     }
 
+    private function msgId(): string
+    {
+        return bin2hex(random_bytes(8));
+    }
+
     private function handleGroupMessage($from, $msg, $type)
     {
         $groupId = $from->currentGroup;
@@ -266,6 +277,7 @@ class Chat implements MessageComponentInterface
         $this->groupActivity[$groupId] = time();
 
         $payload = json_encode([
+            'id' => $this->msgId(),
             'status' => 'group_msg',
             'name' => $from->nickname,
             'msg' => $msg,
@@ -284,6 +296,7 @@ class Chat implements MessageComponentInterface
     {
 
         $payload = json_encode([
+            'id' => $this->msgId(),
             'status' => 'public_msg',
             'name' => $from->nickname,
             'msg' => $msg,
@@ -303,6 +316,7 @@ class Chat implements MessageComponentInterface
         if (isset($this->pairs[$from->resourceId])) {
             $partner = $this->pairs[$from->resourceId];
             $partner->send(json_encode([
+                'id' => $this->msgId(),
                 'status' => 'message',
                 'msg' => $msg,
                 'type' => $type

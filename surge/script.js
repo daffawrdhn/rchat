@@ -12,6 +12,7 @@ let isSearching = false;
 let randomPartnerName = 'Stranger';
 let currentGroupId = null;
 let matchedMode = null;
+const seenMsgIds = new Set();
 
 // UI Refs
 const randomView = document.getElementById('random-chat-view');
@@ -54,14 +55,9 @@ const videoContainer = document.getElementById('video-container');
 const btnCall = document.getElementById('btn-call');
 const btnHangup = document.getElementById('btn-hangup');
 const incomingOverlay = document.getElementById('incoming_call_overlay');
-const rtcConfig = {
+let rtcConfig = {
     iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        {
-            urls: 'turn:20.2.138.225:3478',
-            username: 'johndoe',
-            credential: 'johndoe-password'
-        }
+        { urls: 'stun:stun.l.google.com:19302' }
     ]
 };
 
@@ -129,6 +125,13 @@ function initSocket() {
             if (avatarCharEl && myNickname) {
                 avatarCharEl.innerText = myNickname.charAt(0).toUpperCase();
             }
+            if (data.turnUrl && data.turnUsername && data.turnPassword) {
+                rtcConfig.iceServers[1] = {
+                    urls: data.turnUrl,
+                    username: data.turnUsername,
+                    credential: data.turnPassword
+                };
+            }
         }
         else if (data.status === 'stats') {
             countVal.innerText = data.count;
@@ -151,6 +154,7 @@ function initSocket() {
             
             // Clear previous chat messages
             randomBox.innerHTML = '';
+            seenMsgIds.clear();
             
             playAudio('connect');
             setRandomUI('connected');
@@ -189,6 +193,8 @@ function initSocket() {
             matchedMode = null;
         }
         else if (data.status === 'message') {
+            if (data.id && seenMsgIds.has(data.id)) return;
+            if (data.id) seenMsgIds.add(data.id);
             if (currentMode !== matchedMode) { 
                 if (matchedMode === 'video') {
                     unreadVideo++;
@@ -207,11 +213,15 @@ function initSocket() {
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: matchedMode || 'random' }));
         }
         else if (data.status === 'public_msg') {
+            if (data.id && seenMsgIds.has(data.id)) return;
+            if (data.id) seenMsgIds.add(data.id);
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
             logMessage(publicBox, 'other', data.name, data.msg, data.type);
             notifyBackground("Public Lounge", data.name + ": " + data.msg.substring(0, 30));
         }
         else if (data.status === 'group_msg') {
+            if (data.id && seenMsgIds.has(data.id)) return;
+            if (data.id) seenMsgIds.add(data.id);
             if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
             const decrypted = await decryptMsg(data.msg, rawCustomRoomCode);
             logMessage(groupBox, 'other', data.name, decrypted, data.type);

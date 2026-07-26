@@ -60,11 +60,6 @@ body {
     transition: background-color 0.2s ease;
 }
 
-/* Hide background glowing blobs */
-.blob-1, .blob-2 {
-    display: none !important;
-}
-
 /* ============================================================
    TELEGRAM INPUT FIELD OVERRIDES
    ============================================================ */

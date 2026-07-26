@@ -39,4 +39,9 @@ return [
 
     // Group Room Settings
     'group_inactivity_timeout' => (int)(getenv('GROUP_INACTIVITY_TIMEOUT') ?: 300),
+
+    // WebRTC TURN Server
+    'turn_url'      => getenv('TURN_URL')      ?: 'turn:20.2.138.225:3478',
+    'turn_username' => getenv('TURN_USERNAME') ?: 'johndoe',
+    'turn_password' => getenv('TURN_PASSWORD') ?: 'johndoe-password',
 ];
