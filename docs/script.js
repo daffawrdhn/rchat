@@ -13,6 +13,8 @@ let randomPartnerName = 'Stranger';
 let currentGroupId = null;
 let matchedMode = null;
 const seenMsgIds = new Set();
+let callTimerInterval = null;
+let callStartTime = null;
 
 // UI Refs
 const randomView = document.getElementById('random-chat-view');
@@ -208,7 +210,7 @@ function initSocket() {
             playAudio('msg');
             showTyping(false);
             const decrypted = await decryptMsg(data.msg, currentAesKey);
-            logMessage(randomBox, 'stranger', randomPartnerName, decrypted, data.type);
+            logMessage(randomBox, 'stranger', randomPartnerName, decrypted, data.type, data.id);
             notifyBackground(`New message from ${randomPartnerName}`, decrypted.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: matchedMode || 'random' }));
         }
@@ -216,7 +218,7 @@ function initSocket() {
             if (data.id && seenMsgIds.has(data.id)) return;
             if (data.id) seenMsgIds.add(data.id);
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
-            logMessage(publicBox, 'other', data.name, data.msg, data.type);
+            logMessage(publicBox, 'other', data.name, data.msg, data.type, data.id);
             notifyBackground("Public Lounge", data.name + ": " + data.msg.substring(0, 30));
         }
         else if (data.status === 'group_msg') {
@@ -224,7 +226,7 @@ function initSocket() {
             if (data.id) seenMsgIds.add(data.id);
             if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
             const decrypted = await decryptMsg(data.msg, rawCustomRoomCode);
-            logMessage(groupBox, 'other', data.name, decrypted, data.type);
+            logMessage(groupBox, 'other', data.name, decrypted, data.type, data.id);
             notifyBackground("Custom Room", data.name + ": " + decrypted.substring(0, 30));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'group' }));
         }
@@ -262,10 +264,38 @@ function initSocket() {
             showTyping(true, ctx, name);
         }
         else if (data.status === 'call_signal') handleSignalMessage(data.signal);
+        else if (data.status === 'reaction') {
+            if (data.msgId && data.reaction) applyReaction(data.msgId, data.reaction);
+        }
     };
 }
 
 // --- UI UTILS ---
+function startCallTimer() {
+    const el = document.getElementById('call-timer');
+    if (!el) return;
+    callStartTime = Date.now();
+    el.classList.remove('hidden');
+    clearInterval(callTimerInterval);
+    callTimerInterval = setInterval(() => {
+        const sec = Math.floor((Date.now() - callStartTime) / 1000);
+        const m = String(Math.floor(sec / 60)).padStart(2, '0');
+        const s = String(sec % 60).padStart(2, '0');
+        el.textContent = `${m}:${s}`;
+    }, 1000);
+}
+
+function stopCallTimer() {
+    clearInterval(callTimerInterval);
+    callTimerInterval = null;
+    callStartTime = null;
+    const el = document.getElementById('call-timer');
+    if (el) {
+        el.classList.add('hidden');
+        el.textContent = '00:00';
+    }
+}
+
 function updateStatus(text, type) {
     statusBar.innerText = text;
     if (type === 'success') {
@@ -351,7 +381,7 @@ function switchMode(mode) {
 
     if (mode !== currentMode) {
         if (isMatchingMode && (isSearching || matchedMode !== null)) {
-            const confirmMsg = "Apakah Anda yakin ingin mengganti mode? Ini akan memutuskan obrolan atau membatalkan pencarian aktif Anda.";
+            const confirmMsg = "Are you sure you want to switch mode? This will disconnect your chat or cancel your active search.";
             if (!confirm(confirmMsg)) {
                 return; // Keep current mode
             }
@@ -542,7 +572,7 @@ function isNearBottom(el) {
     return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
 }
 
-function logMessage(container, type, name, msg, msgType = 'text') {
+function logMessage(container, type, name, msg, msgType = 'text', msgId = null) {
     const isMe = type === 'you';
     const align = isMe ? 'chat-end' : 'chat-start';
     const bubbleColor = isMe ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content';
@@ -581,16 +611,25 @@ function logMessage(container, type, name, msg, msgType = 'text') {
         });
     }
 
+    const ts = new Date();
+    const timeStr = String(ts.getHours()).padStart(2, '0') + ':' + String(ts.getMinutes()).padStart(2, '0');
     const receipt = isMe ? `<span class="read-receipt text-xs opacity-50 ml-2">✓</span>` : '';
+    const reactionsHtml = msgId ? `<div class="flex gap-0.5 mt-0.5 ${align === 'chat-end' ? 'justify-end' : 'justify-start'}">
+        <div id="react-display-${msgId}" class="flex gap-0.5 items-center"></div>
+        <div class="flex gap-0.5 opacity-40 hover:opacity-100 transition-opacity">
+            ${['👍','❤️','😮'].map(e => `<button class="text-xs px-1 py-0.5 rounded hover:bg-base-content/10" data-msg-id="${msgId}" data-reaction="${e}" onclick="toggleReaction(this)">${e}</button>`).join('')}
+        </div>
+    </div>` : '';
     const html = `
-    <div class="chat ${align} msg-anim">
+    <div class="chat ${align} msg-anim" ${msgId ? `data-msg-id="${msgId}"` : ''}>
         <div class="chat-image avatar placeholder">
             <div class="${avatarBg} text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-xs select-none">
                 <span>${initial}</span>
             </div>
         </div>
-        <div class="chat-header text-xs opacity-50 mb-1 ml-1">${name} ${receipt}</div>
+        <div class="chat-header text-xs opacity-50 mb-1 ml-1">${name} <span class="text-[10px] opacity-60">${timeStr}</span> ${receipt}</div>
         <div class="chat-bubble ${bubbleColor} shadow-md text-sm break-words">${contentHtml}</div>
+        ${reactionsHtml}
     </div>`;
     container.insertAdjacentHTML('beforeend', html);
     if (isMe || isNearBottom(container)) {
@@ -705,6 +744,31 @@ async function sendMessage(context, msgType = 'text', overrideMsg = null) {
 
     if (msgType === 'text') { input.focus(); }
 }
+function toggleReaction(btn) {
+    const msgId = btn.dataset.msgId;
+    const reaction = btn.dataset.reaction;
+    if (!msgId || !reaction) return;
+    conn.send(JSON.stringify({ action: 'react', msgId, reaction }));
+}
+
+function applyReaction(msgId, reaction) {
+    const display = document.getElementById('react-display-' + msgId);
+    if (!display) return;
+    const existing = display.querySelector(`[data-reaction="${reaction}"]`);
+    if (existing) {
+        const count = parseInt(existing.dataset.count) + 1;
+        existing.dataset.count = count;
+        existing.textContent = reaction + ' ' + count;
+    } else {
+        const el = document.createElement('span');
+        el.className = 'text-xs px-1 py-0.5 rounded-full bg-base-content/5 border border-base-content/10';
+        el.dataset.reaction = reaction;
+        el.dataset.count = '1';
+        el.textContent = reaction + ' 1';
+        display.appendChild(el);
+    }
+}
+
 function handleInput(e, ctx) { 
     if (e.key === 'Enter') {
         sendMessage(ctx); 
@@ -962,6 +1026,7 @@ async function startCall(isVoiceOnly = false) {
 
         videoContainer.style.display = 'block';
         videoContainer.classList.remove('hidden');
+        startCallTimer();
 
         // Toggle voice placeholder visibility
         const voicePlaceholder = document.getElementById('voice-placeholder');
@@ -1116,6 +1181,7 @@ function endCall(isRemote = false) {
 
     videoContainer.style.display = 'none';
     videoContainer.classList.add('hidden');
+    stopCallTimer();
 
     btnCall.classList.remove('hidden');
     if (btnVoiceCall) btnVoiceCall.classList.remove('hidden');
@@ -1148,16 +1214,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeDisappearingElement) {
                 activeDisappearingElement.outerHTML = `
                     <div class="flex items-center gap-1.5 text-xs font-bold text-base-content/40 bg-base-300/40 px-3 py-2 rounded-lg border border-base-content/5 select-none">
-                        <span>✕</span> Media dibuka (Pesan Sekali Lihat)
+                        <span>✕</span> Media opened (View Once)
                     </div>`;
                 activeDisappearingElement = null;
             }
         });
     }
 
-    // Always use light mode
-    document.documentElement.setAttribute('data-theme', 'light');
-    localStorage.removeItem('theme');
+    // Dark mode toggle
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        const toggle = document.getElementById('dark-mode-toggle');
+        if (toggle) toggle.checked = true;
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+    const darkToggle = document.getElementById('dark-mode-toggle');
+    if (darkToggle) {
+        darkToggle.addEventListener('change', () => {
+            const theme = darkToggle.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        });
+    }
 
     // Flag fetching removed
 

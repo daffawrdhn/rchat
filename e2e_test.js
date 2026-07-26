@@ -229,7 +229,7 @@ const path = require('path');
             await page2.waitForFunction(
                 () => {
                     const box = document.getElementById('random-chat-box');
-                    return box && box.innerText.includes("Media dibuka");
+                    return box && box.innerText.includes("Media opened");
                 },
                 { timeout: 5000 }
             );

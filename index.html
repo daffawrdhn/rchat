@@ -254,6 +254,7 @@
                                     <div class="badge badge-error gap-1 animate-pulse border-none text-white font-bold text-xs shadow-lg">
                                         <div class="w-2 h-2 rounded-full bg-white"></div> LIVE
                                     </div>
+                                    <div id="call-timer" class="badge bg-black/60 border-none text-white font-bold text-xs shadow-lg hidden">00:00</div>
                                 </div>
                                 <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-white font-bold pointer-events-none">
                                     <span id="video-partner-name">Stranger</span>
@@ -627,6 +628,13 @@
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span><span id="count-val">0</span> Online</span>
                         </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 text-xs text-[#707579] cursor-pointer select-none">
+                            <span>🌙</span>
+                            <span>Dark Mode</span>
+                        </label>
+                        <input type="checkbox" id="dark-mode-toggle" class="toggle toggle-sm border-[#dfe5ec] bg-white [--tglbg:#dfe5ec] checked:bg-[#2481cc] checked:border-[#2481cc] checked:[--tglbg:white]">
                     </div>
                     <div class="flex justify-center gap-4 text-[11px] text-[#707579] opacity-80 font-semibold">
                         <a href="privacy.html" target="_blank" class="hover:text-[#2481cc] transition-colors">Privacy Policy</a>
