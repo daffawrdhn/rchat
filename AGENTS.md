@@ -14,6 +14,9 @@ Single-page anonymous chat platform. No database — all state (connections, pai
 | Main app UI | `index.html` |
 | Config (reads `.env`) | `config.php` |
 | Browser-exposed config | `config-env.php` (served as JS, sets `window.XOXO_CONFIG`) |
+| Netlify static client | `netlify/index.html` (+ `netlify/config.js` replaces `config-env.php`) |
+| GitHub Pages client | `docs/index.html` (+ `docs/config.js` replaces `config-env.php`) |
+| Origin check fix | `src/SafeOriginCheck.php` (subdomain matching + inline close) |
 
 ## Developer commands
 
@@ -45,6 +48,16 @@ Run `php server.php` as a systemd service. Proxy WebSocket traffic (`/ws` → `w
 
 PSR-4 autoload: `Hackertampan\Rchat\` maps to `src/`. The handler class `MyApp\Chat` lives in `src/Chat.php` (uses legacy namespace, not the PSR-4 prefix).
 
+## Static clients (Netlify / GitHub Pages)
+
+`netlify/` and `docs/` are standalone static copies of the production client. Differences from the PHP-served `index.html`:
+- `config.js` replaces `config-env.php` (hardcoded `window.XOXO_CONFIG`)
+- `sw.js` uses a unique cache name per platform
+- All paths are relative; no PHP dependency
+- WebSocket always connects to `wss://chat.1year.site/ws`
+
+To add a new platform: copy `netlify/` → `<dir>/`, update `sw.js` cache name, write a README, add origin to `.env` on the server.
+
 ## Notes
 
 - Frontend config is served as `script src="config-env.php"` — that file sets `window.XOXO_CONFIG` with `wsUrl`, `appName`, etc.
@@ -56,3 +69,4 @@ PSR-4 autoload: `Hackertampan\Rchat\` maps to `src/`. The handler class `MyApp\C
 - Sidebar is full-height (`min-h-full`) with `border-r`, no pill shape. Input areas are floating pill bars (`rounded-2xl shadow-md border`) across all chat modes.
 - WebSocket connects after user clicks "I Agree"; returning users (sessionStorage) auto-connect on load.
 - Connection status indicator is in the sidebar below nickname, visible in all modes.
+- `SafeOriginCheck.php` supports subdomain matching (e.g. `netlify.app` matches `*.netlify.app`). The parent `OriginCheck::close()` is private, so the response is sent via Guzzle directly.
