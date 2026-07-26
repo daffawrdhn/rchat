@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XOXO Chat — Netlify Client</title>
+    <script>
+        document.documentElement.setAttribute('data-theme', 'light');
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+            originalWarn.apply(console, args);
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { font-family: 'Outfit', sans-serif; box-sizing: border-box; }
+        body { background: #f0f2f5; height: 100vh; overflow: hidden; }
+        #sidebar { width: 280px; min-width: 280px; }
+        #sidebar a { padding: 10px 16px; border-radius: 8px; transition: 0.15s; cursor: pointer; }
+        #sidebar a:hover { background: #e5e9f0; }
+        #sidebar a.active { background: #d1e3f5; color: #2481cc; font-weight: 600; }
+        .chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .chat-bubble { max-width: 75%; padding: 8px 14px; border-radius: 14px; word-wrap: break-word; line-height: 1.4; font-size: 14px; }
+        .chat-bubble.self { background: #2481cc; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .chat-bubble.other { background: #e5e9f0; color: #1c1e21; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .chat-bubble.system { background: transparent; color: #65676b; font-size: 12px; align-self: center; text-align: center; }
+        .chat-bubble .name-label { font-size: 11px; font-weight: 600; color: #2481cc; margin-bottom: 2px; }
+        .chat-bubble.other .name-label { color: #2481cc; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .status-dot.success { background: #31a24c; }
+        .status-dot.warning { background: #f59e0b; }
+        .status-dot.error { background: #e53e3e; }
+        #input-bar { background: white; border: 1px solid #dfe5ec; border-radius: 999px; padding: 6px 6px 6px 20px; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        #input-bar input { flex: 1; border: none; outline: none; font-size: 14px; background: transparent; }
+        #input-bar button { width: 36px; height: 36px; border-radius: 50%; background: #2481cc; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.15s; flex-shrink: 0; }
+        #input-bar button:hover { background: #1d6fb3; }
+        #input-bar button:disabled { background: #b0c4de; cursor: not-allowed; }
+        .mode-btn { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; border: 1px solid #dfe5ec; background: white; color: #4a4e57; }
+        .mode-btn:hover { border-color: #2481cc; color: #2481cc; }
+        .mode-btn.active { background: #2481cc; color: white; border-color: #2481cc; }
+        #status-text { font-size: 12px; color: #65676b; }
+        .typing-indicator { font-size: 12px; color: #65676b; font-style: italic; padding: 2px 14px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar" class="bg-white border-r border-[#dfe5ec] flex flex-col" data-testid="sidebar">
+        <div class="bg-gradient-to-r from-[#5b95c6] to-[#4682b4] p-5 text-white">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="bg-white/20 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl border-2 border-white/30" id="avatar-char">U</div>
+                <div>
+                    <div class="font-semibold text-sm" id="display-nickname">Connecting...</div>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="status-dot warning" id="status-dot"></span>
+                        <span class="text-xs text-white/80" id="status-text">Connecting...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-xs text-white/70 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span id="online-count">0</span> online
+            </div>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-1">
+            <a id="nav-random" class="flex items-center gap-3 active text-sm" onclick="switchMode('random')">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                Random Chat
+            </a>
+            <a id="nav-public" class="flex items-center gap-3 text-sm" onclick="switchMode('public')">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+                Public Lounge
+            </a>
+            <a id="nav-group" class="flex items-center gap-3 text-sm" onclick="switchMode('group')">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
+                Custom Room
+            </a>
+        </nav>
+
+        <div class="p-3 border-t border-[#dfe5ec] text-xs text-center text-[#65676b]">
+            XOXO Chat &middot; Netlify Client
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-[#dfe5ec]">
+            <h2 class="font-semibold text-[17px] text-[#1c1e21]" id="chat-title">Random Chat</h2>
+            <div class="flex items-center gap-2">
+                <button id="btn-start" class="mode-btn active" onclick="startSearch()">Find Partner</button>
+                <button id="btn-stop" class="mode-btn hidden" onclick="stopSearch()">Stop</button>
+            </div>
+        </div>
+
+        <!-- Random Chat View -->
+        <div id="random-chat-view" class="flex-1 flex flex-col">
+            <div id="random-chat-box" class="chat-box"></div>
+            <div class="px-4 pb-4">
+                <div id="random-typing" class="typing-indicator hidden"></div>
+                <div id="input-bar">
+                    <input id="random-msg-input" type="text" placeholder="Write a message..." maxlength="2000" onkeydown="if(event.key==='Enter') sendMessage('random')">
+                    <button id="btn-send-random" onclick="sendMessage('random')" disabled>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Public Chat View -->
+        <div id="public-chat-view" class="flex-1 flex flex-col hidden">
+            <div id="public-chat-box" class="chat-box"></div>
+            <div class="px-4 pb-4">
+                <div id="input-bar">
+                    <input id="public-msg-input" type="text" placeholder="Write a message..." maxlength="2000" onkeydown="if(event.key==='Enter') sendMessage('public')">
+                    <button id="btn-send-public" onclick="sendMessage('public')" disabled>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group Chat View -->
+        <div id="group-chat-view" class="flex-1 flex flex-col hidden">
+            <!-- Idle state -->
+            <div id="group-idle" class="flex-1 flex flex-col items-center justify-center gap-4 p-6">
+                <div class="text-[#65676b] text-sm text-center max-w-xs">
+                    Enter a room code to join or create a private encrypted group.
+                </div>
+                <div class="flex gap-2 w-full max-w-sm">
+                    <input id="room-code-input" type="text" placeholder="Room code..." class="input input-bordered flex-1" onkeydown="if(event.key==='Enter') joinCustomRoom()">
+                    <button class="btn btn-primary btn-sm" onclick="joinCustomRoom()">Join</button>
+                </div>
+            </div>
+            <!-- Active state -->
+            <div id="group-active" class="flex-1 flex flex-col hidden">
+                <div id="group-chat-box" class="chat-box"></div>
+                <div class="px-4 pb-4">
+                    <div id="group-typing" class="typing-indicator hidden"></div>
+                    <div id="input-bar">
+                        <input id="group-msg-input" type="text" placeholder="Write a message..." maxlength="2000" onkeydown="if(event.key==='Enter') sendMessage('group')">
+                        <button id="btn-send-group" onclick="sendMessage('group')" disabled>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== CONFIG ==========
+const WSS_URL = 'wss://chat.1year.site/ws';
+
+// ========== STATE ==========
+let conn = null;
+let currentMode = 'random';
+let myNickname = '';
+let isSearching = false;
+let randomPartnerName = 'Stranger';
+let matchedMode = null;
+let currentGroupId = null;
+let rawCustomRoomCode = null;
+let currentAesKey = null;
+
+// ========== DOM REFS ==========
+const $ = id => document.getElementById(id);
+const randomView = $('random-chat-view');
+const publicView = $('public-chat-view');
+const groupView = $('group-chat-view');
+const randomBox = $('random-chat-box');
+const publicBox = $('public-chat-box');
+const groupBox = $('group-chat-box');
+const chatTitle = $('chat-title');
+const btnStart = $('btn-start');
+const btnStop = $('btn-stop');
+const navRandom = $('nav-random');
+const navPublic = $('nav-public');
+const navGroup = $('nav-group');
+
+// ========== CRYPTO ==========
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function deriveAesKey(passphrase) {
+    const msgBuffer = new TextEncoder().encode(passphrase);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+    return window.crypto.subtle.importKey('raw', hashBuffer, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function encryptMsg(msg, key) {
+    if (!key) return msg;
+    try {
+        const aesKey = await deriveAesKey(key);
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const encoded = new TextEncoder().encode(msg);
+        const ciphertext = await window.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, encoded);
+        const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+        combined.set(iv, 0);
+        combined.set(new Uint8Array(ciphertext), iv.length);
+        let binary = '';
+        for (let i = 0; i < combined.length; i++) binary += String.fromCharCode(combined[i]);
+        return btoa(binary);
+    } catch(e) { console.error('Encrypt failed', e); return msg; }
+}
+
+async function decryptMsg(msg, key) {
+    if (!key) return msg;
+    try {
+        const aesKey = await deriveAesKey(key);
+        const binary = atob(msg);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const iv = bytes.slice(0, 12);
+        const ciphertext = bytes.slice(12);
+        const decrypted = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, ciphertext);
+        return new TextDecoder().decode(decrypted);
+    } catch(e) { console.error('Decrypt failed', e); return msg; }
+}
+
+// ========== UI HELPERS ==========
+function setChatTitle(text) { chatTitle.innerText = text; }
+
+function logMessage(container, type, name, msg) {
+    const div = document.createElement('div');
+    div.className = 'chat-bubble ' + type;
+    if (type === 'self') {
+        div.innerHTML = msg;
+    } else if (type === 'other') {
+        div.innerHTML = '<div class="name-label">' + escapeHtml(name) + '</div>' + escapeHtml(msg);
+    } else {
+        div.innerHTML = msg;
+    }
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function logSystem(container, msg) {
+    const div = document.createElement('div');
+    div.className = 'chat-bubble system';
+    div.innerText = msg;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
+function updateStatus(text, type) {
+    const dot = $('status-dot');
+    const txt = $('status-text');
+    dot.className = 'status-dot ' + type;
+    txt.innerText = text;
+}
+
+function setRandomUI(state) {
+    if (state === 'idle') {
+        btnStart.classList.remove('hidden');
+        btnStop.classList.add('hidden');
+    } else if (state === 'waiting' || state === 'connected') {
+        btnStart.classList.add('hidden');
+        btnStop.classList.remove('hidden');
+    } else {
+        btnStart.classList.remove('hidden');
+        btnStop.classList.add('hidden');
+        matchedMode = null;
+        isSearching = false;
+    }
+}
+
+function updateNavActive(mode) {
+    [navRandom, navPublic, navGroup].forEach(el => el.classList.remove('active'));
+    if (mode === 'random') navRandom.classList.add('active');
+    else if (mode === 'public') navPublic.classList.add('active');
+    else if (mode === 'group') navGroup.classList.add('active');
+}
+
+// ========== MODE SWITCH ==========
+function switchMode(mode) {
+    if (mode === currentMode) return;
+    if ((currentMode === 'random') && (isSearching || matchedMode)) {
+        if (!confirm('Switch mode? You will leave the current chat.')) return;
+        conn.send(JSON.stringify({ action: 'stop' }));
+        isSearching = false;
+        matchedMode = null;
+    }
+
+    randomView.classList.add('hidden');
+    publicView.classList.add('hidden');
+    groupView.classList.add('hidden');
+
+    currentMode = mode;
+    updateNavActive(mode);
+
+    if (mode === 'random') {
+        randomView.classList.remove('hidden');
+        setChatTitle('Random Chat');
+        setRandomUI('idle');
+    } else if (mode === 'public') {
+        publicView.classList.remove('hidden');
+        setChatTitle('Public Lounge');
+        $('btn-send-public').disabled = false;
+    } else if (mode === 'group') {
+        groupView.classList.remove('hidden');
+        if (currentGroupId) {
+            $('group-idle').classList.add('hidden');
+            $('group-active').classList.remove('hidden');
+            setChatTitle('Room: ' + currentGroupId.substring(0, 8) + '...');
+        } else {
+            $('group-idle').classList.remove('hidden');
+            $('group-active').classList.add('hidden');
+            setChatTitle('Custom Room');
+        }
+    }
+}
+
+// ========== CHAT ACTIONS ==========
+function startSearch() {
+    if (!conn || conn.readyState !== WebSocket.OPEN) return;
+    isSearching = true;
+    matchedMode = null;
+    randomBox.innerHTML = '';
+    conn.send(JSON.stringify({ action: 'find_partner', mode: 'text' }));
+    setRandomUI('waiting');
+    logSystem(randomBox, 'Looking for a partner...');
+    setChatTitle('Random Chat (Searching...)');
+}
+
+function stopSearch() {
+    if (!conn || conn.readyState !== WebSocket.OPEN) return;
+    conn.send(JSON.stringify({ action: 'stop' }));
+    isSearching = false;
+    matchedMode = null;
+    setRandomUI('idle');
+    setChatTitle('Random Chat');
+    logSystem(randomBox, 'Search stopped.');
+}
+
+function sendMessage(context) {
+    const inputMap = { random: 'random-msg-input', public: 'public-msg-input', group: 'group-msg-input' };
+    const btnMap = { random: 'btn-send-random', public: 'btn-send-public', group: 'btn-send-group' };
+    const input = $(inputMap[context]);
+    const msg = input.value.trim();
+    if (!msg || !conn || conn.readyState !== WebSocket.OPEN) return;
+
+    input.value = '';
+    $(btnMap[context]).disabled = true;
+
+    if (context === 'random') {
+        const encrypted = currentAesKey ? encryptMsg(msg, currentAesKey) : Promise.resolve(msg);
+        encrypted.then(payload => {
+            conn.send(JSON.stringify({ action: 'message', content: payload, context: 'random', type: 'text' }));
+            logMessage(randomBox, 'self', null, escapeHtml(msg));
+        });
+    } else if (context === 'public') {
+        conn.send(JSON.stringify({ action: 'public_message', msg }));
+        logMessage(publicBox, 'self', null, escapeHtml(msg));
+    } else if (context === 'group') {
+        if (!rawCustomRoomCode) return;
+        encryptMsg(msg, rawCustomRoomCode).then(payload => {
+            conn.send(JSON.stringify({ action: 'group_message', msg: payload }));
+            logMessage(groupBox, 'self', null, escapeHtml(msg));
+        });
+    }
+}
+
+// ========== GROUP ==========
+async function joinCustomRoom() {
+    const code = $('room-code-input').value.trim();
+    if (!code) return alert('Enter a room code!');
+    if (!conn || conn.readyState !== WebSocket.OPEN) return;
+
+    rawCustomRoomCode = code;
+    const hashed = await sha256(code);
+    groupBox.innerHTML = '';
+    conn.send(JSON.stringify({ action: 'join_group', group_id: hashed }));
+}
+
+function leaveCustomRoom() {
+    if (conn && conn.readyState === WebSocket.OPEN) {
+        conn.send(JSON.stringify({ action: 'leave_group' }));
+    }
+    currentGroupId = null;
+    rawCustomRoomCode = null;
+    $('group-idle').classList.remove('hidden');
+    $('group-active').classList.add('hidden');
+    setChatTitle('Custom Room');
+}
+
+// ========== INPUT HANDLING ==========
+['random', 'public', 'group'].forEach(ctx => {
+    const input = $(ctx + '-msg-input');
+    const btn = $('btn-send-' + ctx);
+    if (!input || !btn) return;
+    input.addEventListener('input', function() {
+        btn.disabled = !this.value.trim();
+    });
+});
+
+// ========== WEBSOCKET ==========
+function initSocket() {
+    conn = new WebSocket(WSS_URL);
+
+    conn.onopen = function () {
+        updateStatus('Connected', 'success');
+        conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
+        conn.send(JSON.stringify({ action: 'set_profile' }));
+        if (currentMode === 'random') {
+            setRandomUI('idle');
+        }
+    };
+
+    conn.onclose = function () {
+        updateStatus('Disconnected', 'error');
+        setTimeout(initSocket, 3000);
+        setRandomUI('idle');
+        matchedMode = null;
+    };
+
+    conn.onmessage = async function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.status === 'identity') {
+            myNickname = data.nickname;
+            $('display-nickname').innerText = myNickname;
+            $('avatar-char').innerText = myNickname.charAt(0).toUpperCase();
+            $('online-count').innerText = data.online_count || '0';
+        }
+        else if (data.status === 'stats') {
+            $('online-count').innerText = data.count;
+        }
+        else if (data.status === 'system') {
+            const box = (currentMode === 'random') ? randomBox : publicBox;
+            logSystem(box, data.msg);
+        }
+        else if (data.status === 'waiting') {
+            if (isSearching) {
+                setRandomUI('waiting');
+                logSystem(randomBox, data.msg);
+            }
+        }
+        else if (data.status === 'connected') {
+            if (data.shared_key) currentAesKey = data.shared_key;
+            randomPartnerName = data.nickname || 'Stranger';
+            matchedMode = data.mode || 'text';
+            isSearching = false;
+            randomBox.innerHTML = '';
+            setRandomUI('connected');
+            logSystem(randomBox, 'Connected with ' + randomPartnerName);
+            setChatTitle('Random Chat (' + randomPartnerName + ')');
+        }
+        else if (data.status === 'disconnected') {
+            setRandomUI('idle');
+            logSystem(randomBox, randomPartnerName + ' left.');
+            randomPartnerName = 'Stranger';
+            matchedMode = null;
+            setChatTitle('Random Chat');
+        }
+        else if (data.status === 'message') {
+            const decrypted = await decryptMsg(data.msg, currentAesKey);
+            logMessage(randomBox, 'other', randomPartnerName, escapeHtml(decrypted));
+        }
+        else if (data.status === 'public_msg') {
+            logMessage(publicBox, 'other', data.name, escapeHtml(data.msg));
+        }
+        else if (data.status === 'group_joined') {
+            currentGroupId = data.group_id;
+            $('group-idle').classList.add('hidden');
+            $('group-active').classList.remove('hidden');
+            logSystem(groupBox, data.msg);
+            setChatTitle('Room: ' + data.group_id.substring(0, 8) + '...');
+        }
+        else if (data.status === 'group_kicked') {
+            currentGroupId = null;
+            $('group-idle').classList.remove('hidden');
+            $('group-active').classList.add('hidden');
+            $('group-msg-input').value = '';
+        }
+        else if (data.status === 'group_system') {
+            logSystem(groupBox, data.msg);
+        }
+        else if (data.status === 'group_msg') {
+            const decrypted = await decryptMsg(data.msg, rawCustomRoomCode);
+            logMessage(groupBox, 'other', data.name, escapeHtml(decrypted));
+        }
+        else if (data.status === 'typing') {
+            const ctx = data.context || 'random';
+            const typingEl = $(ctx + '-typing');
+            if (typingEl) {
+                typingEl.innerText = data.name + ' is typing...';
+                typingEl.classList.remove('hidden');
+                clearTimeout(typingEl._timer);
+                typingEl._timer = setTimeout(() => typingEl.classList.add('hidden'), 2000);
+            }
+        }
+    };
+}
+
+// ========== INIT ==========
+initSocket();
+</script>
+</body>
+</html>
