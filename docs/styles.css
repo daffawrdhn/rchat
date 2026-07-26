@@ -1,0 +1,256 @@
+/* ============================================================
+   DESIGN TOKENS — TELEGRAM LIGHT PALETTE
+   ============================================================ */
+:root,
+[data-theme="light"] {
+    --app-height:      100dvh;
+
+    /* Telegram Light Theme Colors */
+    --bg-base:         #e7ebf0;   /* Telegram main light background */
+    --bg-surface:      #ffffff;   /* Telegram panels & headers */
+    --bg-card:         #ffffff;
+    --bg-card-hover:   #f4f5f6;
+    --bg-input:        #f1f5f9;
+    --bg-input-focus:  #ffffff;
+    --bg-navbar:       #ffffff;
+    --bg-chat-input:   #ffffff;
+    --bg-chat-header:  #ffffff;
+
+    /* Borders */
+    --border-default:  #dfe5ec;
+    --border-hover:    #cdd6e2;
+    --border-focus:    #2481cc;   /* Telegram Blue */
+
+    /* Text */
+    --text-base:       #000000;
+    --text-muted:      #707579;   /* Telegram light muted text */
+    --text-faint:      #9ea3a7;
+    --text-on-accent:  #ffffff;
+
+    /* Chat bubbles */
+    --bubble-in-bg:    #ffffff;
+    --bubble-in-text:  #000000;
+    --bubble-in-border:#ffffff;
+
+    /* Scrollbar */
+    --scrollbar:       rgba(0, 0, 0, 0.08);
+    --scrollbar-hover: rgba(0, 0, 0, 0.15);
+
+    /* Divider */
+    --divider-color:   #dfe5ec;
+    --divider-opacity: 0.8;
+}
+
+/* ============================================================
+   BASE LAYOUT
+   ============================================================ */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    height: var(--app-height);
+    overflow: hidden;
+    background-color: var(--bg-base);
+    color: var(--text-base);
+}
+
+/* Reset bento-style glass panels to flat solid panels */
+.glass-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    box-shadow: none;
+    transition: background-color 0.2s ease;
+}
+
+/* Hide background glowing blobs */
+.blob-1, .blob-2 {
+    display: none !important;
+}
+
+/* ============================================================
+   TELEGRAM INPUT FIELD OVERRIDES
+   ============================================================ */
+.glass-input {
+    background: #f1f5f9 !important;
+    border: 1px solid #dfe5ec !important;
+    color: #000000 !important;
+    transition: all 0.2s ease;
+}
+.glass-input::placeholder {
+    color: #707579 !important;
+    opacity: 0.7 !important;
+}
+.glass-input:focus {
+    background: #ffffff !important;
+    border-color: var(--border-focus) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* ============================================================
+   TELEGRAM CHAT BUBBLES
+   ============================================================ */
+.chat-bubble {
+    border-radius: 14px 14px 14px 2px !important;
+    padding: 8px 14px !important;
+    font-size: 0.95rem !important;
+    max-width: 75% !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.07) !important;
+    line-height: 1.45 !important;
+    word-break: break-word;
+}
+
+/* Incoming Bubble */
+.chat-start .chat-bubble {
+    background: var(--bubble-in-bg) !important;
+    border: none !important;
+    color: var(--bubble-in-text) !important;
+}
+
+/* Outgoing Bubble (Classic Telegram Light Green) */
+.chat-end .chat-bubble {
+    background: #effdde !important;   
+    border: none !important;
+    color: #000000 !important;
+    border-radius: 14px 14px 2px 14px !important;
+}
+
+/* System and Divider message overrides */
+.divider {
+    color: #707579 !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    margin: 16px 0 !important;
+}
+
+/* ============================================================
+   ACTIVE BUTTON OVERRIDES (Preserving HTML class signatures)
+   ============================================================ */
+
+/* Match Mode button inactive */
+.match-mode-btn {
+    background-color: #f1f5f9 !important;
+    border: 1px solid #dfe5ec !important;
+    color: #707579 !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
+.match-mode-btn:hover {
+    background-color: #e2e8f0 !important;
+}
+
+/* Match Mode button active (Tailwind trigger class) */
+.match-mode-btn.bg-gradient-to-br {
+    background-image: none !important;
+    background-color: rgba(36, 129, 204, 0.15) !important;
+    border-color: #2481cc !important;
+    color: #2481cc !important;
+}
+
+/* User & Target Gender buttons inactive */
+.user-gender-btn,
+.target-gender-btn {
+    background-color: transparent !important;
+    border: none !important;
+    color: #707579 !important;
+    font-weight: bold !important;
+}
+.user-gender-btn:hover,
+.target-gender-btn:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* User & Target Gender buttons active (Tailwind trigger class) */
+.user-gender-btn.bg-white\/15,
+.target-gender-btn.bg-white\/15 {
+    background-color: #2481cc !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
+}
+
+/* ============================================================
+   NAVIGATION MENUS
+   ============================================================ */
+.glass-nav-item {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    transition: background-color 0.15s ease;
+}
+.glass-nav-item:hover {
+    background-color: #f4f5f6 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.glass-nav-item.active {
+    background-color: #f4f5f6 !important;
+    border-left: 3px solid #2481cc !important;
+}
+.glass-nav-item.active span {
+    color: #2481cc !important;
+}
+.glass-nav-item.active .font-bold {
+    color: #000000 !important;
+}
+.glass-nav-item svg {
+    color: #707579;
+    transition: color 0.15s ease;
+}
+.glass-nav-item:hover svg {
+    color: #2481cc;
+}
+.glass-nav-item.active svg {
+    color: #2481cc !important;
+}
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+.chat-scroll::-webkit-scrollbar        { width: 4px; height: 4px; }
+.chat-scroll::-webkit-scrollbar-track  { background: transparent; }
+.chat-scroll::-webkit-scrollbar-thumb  {
+    background-color: var(--scrollbar);
+    border-radius: 9999px;
+}
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-hover);
+}
+
+/* ============================================================
+   VIDEO LAYOUT
+   ============================================================ */
+#video-container {
+    width: 100%;
+    height: 40vh;
+    overflow: hidden;
+    display: none;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #dfe5ec;
+    margin-bottom: 0;
+}
+@media (min-width: 1024px) {
+    #video-container { height: 380px; }
+}
+
+.local-wrapper {
+    width: 25%;
+    max-width: 160px;
+    min-width: 90px;
+    height: auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    border: 1px solid #dfe5ec;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ============================================================
+   INCOMING CALL OVERLAY
+   ============================================================ */
+.theme-overlay {
+    background: #e7ebf0;
+}
+
+.theme-start-overlay {
+    background: #e7ebf0;
+}
