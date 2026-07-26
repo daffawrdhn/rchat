@@ -99,6 +99,44 @@ Open `http://localhost:8000/index.html` in your web browser.
 
 For a production deployment, WebRTC and camera/mic access **require an SSL connection (HTTPS/WSS)**. 
 
+### 0. Prerequisites — Fresh Ubuntu VPS
+
+Install system packages:
+
+```bash
+sudo apt update && sudo apt upgrade -y
+
+# PHP 8.x + required extensions (sockets & mbstring for Ratchet)
+sudo apt install -y php php-cli php-sockets php-mbstring php-xml composer git
+
+# Web server (choose one)
+sudo apt install -y apache2         # Option A: Apache
+# sudo apt install -y nginx         # Option B: Nginx
+
+# SSL certificate automation
+sudo apt install -y certbot python3-certbot-apache  # for Apache
+# sudo apt install -y certbot python3-certbot-nginx  # for Nginx
+
+# WebRTC TURN server (required for video/voice calls)
+sudo apt install -y coturn
+
+# Optional: Redis (for multi-server scaling — not currently used by default)
+# sudo apt install -y redis-server
+```
+
+Clone the project and install PHP dependencies:
+
+```bash
+cd /var/www
+sudo git clone https://github.com/daffawrdhn/rchat.git
+cd rchat
+composer install --no-dev
+
+# Copy environment config
+cp .env.example .env
+nano .env     # adjust WS_PORT, WS_ALLOWED_ORIGINS, etc.
+```
+
 ### 1. Systemd Service (Process Daemon)
 To keep the WebSocket server running continuously in the background, configure a systemd daemon on your VPS.
 
