@@ -304,5 +304,16 @@ Always configure your cloud provider's network firewall (Security Group / Inboun
 
 ---
 
+## 🌐 Live Demos
+
+| Platform | URL |
+|---|---|
+| 🏠 **Production** | [chat.1year.site](https://chat.1year.site) |
+| ☁️ **Netlify** | [gilded-jalebi-0ed865.netlify.app](https://gilded-jalebi-0ed865.netlify.app) |
+| 📘 **GitHub Pages** | [daffawrdhn.github.io/rchat](https://daffawrdhn.github.io/rchat) |
+| 🌊 **Surge** | [xoxo-chat.surge.sh](https://xoxo-chat.surge.sh) |
+
+All clients connect to the same WebSocket backend (`wss://chat.1year.site/ws`). Source code per platform: `netlify/`, `docs/`, `surge/`.
+
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

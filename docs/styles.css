@@ -227,9 +227,16 @@ body {
     border: none;
     border-bottom: 1px solid #dfe5ec;
     margin-bottom: 0;
+    flex-shrink: 0;
+}
+#video-container.full-height {
+    flex: 1;
+    height: auto;
+    min-height: 0;
 }
 @media (min-width: 1024px) {
     #video-container { height: 380px; }
+    #video-container.full-height { height: auto; }
 }
 
 .local-wrapper {

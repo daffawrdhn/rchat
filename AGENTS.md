@@ -72,3 +72,4 @@ To add a new platform: copy `netlify/` → `<dir>/`, update `sw.js` cache name, 
 - WebSocket connects after user clicks "I Agree"; returning users (sessionStorage) auto-connect on load.
 - Connection status indicator is in the sidebar below nickname, visible in all modes.
 - `SafeOriginCheck.php` supports subdomain matching (e.g. `netlify.app` matches `*.netlify.app`). The parent `OriginCheck::close()` is private, so the response is sent via Guzzle directly.
+- Video/voice call layout: `#video-container` has `height: 40vh` (380px desktop). When `full-height` class is added (in video/voice mode), it switches to `flex: 1` to fill available space. The JS hides `#random-chat-box` and input area during video/voice calls to prevent dead space. The `full-height` CSS rule was missing initially (only JS toggled it) — added in `styles.css`.
