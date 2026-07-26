@@ -199,35 +199,6 @@ class Chat implements MessageComponentInterface
             case 'next':
                 $this->handleNext($from);
                 break;
-
-            case 'react':
-                $msgId = $data['msgId'] ?? '';
-                $reaction = $data['reaction'] ?? '';
-                if ($msgId && $reaction) {
-                    // Broadcast to partner (random)
-                    if (isset($this->pairs[$from->resourceId])) {
-                        $this->pairs[$from->resourceId]->send(json_encode([
-                            'status' => 'reaction', 'msgId' => $msgId, 'reaction' => $reaction
-                        ]));
-                    }
-                    // Broadcast to group members
-                    if ($from->currentGroup && isset($this->groups[$from->currentGroup])) {
-                        foreach ($this->groups[$from->currentGroup] as $client) {
-                            if ($client !== $from) {
-                                $client->send(json_encode([
-                                    'status' => 'reaction', 'msgId' => $msgId, 'reaction' => $reaction
-                                ]));
-                            }
-                        }
-                    }
-                    // Broadcast to public (exclude sender)
-                    foreach ($this->clients as $client) {
-                        if ($client !== $from && !isset($this->pairs[$from->resourceId]) && $client->resourceId !== $from->resourceId) {
-                            // Only broadcast to public if not in a private chat
-                        }
-                    }
-                }
-                break;
         }
     }
 
