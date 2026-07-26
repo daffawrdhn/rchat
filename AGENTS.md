@@ -16,7 +16,9 @@ Single-page anonymous chat platform. No database — all state (connections, pai
 | Browser-exposed config | `config-env.php` (served as JS, sets `window.XOXO_CONFIG`) |
 | Netlify static client | `netlify/index.html` (+ `netlify/config.js` replaces `config-env.php`) |
 | GitHub Pages client | `docs/index.html` (+ `docs/config.js` replaces `config-env.php`) |
+| Surge client | `surge/index.html` (+ `surge/config.js` replaces `config-env.php`) |
 | Origin check fix | `src/SafeOriginCheck.php` (subdomain matching + inline close) |
+| Config for static clients | `.env.netlify` (example env for static platform deployment) |
 
 ## Developer commands
 
@@ -31,7 +33,7 @@ There is no local Tailwind build — both Tailwind CSS and DaisyUI are loaded vi
 
 ## Configuration
 
-Copy `.env.example` → `.env`. All settings are loaded at runtime by `config.php`. Key settings: `WS_PORT` (default 8080), `WS_PUBLIC_URL`, `WS_ALLOWED_ORIGINS`, `ANTI_SPAM_COOLDOWN` (0.5s), `IP_CONNECTION_LIMIT` (5), `GROUP_INACTIVITY_TIMEOUT` (300s).
+Copy `.env.example` → `.env`. All settings are loaded at runtime by `config.php`. Key settings: `WS_PORT` (default 8080), `WS_PUBLIC_URL`, `WS_ALLOWED_ORIGINS` (current: `chat.1year.site,localhost,127.0.0.1,netlify.app,github.io,surge.sh`), `ANTI_SPAM_COOLDOWN` (0.5s), `IP_CONNECTION_LIMIT` (5), `GROUP_INACTIVITY_TIMEOUT` (300s).
 
 ## Testing quirks
 
@@ -48,9 +50,9 @@ Run `php server.php` as a systemd service. Proxy WebSocket traffic (`/ws` → `w
 
 PSR-4 autoload: `Hackertampan\Rchat\` maps to `src/`. The handler class `MyApp\Chat` lives in `src/Chat.php` (uses legacy namespace, not the PSR-4 prefix).
 
-## Static clients (Netlify / GitHub Pages)
+## Static clients (Netlify / GitHub Pages / Surge)
 
-`netlify/` and `docs/` are standalone static copies of the production client. Differences from the PHP-served `index.html`:
+`netlify/`, `docs/` and `surge/` are standalone static copies of the production client. Differences from the PHP-served `index.html`:
 - `config.js` replaces `config-env.php` (hardcoded `window.XOXO_CONFIG`)
 - `sw.js` uses a unique cache name per platform
 - All paths are relative; no PHP dependency
