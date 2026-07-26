@@ -328,21 +328,21 @@ function updateMatchModeUI(mode) {
     if (mode === 'video') {
         setChatTitle('Random Video');
         if (startIcon) startIcon.innerText = "🎥";
-        if (startHeading) startHeading.innerText = "Video Matchmaking";
-        if (startDesc) startDesc.innerText = "Match and start high-quality video call instantly and anonymously with strangers.";
-        btnStart.innerText = "Start Video Search";
+        if (startHeading) startHeading.innerText = t('video_matchmaking');
+        if (startDesc) startDesc.innerText = t('video_matchmaking_desc');
+        btnStart.innerText = t('start_searching');
     } else if (mode === 'voice') {
         setChatTitle('Random Call');
         if (startIcon) startIcon.innerText = "📞";
-        if (startHeading) startHeading.innerText = "Voice Matchmaking";
-        if (startDesc) startDesc.innerText = "Match and start voice calls instantly and anonymously with strangers.";
-        btnStart.innerText = "Start Voice Search";
+        if (startHeading) startHeading.innerText = t('voice_matchmaking');
+        if (startDesc) startDesc.innerText = t('voice_matchmaking_desc');
+        btnStart.innerText = t('start_searching');
     } else {
         setChatTitle('Meet Random');
         if (startIcon) startIcon.innerText = "💬";
-        if (startHeading) startHeading.innerText = "Stranger Matchmaking";
-        if (startDesc) startDesc.innerText = "Match randomly, type secretly, or share video calls with stranger completely anonymously.";
-        btnStart.innerText = "Start Searching";
+        if (startHeading) startHeading.innerText = t('stranger_matchmaking');
+        if (startDesc) startDesc.innerText = t('stranger_matchmaking_desc');
+        btnStart.innerText = t('start_searching');
     }
 }
 
@@ -351,7 +351,7 @@ function switchMode(mode) {
 
     if (mode !== currentMode) {
         if (isMatchingMode && (isSearching || matchedMode !== null)) {
-            const confirmMsg = "Apakah Anda yakin ingin mengganti mode? Ini akan memutuskan obrolan atau membatalkan pencarian aktif Anda.";
+            const confirmMsg = t('confirm_switch_mode');
             if (!confirm(confirmMsg)) {
                 return; // Keep current mode
             }
@@ -1148,16 +1148,41 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeDisappearingElement) {
                 activeDisappearingElement.outerHTML = `
                     <div class="flex items-center gap-1.5 text-xs font-bold text-base-content/40 bg-base-300/40 px-3 py-2 rounded-lg border border-base-content/5 select-none">
-                        <span>✕</span> Media dibuka (Pesan Sekali Lihat)
+                        <span>✕</span> ${t('media_opened')}
                     </div>`;
                 activeDisappearingElement = null;
             }
         });
     }
 
-    // Always use light mode
-    document.documentElement.setAttribute('data-theme', 'light');
-    localStorage.removeItem('theme');
+    // Dark mode toggle
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        const toggle = document.getElementById('dark-mode-toggle');
+        if (toggle) toggle.checked = true;
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+    const darkToggle = document.getElementById('dark-mode-toggle');
+    if (darkToggle) {
+        darkToggle.addEventListener('change', () => {
+            const theme = darkToggle.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        });
+    }
+
+    // Language toggle
+    applyTranslations();
+    const langToggle = document.getElementById('lang-toggle');
+    if (langToggle) {
+        langToggle.checked = (currentLang === 'id');
+        langToggle.addEventListener('change', () => {
+            const lang = langToggle.checked ? 'id' : 'en';
+            switchLang(lang);
+        });
+    }
 
     // Flag fetching removed
 

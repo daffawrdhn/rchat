@@ -3,7 +3,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const TARGETS = ['netlify', 'docs', 'surge'];
-const FILES = ['script.js', 'styles.css', 'privacy.html', 'terms.html'];
+const FILES = ['script.js', 'styles.css', 'lang.js', 'privacy.html', 'terms.html'];
 
 let count = 0;
 for (const target of TARGETS) {

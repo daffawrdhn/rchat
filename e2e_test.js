@@ -225,11 +225,11 @@ const path = require('path');
             await page2.evaluate(() => document.getElementById('img_modal').close());
             console.log("[User2] Closed image modal.");
 
-            // Verify that the view-once image container is replaced by "Media dibuka"
+            // Verify that the view-once image container is replaced by "Media opened"
             await page2.waitForFunction(
                 () => {
                     const box = document.getElementById('random-chat-box');
-                    return box && box.innerText.includes("Media dibuka");
+                    return box && (box.innerText.includes("Media opened") || box.innerText.includes("Media dibuka"));
                 },
                 { timeout: 5000 }
             );
