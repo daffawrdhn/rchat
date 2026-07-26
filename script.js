@@ -412,7 +412,6 @@ function setRandomUI(state) {
     const startOverlay = document.getElementById('start-overlay');
 
     if (state === 'waiting') {
-        updateStatus("Searching...", "warning");
         btnStop.classList.remove('hidden');
         if (startOverlay) startOverlay.classList.add('hidden');
     }
@@ -442,11 +441,8 @@ function setRandomUI(state) {
                 videoContainer.classList.remove('hidden');
             }
         }
-        
-        if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') updateStatus("Online", "success");
         if (startOverlay) startOverlay.classList.add('hidden');
     } else if (state === 'disconnected_partner') {
-        if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') updateStatus("Partner Left", "error");
         showTyping(false);
         btnStart.classList.remove('hidden');
         if (startOverlay) startOverlay.classList.remove('hidden');
@@ -626,7 +622,6 @@ function startRandomChat() {
 
     btnStart.classList.add('hidden');
     btnStop.classList.remove('hidden');
-    updateStatus("Searching...", "warning");
     
     const startOverlay = document.getElementById('start-overlay');
     if (startOverlay) startOverlay.classList.add('hidden');
@@ -636,7 +631,6 @@ function stopRandomChat() {
     isSearching = false;
     btnStop.classList.add('hidden');
     btnStart.classList.remove('hidden');
-    updateStatus("Idle", "warning");
     logSystem(randomBox, "Search canceled.");
     
     // Hang up WebRTC and notify backend to clear matching
