@@ -56,7 +56,7 @@ PSR-4 autoload: `Hackertampan\Rchat\` maps to `src/`. The handler class `MyApp\C
 - All paths are relative; no PHP dependency
 - WebSocket always connects to `wss://chat.1year.site/ws`
 
-To add a new platform: copy `netlify/` → `<dir>/`, update `sw.js` cache name, write a README, add origin to `.env` on the server.
+To add a new platform: copy `netlify/` → `<dir>/`, update `sw.js` cache name, write a README, add origin to `.env` on the server. Don't forget to also copy `privacy.html` and `terms.html` (needed by SW cache).
 
 ## Notes
 
