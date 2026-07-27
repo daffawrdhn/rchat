@@ -91,6 +91,35 @@ const LANG = {
         // Install
         install_app: "Install XOXO App",
         install_desc: "For the best experience, add this to your home screen.",
+        // Page
+        page_title: "XOXO Chat - Chat with Stranger Anonymously",
+        stranger: "Stranger",
+        is_typing: "is typing...",
+        self_name: "You",
+        view_once: "View Once",
+        live_label: "LIVE",
+        preview_alt: "Preview",
+        close_btn: "close",
+        // Chat titles
+        title_random_video: "Random Video",
+        title_random_call: "Random Call",
+        // Gender
+        male: "Male",
+        female: "Female",
+        all_genders: "All Genders",
+        // Tooltips
+        share_image: "Share Image",
+        voice_message: "Voice Message",
+        video_call_btn: "Video Call",
+        voice_call_btn: "Voice Call",
+        // Placeholders
+        type_message_random: "Type a message...",
+        type_message_public: "Message everyone in public lobby...",
+        type_message_group: "Message group...",
+        // Notifications
+        new_msg_from: "New message from",
+        image_attachment: "[Image]",
+        audio_attachment: "[Audio]",
     },
     id: {
         // Sidebar
@@ -184,6 +213,35 @@ const LANG = {
         // Install
         install_app: "Pasang XOXO App",
         install_desc: "Untuk pengalaman terbaik, tambahkan ini ke layar awal Anda.",
+        // Page
+        page_title: "XOXO Chat - Ngobrol dengan Stranger Anonim",
+        stranger: "Stranger",
+        is_typing: "sedang mengetik...",
+        self_name: "Kamu",
+        view_once: "Sekali Lihat",
+        live_label: "LIVE",
+        preview_alt: "Pratinjau",
+        close_btn: "tutup",
+        // Chat titles
+        title_random_video: "Video Random",
+        title_random_call: "Panggilan Random",
+        // Gender
+        male: "Pria",
+        female: "Wanita",
+        all_genders: "Semua Gender",
+        // Tooltips
+        share_image: "Bagikan Gambar",
+        voice_message: "Pesan Suara",
+        video_call_btn: "Panggilan Video",
+        voice_call_btn: "Panggilan Suara",
+        // Placeholders
+        type_message_random: "Ketik pesan...",
+        type_message_public: "Kirim pesan ke lobi publik...",
+        type_message_group: "Ketik pesan grup...",
+        // Notifications
+        new_msg_from: "Pesan baru dari",
+        image_attachment: "[Gambar]",
+        audio_attachment: "[Audio]",
     }
 };
 
@@ -203,6 +261,16 @@ function applyTranslations() {
         const key = el.getAttribute('data-i18n-placeholder');
         const translated = t(key);
         if (translated) el.placeholder = translated;
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        const translated = t(key);
+        if (translated) el.title = translated;
+    });
+    document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+        const key = el.getAttribute('data-i18n-alt');
+        const translated = t(key);
+        if (translated) el.alt = translated;
     });
     const langBtn = document.getElementById('lang-toggle');
     if (langBtn) langBtn.innerText = (currentLang === 'id') ? '🇮🇩' : '🇺🇸';

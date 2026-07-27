@@ -9,7 +9,7 @@ let unreadVoice = 0;
 let unreadPublic = 0;
 let unreadGroup = 0;
 let isSearching = false;
-let randomPartnerName = 'Stranger';
+let randomPartnerName = t('stranger');
 let currentGroupId = null;
 let matchedMode = null;
 const seenMsgIds = new Set();
@@ -95,7 +95,7 @@ function initSocket() {
     conn = new WebSocket(socketUrl);
 
     conn.onopen = function () {
-        updateStatus("Connected", "success");
+        updateStatus(t('connected'), "success");
         conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
         conn.send(JSON.stringify({ action: 'set_profile' }));
 
@@ -110,7 +110,7 @@ function initSocket() {
     };
 
     conn.onclose = function () {
-        updateStatus("Disconnected", "error");
+        updateStatus(t('disconnected'), "error");
         setTimeout(initSocket, 3000);
         setRandomUI('disconnected');
         endCall(true);
@@ -149,7 +149,7 @@ function initSocket() {
         }
         else if (data.status === 'connected') {
             if (data.shared_key) currentAesKey = data.shared_key;
-            randomPartnerName = data.nickname || 'Stranger';
+            randomPartnerName = data.nickname || t('stranger');
             matchedMode = data.mode || 'text';
             isSearching = false;
             
@@ -162,9 +162,9 @@ function initSocket() {
             notifyBackground(`${randomPartnerName} ${t('found')}`, `${t('you_connected_with')} ${randomPartnerName}.`);
             logSystem(randomBox, `${t('connected_with')} ${randomPartnerName}.`);
             
-            let modeTitle = 'Meet Random';
-            if (matchedMode === 'video') modeTitle = 'Random Video';
-            else if (matchedMode === 'voice') modeTitle = 'Random Call';
+            let modeTitle = t('nav_random');
+            if (matchedMode === 'video') modeTitle = t('title_random_video');
+            else if (matchedMode === 'voice') modeTitle = t('title_random_call');
             setChatTitle(`${modeTitle} (${randomPartnerName})`);
 
             const videoNameSpan = document.getElementById('video-partner-name');
@@ -182,15 +182,15 @@ function initSocket() {
             setRandomUI('disconnected_partner');
             logSystem(randomBox, `${randomPartnerName} ${t('left_chat')}`);
             endCall(true);
-            randomPartnerName = 'Stranger';
+            randomPartnerName = t('stranger');
             
-            let modeTitle = 'Meet Random';
-            if (currentMode === 'video') modeTitle = 'Random Video';
-            else if (currentMode === 'voice') modeTitle = 'Random Call';
+            let modeTitle = t('nav_random');
+            if (currentMode === 'video') modeTitle = t('title_random_video');
+            else if (currentMode === 'voice') modeTitle = t('title_random_call');
             setChatTitle(modeTitle);
 
             const videoNameSpan = document.getElementById('video-partner-name');
-            if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
+            if (videoNameSpan) videoNameSpan.innerText = t('stranger');
             matchedMode = null;
         }
         else if (data.status === 'message') {
@@ -210,7 +210,7 @@ function initSocket() {
             showTyping(false);
             const decrypted = await decryptMsg(data.msg, currentAesKey);
             logMessage(randomBox, 'stranger', randomPartnerName, decrypted, data.type);
-            notifyBackground(`New message from ${randomPartnerName}`, decrypted.substring(0, 50) + (data.type === 'image' ? ' [Image]' : (data.type === 'audio' ? ' [Audio]' : '')));
+            notifyBackground(t('new_msg_from') + ' ' + randomPartnerName, decrypted.substring(0, 50) + (data.type === 'image' ? ' ' + t('image_attachment') : (data.type === 'audio' ? ' ' + t('audio_attachment') : '')));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: matchedMode || 'random' }));
         }
         else if (data.status === 'public_msg') {
@@ -218,7 +218,7 @@ function initSocket() {
             if (data.id) seenMsgIds.add(data.id);
             if (currentMode !== 'public') { unreadPublic++; updateBadges(); }
             logMessage(publicBox, 'other', data.name, data.msg, data.type);
-            notifyBackground("Public Lounge", data.name + ": " + data.msg.substring(0, 30));
+            notifyBackground(t('nav_public'), data.name + ": " + data.msg.substring(0, 30));
         }
         else if (data.status === 'group_msg') {
             if (data.id && seenMsgIds.has(data.id)) return;
@@ -226,7 +226,7 @@ function initSocket() {
             if (currentMode !== 'group') { unreadGroup++; updateBadges(); }
             const decrypted = await decryptMsg(data.msg, rawCustomRoomCode);
             logMessage(groupBox, 'other', data.name, decrypted, data.type);
-            notifyBackground("Custom Room", data.name + ": " + decrypted.substring(0, 30));
+            notifyBackground(t('custom_room'), data.name + ": " + decrypted.substring(0, 30));
             if (document.hasFocus()) conn.send(JSON.stringify({ action: 'read', context: 'group' }));
         }
         else if (data.status === 'read') {
@@ -259,7 +259,7 @@ function initSocket() {
         }
         else if (data.status === 'typing') {
             const ctx = data.context || 'random';
-            const name = data.name || ((ctx === 'random' || ctx === 'video') ? randomPartnerName : 'Stranger');
+            const name = data.name || ((ctx === 'random' || ctx === 'video') ? randomPartnerName : t('stranger'));
             showTyping(true, ctx, name);
         }
         else if (data.status === 'call_signal') handleSignalMessage(data.signal);
@@ -327,19 +327,19 @@ function updateMatchModeUI(mode) {
     const startDesc = document.getElementById('start-desc');
     
     if (mode === 'video') {
-        setChatTitle('Random Video');
+        setChatTitle(t('title_random_video'));
         if (startIcon) startIcon.innerText = "🎥";
         if (startHeading) startHeading.innerText = t('video_matchmaking');
         if (startDesc) startDesc.innerText = t('video_matchmaking_desc');
         btnStart.innerText = t('start_searching');
     } else if (mode === 'voice') {
-        setChatTitle('Random Call');
+        setChatTitle(t('title_random_call'));
         if (startIcon) startIcon.innerText = "📞";
         if (startHeading) startHeading.innerText = t('voice_matchmaking');
         if (startDesc) startDesc.innerText = t('voice_matchmaking_desc');
         btnStart.innerText = t('start_searching');
     } else {
-        setChatTitle('Meet Random');
+        setChatTitle(t('nav_random'));
         if (startIcon) startIcon.innerText = "💬";
         if (startHeading) startHeading.innerText = t('stranger_matchmaking');
         if (startDesc) startDesc.innerText = t('stranger_matchmaking_desc');
@@ -398,7 +398,7 @@ function switchMode(mode) {
         randomView.classList.add('hidden');
         publicView.classList.remove('hidden');
         groupView.classList.add('hidden');
-        setChatTitle('Public Lounge');
+        setChatTitle(t('nav_public'));
         statusWrapper.classList.remove('invisible');
         unreadPublic = 0; updateBadges();
         setTimeout(() => publicBox.scrollTop = publicBox.scrollHeight, 100);
@@ -406,7 +406,7 @@ function switchMode(mode) {
         randomView.classList.add('hidden');
         publicView.classList.add('hidden');
         groupView.classList.remove('hidden');
-        setChatTitle('Private Room');
+        setChatTitle(t('nav_group'));
         statusWrapper.classList.remove('invisible');
         unreadGroup = 0; updateBadges();
         setTimeout(() => groupBox.scrollTop = groupBox.scrollHeight, 100);
@@ -567,7 +567,7 @@ function logMessage(container, type, name, msg, msgType = 'text') {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        View Once
+                        ${t('view_once')}
                     </span>
                 </div>
             </div>`;
@@ -651,14 +651,14 @@ function stopRandomChat() {
     // Reset mode back to select preference
     currentMode = document.querySelector('.match-mode-btn.bg-gradient-to-br')?.getAttribute('data-value') || 'random';
     
-    randomPartnerName = 'Stranger';
-    let modeTitle = 'Meet Random';
-    if (currentMode === 'video') modeTitle = 'Random Video';
-    else if (currentMode === 'voice') modeTitle = 'Random Call';
+    randomPartnerName = t('stranger');
+    let modeTitle = t('nav_random');
+    if (currentMode === 'video') modeTitle = t('title_random_video');
+    else if (currentMode === 'voice') modeTitle = t('title_random_call');
     setChatTitle(modeTitle);
 
     const videoNameSpan = document.getElementById('video-partner-name');
-    if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
+    if (videoNameSpan) videoNameSpan.innerText = t('stranger');
     
     const startOverlay = document.getElementById('start-overlay');
     if (startOverlay) startOverlay.classList.remove('hidden');
@@ -676,10 +676,10 @@ function nextPartner() {
     showTyping(false);
     endCall();
     isSearching = true;
-    randomPartnerName = 'Stranger';
-    setChatTitle(currentMode === 'video' ? 'Random Video' : 'Meet Random');
+    randomPartnerName = t('stranger');
+    setChatTitle(currentMode === 'video' ? t('title_random_video') : t('nav_random'));
     const videoNameSpan = document.getElementById('video-partner-name');
-    if (videoNameSpan) videoNameSpan.innerText = 'Stranger';
+    if (videoNameSpan) videoNameSpan.innerText = t('stranger');
     conn.send(JSON.stringify({ action: 'next' }));
 }
 
@@ -701,7 +701,7 @@ async function sendMessage(context, msgType = 'text', overrideMsg = null) {
         payloadMsg = await encryptMsg(payloadMsg, rawCustomRoomCode);
     }
 
-    logMessage((context === 'random' || context === 'video') ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', 'You', (overrideMsg || msg), msgType);
+    logMessage((context === 'random' || context === 'video') ? randomBox : (context === 'public' ? publicBox : groupBox), 'you', t('self_name'), (overrideMsg || msg), msgType);
     conn.send(JSON.stringify({ action: 'message', content: payloadMsg, context: context, type: msgType }));
 
     if (msgType === 'text') { input.focus(); }
@@ -762,7 +762,7 @@ function sendTypingSignal(ctx = 'random') {
     }
 }
 
-function showTyping(show, context = 'random', name = 'Stranger') {
+function showTyping(show, context = 'random', name = t('stranger')) {
     const displayContext = (context === 'random' || context === 'video') ? 'random' : context;
     const box = displayContext === 'random' ? randomBox : (displayContext === 'public' ? publicBox : groupBox);
     if (!box) return;
@@ -779,7 +779,7 @@ function showTyping(show, context = 'random', name = 'Stranger') {
         }
         ind.innerHTML = `
             <div class="flex space-x-1.5 items-center px-4 py-2 bg-base-200/40 rounded-full border border-base-content/5">
-                <span class="font-semibold mr-1 text-base-content">${name} is typing</span>
+                <span class="font-semibold mr-1 text-base-content">${name} ${t('is_typing')}</span>
                 <span class="w-1.5 h-1.5 bg-base-content/40 rounded-full animate-bounce"></span>
                 <span class="w-1.5 h-1.5 bg-base-content/40 rounded-full animate-bounce" style="animation-delay: 0.15s"></span>
                 <span class="w-1.5 h-1.5 bg-base-content/40 rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
@@ -1260,7 +1260,7 @@ function acceptTerms() {
 
     conn.onopen = function () {
         document.getElementById('agreement_modal').close();
-        updateStatus("Connected", "success");
+        updateStatus(t('connected'), "success");
         conn.send(JSON.stringify({ action: 'join_room', room: 'random' }));
         conn.send(JSON.stringify({ action: 'set_profile' }));
         if (currentMode === 'random' || currentMode === 'video' || currentMode === 'voice') {
@@ -1277,7 +1277,7 @@ function acceptTerms() {
     };
 
     conn.onclose = function () {
-        updateStatus("Disconnected", "error");
+        updateStatus(t('disconnected'), "error");
         setTimeout(initSocket, 3000);
         setRandomUI('disconnected');
         endCall(true);
