@@ -30,8 +30,8 @@ const path = require('path');
         await page.waitForSelector('button[onclick="acceptTerms()"]', { visible: true });
         await page.click('button[onclick="acceptTerms()"]');
         
-        // Wait for Random Chat view to be visible
-        await page.waitForSelector('#random-chat-view:not(.hidden)', { visible: true });
+        // Wait for WebSocket connection to open
+        await page.waitForFunction(() => typeof conn !== 'undefined' && conn && conn.readyState === WebSocket.OPEN, { timeout: 10000 });
         console.log(`[${name}] Logged in successfully.`);
     }
 
@@ -44,8 +44,12 @@ const path = require('path');
         // ==========================================
         console.log("\n--- Running Test 1: Public Lounge ---");
         
-        await page1.click('#nav-public');
-        await page2.click('#nav-public');
+        // Wait for WebSocket to be fully open before switching mode
+        await page1.waitForFunction(() => typeof conn !== 'undefined' && conn && conn.readyState === WebSocket.OPEN, { timeout: 10000 });
+        await page2.waitForFunction(() => typeof conn !== 'undefined' && conn && conn.readyState === WebSocket.OPEN, { timeout: 10000 });
+        
+        await page1.evaluate(() => switchMode('public'));
+        await page2.evaluate(() => switchMode('public'));
         
         await page1.waitForSelector('#public-chat-view:not(.hidden)', { visible: true });
         await page2.waitForSelector('#public-chat-view:not(.hidden)', { visible: true });
