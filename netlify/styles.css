@@ -1,8 +1,7 @@
 /* ============================================================
    DESIGN TOKENS — TELEGRAM LIGHT PALETTE
    ============================================================ */
-:root,
-[data-theme="light"] {
+:root {
     --app-height:      100dvh;
 
     /* Telegram Light Theme Colors */
@@ -39,34 +38,6 @@
     /* Divider */
     --divider-color:   #dfe5ec;
     --divider-opacity: 0.8;
-}
-
-/* ============================================================
-   DARK MODE TOKENS
-   ============================================================ */
-[data-theme="dark"] {
-    --bg-base:         #1a1b2e;
-    --bg-surface:      #232438;
-    --bg-card:         #2a2b40;
-    --bg-card-hover:   #32334a;
-    --bg-input:        #2a2b40;
-    --bg-input-focus:  #32334a;
-    --bg-navbar:       #232438;
-    --bg-chat-input:   #232438;
-    --bg-chat-header:  #232438;
-    --border-default:  #363850;
-    --border-hover:    #4a4d6a;
-    --border-focus:    #5b9fd4;
-    --text-base:       #e4e6f0;
-    --text-muted:      #9ea3b8;
-    --text-faint:      #6b7087;
-    --text-on-accent:  #ffffff;
-    --bubble-in-bg:    #2a2b40;
-    --bubble-in-text:  #e4e6f0;
-    --bubble-in-border:#2a2b40;
-    --scrollbar:       rgba(255, 255, 255, 0.08);
-    --scrollbar-hover: rgba(255, 255, 255, 0.15);
-    --divider-color:   #363850;
 }
 
 /* ============================================================
@@ -108,20 +79,6 @@ body {
     outline: none !important;
 }
 
-/* Dark mode glass input */
-[data-theme="dark"] .glass-input {
-    background: var(--bg-input) !important;
-    border-color: var(--border-default) !important;
-    color: var(--text-base) !important;
-}
-[data-theme="dark"] .glass-input::placeholder {
-    color: var(--text-muted) !important;
-}
-[data-theme="dark"] .glass-input:focus {
-    background: var(--bg-input-focus) !important;
-    border-color: var(--border-focus) !important;
-}
-
 /* ============================================================
    TELEGRAM CHAT BUBBLES
    ============================================================ */
@@ -150,21 +107,12 @@ body {
     border-radius: 14px 14px 2px 14px !important;
 }
 
-/* Dark mode outgoing bubble */
-[data-theme="dark"] .chat-end .chat-bubble {
-    background: #1b4a3a !important;
-    color: #e4e6f0 !important;
-}
-
 /* System and Divider message overrides */
 .divider {
     color: #707579 !important;
     font-size: 11px !important;
     font-weight: 500 !important;
     margin: 16px 0 !important;
-}
-[data-theme="dark"] .divider {
-    color: var(--text-muted) !important;
 }
 
 /* ============================================================
@@ -192,21 +140,6 @@ body {
     color: #2481cc !important;
 }
 
-/* Dark mode match mode */
-[data-theme="dark"] .match-mode-btn {
-    background-color: var(--bg-input) !important;
-    border-color: var(--border-default) !important;
-    color: var(--text-muted) !important;
-}
-[data-theme="dark"] .match-mode-btn:hover {
-    background-color: var(--bg-card-hover) !important;
-}
-[data-theme="dark"] .match-mode-btn.bg-gradient-to-br {
-    background-color: rgba(91, 159, 212, 0.2) !important;
-    border-color: #5b9fd4 !important;
-    color: #5b9fd4 !important;
-}
-
 /* User & Target Gender buttons inactive */
 .user-gender-btn,
 .target-gender-btn {
@@ -220,27 +153,12 @@ body {
     background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Dark mode gender buttons */
-[data-theme="dark"] .user-gender-btn,
-[data-theme="dark"] .target-gender-btn {
-    color: var(--text-muted) !important;
-}
-[data-theme="dark"] .user-gender-btn:hover,
-[data-theme="dark"] .target-gender-btn:hover {
-    background-color: var(--bg-card-hover) !important;
-}
-
 /* User & Target Gender buttons active (Tailwind trigger class) */
 .user-gender-btn.bg-white\/15,
 .target-gender-btn.bg-white\/15 {
     background-color: #2481cc !important;
     color: #ffffff !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
-}
-[data-theme="dark"] .user-gender-btn.bg-white\/15,
-[data-theme="dark"] .target-gender-btn.bg-white\/15 {
-    background-color: #5b9fd4 !important;
-    color: #ffffff !important;
 }
 
 /* ============================================================
@@ -276,30 +194,6 @@ body {
 }
 .glass-nav-item.active svg {
     color: #2481cc !important;
-}
-
-/* Dark mode nav */
-[data-theme="dark"] .glass-nav-item:hover,
-[data-theme="dark"] .glass-nav-item.active {
-    background-color: var(--bg-card-hover) !important;
-}
-[data-theme="dark"] .glass-nav-item.active {
-    border-left-color: #5b9fd4 !important;
-}
-[data-theme="dark"] .glass-nav-item.active span {
-    color: #5b9fd4 !important;
-}
-[data-theme="dark"] .glass-nav-item.active .font-bold {
-    color: var(--text-base) !important;
-}
-[data-theme="dark"] .glass-nav-item svg {
-    color: var(--text-muted);
-}
-[data-theme="dark"] .glass-nav-item:hover svg {
-    color: #5b9fd4;
-}
-[data-theme="dark"] .glass-nav-item.active svg {
-    color: #5b9fd4 !important;
 }
 
 /* ============================================================
@@ -350,16 +244,6 @@ body {
     border-radius: 8px;
     overflow: hidden;
 }
-[data-theme="dark"] .local-wrapper {
-    border-color: var(--border-default);
-    background: var(--bg-surface);
-}
-[data-theme="dark"] #chat-card {
-    background: var(--bg-base);
-}
-[data-theme="dark"] .chat-bubble {
-    color: var(--text-base) !important;
-}
 
 /* ============================================================
    INCOMING CALL OVERLAY
@@ -367,32 +251,7 @@ body {
 .theme-overlay {
     background: #e7ebf0;
 }
+
 .theme-start-overlay {
     background: #e7ebf0;
-}
-[data-theme="dark"] .theme-overlay,
-[data-theme="dark"] .theme-start-overlay {
-    background: var(--bg-base);
-}
-
-/* ============================================================
-   DRAWER SIDEBAR & MODALS
-   ============================================================ */
-[data-theme="dark"] .drawer-side .drawer-overlay {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-}
-[data-theme="dark"] .modal-box {
-    background-color: var(--bg-surface) !important;
-}
-[data-theme="dark"] .modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-}
-
-/* ============================================================
-   TOGGLE SWITCH
-   ============================================================ */
-[data-theme="dark"] .toggle:not(:checked) {
-    background-color: var(--bg-input) !important;
-    border-color: var(--border-default) !important;
-    --tglbg: var(--bg-card-hover) !important;
 }

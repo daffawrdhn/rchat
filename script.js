@@ -1156,17 +1156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Dark mode toggle — sync with the theme already applied by inline script
-    const darkToggle = document.getElementById('dark-mode-toggle');
-    if (darkToggle) {
-        darkToggle.checked = (document.documentElement.getAttribute('data-theme') === 'dark');
-        darkToggle.addEventListener('change', () => {
-            const theme = darkToggle.checked ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        });
-    }
-
     // Language selector (dropdown)
     applyTranslations();
     const langSelect = document.getElementById('lang-select');

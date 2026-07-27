@@ -20,12 +20,6 @@
 
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script>
-        // Apply saved theme before render (prevent flash)
-        (function() {
-            var saved = localStorage.getItem('theme');
-            var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        })();
         const originalWarn = console.warn;
         console.warn = function(...args) {
             if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
@@ -638,14 +632,10 @@
                         <a href="terms.html" target="_blank" class="hover:text-[#2481cc] transition-colors" data-i18n="terms_service">Terms of Service</a>
                     </div>
                     <div class="flex items-center justify-between text-xs text-[#707579]">
-                        <span data-i18n="dark_mode">Dark Mode</span>
-                        <input type="checkbox" id="dark-mode-toggle" class="toggle toggle-sm border-[#dfe5ec] bg-white [--tglbg:#dfe5ec] checked:bg-[#2481cc] checked:border-[#2481cc] checked:[--tglbg:white]">
-                    </div>
-                    <div class="flex items-center justify-between text-xs text-[#707579]">
                         <span data-i18n="lang_label">Bahasa</span>
                         <select id="lang-select" class="select select-bordered select-sm bg-white border-[#dfe5ec] w-auto max-w-[100px]">
-                            <option value="en" data-i18n="lang_en">English</option>
-                            <option value="id" data-i18n="lang_id">Indonesia</option>
+                            <option value="en">English</option>
+                            <option value="id">Indonesia</option>
                         </select>
                     </div>
                 </div>

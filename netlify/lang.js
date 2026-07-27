@@ -12,7 +12,6 @@ const LANG = {
         online: "Online",
         privacy_policy: "Privacy Policy",
         terms_service: "Terms of Service",
-        dark_mode: "Dark Mode",
         lang_label: "Bahasa",
         // Status
         initializing: "Initializing...",
@@ -106,7 +105,6 @@ const LANG = {
         online: "Online",
         privacy_policy: "Kebijakan Privasi",
         terms_service: "Syarat Layanan",
-        dark_mode: "Mode Gelap",
         lang_label: "Language",
         // Status
         initializing: "Memuat...",
