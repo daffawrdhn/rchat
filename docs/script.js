@@ -1167,14 +1167,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Language toggle
+    // Language selector (dropdown)
     applyTranslations();
-    const langToggle = document.getElementById('lang-toggle');
-    if (langToggle) {
-        langToggle.checked = (currentLang === 'id');
-        langToggle.addEventListener('change', () => {
-            const lang = langToggle.checked ? 'id' : 'en';
-            switchLang(lang);
+    const langSelect = document.getElementById('lang-select');
+    if (langSelect) {
+        langSelect.value = currentLang;
+        langSelect.addEventListener('change', () => {
+            switchLang(langSelect.value);
         });
     }
 
