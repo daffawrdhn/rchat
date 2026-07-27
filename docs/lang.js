@@ -204,8 +204,8 @@ function applyTranslations() {
         const translated = t(key);
         if (translated) el.placeholder = translated;
     });
-    const langSelect = document.getElementById('lang-select');
-    if (langSelect) langSelect.value = currentLang;
+    const langBtn = document.getElementById('lang-toggle');
+    if (langBtn) langBtn.innerText = (currentLang === 'id') ? '🇮🇩' : '🇺🇸';
 }
 
 function switchLang(lang) {

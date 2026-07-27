@@ -1156,13 +1156,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Language selector (dropdown)
+    // Language toggle (flag button)
     applyTranslations();
-    const langSelect = document.getElementById('lang-select');
-    if (langSelect) {
-        langSelect.value = currentLang;
-        langSelect.addEventListener('change', () => {
-            switchLang(langSelect.value);
+    const langBtn = document.getElementById('lang-toggle');
+    if (langBtn) {
+        langBtn.innerText = (currentLang === 'id') ? '🇮🇩' : '🇺🇸';
+        langBtn.addEventListener('click', () => {
+            const next = currentLang === 'en' ? 'id' : 'en';
+            switchLang(next);
+            langBtn.innerText = (next === 'id') ? '🇮🇩' : '🇺🇸';
         });
     }
 
