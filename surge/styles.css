@@ -283,13 +283,49 @@ body {
 }
 
 /* ============================================================
-   DARK MODE OVERRIDES
+   DARK MODE OVERRIDES — Comprehensive
    ============================================================ */
 [data-theme="dark"] body {
     background-color: var(--bg-base);
     color: var(--text-base);
 }
 
+/* Hardcoded Tailwind utility overrides */
+[data-theme="dark"] .bg-white { background-color: var(--bg-surface) !important; }
+[data-theme="dark"] .bg-\[#e7ebf0\] { background-color: var(--bg-base) !important; }
+[data-theme="dark"] .bg-\[#f1f5f9\],
+[data-theme="dark"] .bg-slate-100 { background-color: var(--bg-card-hover) !important; }
+[data-theme="dark"] .bg-slate-50 { background-color: var(--bg-card) !important; }
+[data-theme="dark"] .bg-emerald-50 { background-color: rgba(34, 197, 94, 0.1) !important; }
+
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-700 { color: var(--text-base) !important; }
+[data-theme="dark"] .text-\[#000000\] { color: var(--text-base) !important; }
+[data-theme="dark"] .text-\[#707579\] { color: var(--text-muted) !important; }
+
+[data-theme="dark"] .border-\[#dfe5ec\] { border-color: var(--border-default) !important; }
+[data-theme="dark"] .border-emerald-200 { border-color: rgba(34, 197, 94, 0.3) !important; }
+
+[data-theme="dark"] .hover\:bg-slate-100:hover { background-color: var(--bg-card-hover) !important; }
+[data-theme="dark"] .hover\:bg-slate-200:hover { background-color: var(--bg-card-hover) !important; }
+
+/* Drawer sidebar */
+[data-theme="dark"] .drawer-side .drawer-overlay { background-color: rgba(0, 0, 0, 0.6) !important; }
+
+/* Modals */
+[data-theme="dark"] .modal-box { background-color: var(--bg-surface) !important; }
+[data-theme="dark"] .modal-backdrop { background-color: rgba(0, 0, 0, 0.6) !important; }
+
+/* Toggle switch */
+[data-theme="dark"] .toggle:not(:checked) {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-default) !important;
+    --tglbg: var(--bg-card-hover) !important;
+}
+
+/* ============================================================
+   Glass Input
+   ============================================================ */
 [data-theme="dark"] .glass-input {
     background: var(--bg-input) !important;
     border-color: var(--border-default) !important;
@@ -303,11 +339,17 @@ body {
     border-color: var(--border-focus) !important;
 }
 
+/* ============================================================
+   Chat Bubbles
+   ============================================================ */
 [data-theme="dark"] .chat-end .chat-bubble {
     background: #1b4a3a !important;
     color: #e4e6f0 !important;
 }
 
+/* ============================================================
+   Match Mode & Gender Buttons
+   ============================================================ */
 [data-theme="dark"] .match-mode-btn {
     background-color: var(--bg-input) !important;
     border-color: var(--border-default) !important;
@@ -322,6 +364,23 @@ body {
     color: #5b9fd4 !important;
 }
 
+[data-theme="dark"] .user-gender-btn,
+[data-theme="dark"] .target-gender-btn {
+    color: var(--text-muted) !important;
+}
+[data-theme="dark"] .user-gender-btn:hover,
+[data-theme="dark"] .target-gender-btn:hover {
+    background-color: var(--bg-card-hover) !important;
+}
+[data-theme="dark"] .user-gender-btn.bg-white\/15,
+[data-theme="dark"] .target-gender-btn.bg-white\/15 {
+    background-color: #5b9fd4 !important;
+    color: #ffffff !important;
+}
+
+/* ============================================================
+   Navigation
+   ============================================================ */
 [data-theme="dark"] .glass-nav-item:hover,
 [data-theme="dark"] .glass-nav-item.active {
     background-color: var(--bg-card-hover) !important;
@@ -345,6 +404,9 @@ body {
     color: #5b9fd4 !important;
 }
 
+/* ============================================================
+   Overlays
+   ============================================================ */
 [data-theme="dark"] .theme-overlay {
     background: var(--bg-base);
 }
@@ -352,22 +414,11 @@ body {
     background: var(--bg-base);
 }
 
+/* ============================================================
+   Misc
+   ============================================================ */
 [data-theme="dark"] .divider {
     color: var(--text-muted) !important;
-}
-
-[data-theme="dark"] .user-gender-btn,
-[data-theme="dark"] .target-gender-btn {
-    color: var(--text-muted) !important;
-}
-[data-theme="dark"] .user-gender-btn:hover,
-[data-theme="dark"] .target-gender-btn:hover {
-    background-color: var(--bg-card-hover) !important;
-}
-[data-theme="dark"] .user-gender-btn.bg-white\/15,
-[data-theme="dark"] .target-gender-btn.bg-white\/15 {
-    background-color: #5b9fd4 !important;
-    color: #ffffff !important;
 }
 
 [data-theme="dark"] #chat-card {
@@ -376,4 +427,7 @@ body {
 [data-theme="dark"] .local-wrapper {
     border-color: var(--border-default);
     background: var(--bg-surface);
+}
+[data-theme="dark"] .chat-bubble {
+    color: var(--text-base) !important;
 }

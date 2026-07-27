@@ -20,8 +20,12 @@
 
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script>
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.removeItem('theme');
+        // Apply saved theme before render (prevent flash)
+        (function() {
+            var saved = localStorage.getItem('theme');
+            var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
         const originalWarn = console.warn;
         console.warn = function(...args) {
             if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
@@ -146,34 +150,34 @@
 
     <dialog id="agreement_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
         <div class="modal-box bg-white border border-[#dfe5ec] shadow-2xl p-6 rounded-2xl">
-            <h3 class="font-extrabold text-xl text-[#2481cc] flex items-center gap-2.5 tracking-tight">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-                Community Agreement
-            </h3>
-            <div class="py-4 space-y-3.5 text-xs text-[#000000] leading-relaxed">
-                <p>Welcome to <span class="font-bold text-[#2481cc]">XOXO Chat</span>. To keep our community safe and clean, you must accept our guidelines before starting:</p>
-                <ul class="list-disc list-inside space-y-2 font-semibold bg-[#f1f5f9] p-4 rounded-xl border border-[#dfe5ec] text-[#707579]">
-                    <li>You are <span class="text-[#2481cc] font-bold">18 years of age or older</span>.</li>
-                    <li>You will respect other strangers (no insults/harassment).</li>
-                    <li>You will not stream or share illegal content.</li>
-                </ul>
-                <p class="text-[10px] text-[#707579] opacity-80">By agreeing, you confirm compliance. Violating rules leads to permanent bans.</p>
-            </div>
-            <div class="modal-action flex flex-col gap-2 mt-2">
-                <button onclick="acceptTerms()" class="btn bg-[#2481cc] hover:bg-[#1a71b3] w-full text-white rounded-full font-bold border-none shadow">I Agree, Start Chatting</button>
-                <button onclick="window.location.href='https://google.com'" class="btn btn-ghost w-full rounded-full text-[#707579] hover:bg-slate-100">Exit</button>
-            </div>
+                <h3 class="font-extrabold text-xl text-[#2481cc] flex items-center gap-2.5 tracking-tight">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                    <span data-i18n="community_agreement">Community Agreement</span>
+                </h3>
+                <div class="py-4 space-y-3.5 text-xs text-[#000000] leading-relaxed dark:text-[var(--text-base)]">
+                    <p data-i18n="agreement_welcome">Welcome to <span class="font-bold text-[#2481cc]">XOXO Chat</span>. To keep our community safe and clean, you must accept our guidelines before starting:</p>
+                    <ul class="list-disc list-inside space-y-2 font-semibold bg-[#f1f5f9] p-4 rounded-xl border border-[#dfe5ec] text-[#707579] dark:bg-[var(--bg-input)] dark:border-[var(--border-default)] dark:text-[var(--text-muted)]">
+                        <li data-i18n="agreement_18plus">You are <span class="text-[#2481cc] font-bold">18 years of age or older</span>.</li>
+                        <li data-i18n="agreement_respect">You will respect other strangers (no insults/harassment).</li>
+                        <li data-i18n="agreement_no_illegal">You will not stream or share illegal content.</li>
+                    </ul>
+                    <p class="text-[10px] text-[#707579] opacity-80" data-i18n="agreement_compliance">By agreeing, you confirm compliance. Violating rules leads to permanent bans.</p>
+                </div>
+                <div class="modal-action flex flex-col gap-2 mt-2">
+                    <button onclick="acceptTerms()" class="btn bg-[#2481cc] hover:bg-[#1a71b3] w-full text-white rounded-full font-bold border-none shadow" data-i18n="i_agree">I Agree, Start Chatting</button>
+                    <button onclick="window.location.href='https://google.com'" class="btn btn-ghost w-full rounded-full text-[#707579] hover:bg-slate-100 dark:text-[var(--text-muted)] dark:hover:bg-[var(--bg-card-hover)]" data-i18n="exit">Exit</button>
+                </div>
         </div>
     </dialog>
 
     <dialog id="video_tip_modal" class="modal">
         <div class="modal-box glass-panel shadow-2xl p-6 rounded-3xl">
             <h3 class="font-extrabold text-xl text-info tracking-tight flex items-center gap-2">
-                <span>💡</span> Connectivity Tip
+                <span>💡</span> <span data-i18n="connectivity_tip">Connectivity Tip</span>
             </h3>
-            <p class="py-4 text-sm opacity-80 leading-relaxed">
+            <p class="py-4 text-sm opacity-80 leading-relaxed" data-i18n="video_tip_text">
                 If the video call is black or fails to connect:
                 <br><br>
                 <span class="font-semibold text-warning">Try switching from Mobile Data (4G/5G) to WiFi, or vice-versa.</span>
@@ -182,7 +186,7 @@
             </p>
             <div class="modal-action">
                 <form method="dialog">
-                    <button class="btn btn-primary rounded-full px-6 font-bold shadow-lg shadow-primary/25">Got it</button>
+                    <button class="btn btn-primary rounded-full px-6 font-bold shadow-lg shadow-primary/25" data-i18n="got_it">Got it</button>
                 </form>
             </div>
         </div>
@@ -217,7 +221,7 @@
                 <div class="flex-none">
                     <div class="badge bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-bold py-2 px-2.5 flex items-center gap-1 shadow-sm">
                         <span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span><span id="mobile-count">0</span> Online</span>
+                        <span><span id="mobile-count">0</span> <span data-i18n="online">Online</span></span>
                     </div>
                 </div>
             </div>
@@ -477,8 +481,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="text-lg font-bold themed-heading tracking-tight mb-1 text-slate-900">Custom Room</h2>
-                                    <p class="text-xs themed-desc leading-relaxed text-[#707579]">Create or join a private group room. Chats are end-to-end encrypted and auto-delete after 5 mins of inactivity.</p>
+                                    <h2 class="text-lg font-bold themed-heading tracking-tight mb-1 text-slate-900" data-i18n="custom_room">Custom Room</h2>
+                                    <p class="text-xs themed-desc leading-relaxed text-[#707579]" data-i18n="custom_room_desc">Create or join a private group room. Chats are end-to-end encrypted and auto-delete after 5 mins of inactivity.</p>
                                 </div>
                                 <div class="w-full flex flex-col gap-2.5">
                                     <input type="text" id="room-code-input" placeholder="Enter Room Code..." data-i18n-placeholder="room_code" class="input input-bordered w-full rounded-full glass-input text-center text-sm font-semibold focus:outline-none" />
@@ -519,7 +523,7 @@
 
                             <!-- Group Chat Box -->
                             <div id="group-chat-box" class="flex-grow chat-scroll overflow-y-auto p-6 space-y-4 pb-4">
-                                <div class="divider opacity-30 text-xs">Group Created</div>
+                                <div class="divider opacity-30 text-xs" data-i18n="group_created">Group Created</div>
                             </div>
 
                             <!-- Group Chat Inputs -->
@@ -575,7 +579,7 @@
                         <p class="font-bold text-[16px] truncate" id="sidebar-nickname">...</p>
                         <div id="status-wrapper" class="flex items-center gap-2 mt-0.5">
                             <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-white/60"></span>
-                            <span id="status-bar" class="text-xs text-white/80 font-normal tracking-normal">Initializing...</span>
+                            <span id="status-bar" class="text-xs text-white/80 font-normal tracking-normal" data-i18n="initializing">Initializing...</span>
                         </div>
                     </div>
                 </div>
@@ -625,7 +629,7 @@
                         <span data-i18n="users_online">Users online:</span>
                         <span class="badge bg-emerald-50 border border-emerald-200 text-emerald-600 text-[11px] font-bold px-2 py-2 flex items-center gap-1 shadow-sm">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span><span id="count-val">0</span> Online</span>
+                            <span><span id="count-val">0</span> <span data-i18n="online">Online</span></span>
                         </span>
                     </div>
                     <div class="flex justify-center gap-4 text-[11px] text-[#707579] opacity-80 font-semibold">

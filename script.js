@@ -27,6 +27,7 @@ const chatTitle = document.getElementById('chat-title');
 const statusWrapper = document.getElementById('status-wrapper');
 const statusDot = document.getElementById('status-dot');
 const statusBar = document.getElementById('status-bar');
+if (statusBar) statusBar.innerText = t('initializing');
 
 const countVal = document.getElementById('count-val');
 const mobileCount = document.getElementById('mobile-count');
@@ -158,8 +159,8 @@ function initSocket() {
             
             playAudio('connect');
             setRandomUI('connected');
-            notifyBackground(`${randomPartnerName} Found!`, `You are now connected with ${randomPartnerName}.`);
-            logSystem(randomBox, `You are connected with ${randomPartnerName}.`);
+            notifyBackground(`${randomPartnerName} ${t('found')}`, `${t('you_connected_with')} ${randomPartnerName}.`);
+            logSystem(randomBox, `${t('connected_with')} ${randomPartnerName}.`);
             
             let modeTitle = 'Meet Random';
             if (matchedMode === 'video') modeTitle = 'Random Video';
@@ -179,7 +180,7 @@ function initSocket() {
         else if (data.status === 'disconnected') {
             playAudio('disconnect');
             setRandomUI('disconnected_partner');
-            logSystem(randomBox, `${randomPartnerName} left.`);
+            logSystem(randomBox, `${randomPartnerName} ${t('left_chat')}`);
             endCall(true);
             randomPartnerName = 'Stranger';
             
@@ -518,7 +519,7 @@ async function toggleRecording(context) {
             isRecording = true;
             btn.classList.add('text-red-500', 'animate-pulse');
         } catch (err) {
-            alert("Microphone access denied.");
+            alert(t('mic_denied'));
         }
     } else {
         mediaRecorder.stop();
@@ -641,7 +642,7 @@ function stopRandomChat() {
     isSearching = false;
     btnStop.classList.add('hidden');
     btnStart.classList.remove('hidden');
-    logSystem(randomBox, "Search canceled.");
+    logSystem(randomBox, t('search_canceled'));
     
     // Hang up WebRTC and notify backend to clear matching
     endCall();
@@ -718,7 +719,7 @@ function triggerUpload() { document.getElementById('img-upload').click(); }
 function handleImageUpload(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        if (file.size > 5 * 1024 * 1024) { alert("Image too large (Max 5MB origin)"); return; }
+            if (file.size > 5 * 1024 * 1024) { alert(t('image_too_large')); return; }
 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -982,10 +983,10 @@ async function startCall(isVoiceOnly = false) {
         await peerConnection.setLocalDescription(offer);
 
         conn.send(JSON.stringify({ action: 'call_signal', data: { type: 'offer', sdp: offer, isVoiceOnly: isVoiceOnly } }));
-        logSystem(randomBox, isVoiceOnly ? "📞 Calling stranger (Voice)..." : "🎥 Calling stranger...");
+        logSystem(randomBox, isVoiceOnly ? "📞 " + t('calling_voice') : "🎥 " + t('calling_video'));
     } catch (err) {
         console.error(err);
-        alert("Camera/Microphone access required!"); endCall();
+        alert(t('camera_mic_required')); endCall();
     }
 }
 
@@ -1017,7 +1018,7 @@ async function handleSignalMessage(signal) {
     }
     else if (signal.type === 'hangup') {
         endCall(true);
-        logSystem(randomBox, "Call ended.");
+        logSystem(randomBox, t('call_ended'));
     }
 }
 
@@ -1155,17 +1156,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Dark mode toggle
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        const toggle = document.getElementById('dark-mode-toggle');
-        if (toggle) toggle.checked = true;
-    } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-    }
+    // Dark mode toggle — sync with the theme already applied by inline script
     const darkToggle = document.getElementById('dark-mode-toggle');
     if (darkToggle) {
+        darkToggle.checked = (document.documentElement.getAttribute('data-theme') === 'dark');
         darkToggle.addEventListener('change', () => {
             const theme = darkToggle.checked ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', theme);
@@ -1191,9 +1185,9 @@ document.addEventListener('DOMContentLoaded', () => {
     matchModeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             matchModeButtons.forEach(b => {
-                b.className = 'match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-white/5 border-white/10 text-white/60 hover:bg-white/10';
+                b.className = 'match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5';
             });
-            btn.className = 'match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border-indigo-500/40 text-white shadow-md shadow-indigo-500/10';
+            btn.className = 'match-mode-btn py-2.5 px-1 rounded-2xl text-[10px] font-bold border transition-all flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br';
             
             const val = btn.getAttribute('data-value');
             localStorage.setItem('match_mode', val);
@@ -1205,7 +1199,7 @@ document.addEventListener('DOMContentLoaded', () => {
     userGenderButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             userGenderButtons.forEach(b => {
-                b.className = 'user-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5';
+                b.className = 'user-gender-btn py-1.5 rounded-full text-xs transition-all';
             });
             btn.className = 'user-gender-btn py-1.5 rounded-full text-xs transition-all bg-white/15 text-white shadow-sm';
             
@@ -1229,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     targetGenderButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             targetGenderButtons.forEach(b => {
-                b.className = 'target-gender-btn py-1.5 rounded-full text-xs transition-all text-white/60 hover:bg-white/5';
+                b.className = 'target-gender-btn py-1.5 rounded-full text-xs transition-all';
             });
             btn.className = 'target-gender-btn py-1.5 rounded-full text-xs transition-all bg-white/15 text-white shadow-sm';
             
@@ -1323,8 +1317,8 @@ function checkIOSInstall() {
         toast.innerHTML = `
           <div class="flex justify-between items-start">
               <div>
-                  <h3 class="font-bold text-sm">Install XOXO App 📲</h3>
-                  <p class="text-xs opacity-70 mt-1">For the best experience, add this to your home screen.</p>
+                  <h3 class="font-bold text-sm">${t('install_app')} 📲</h3>
+                  <p class="text-xs opacity-70 mt-1">${t('install_desc')}</p>
               </div>
               <button onclick="this.parentElement.parentElement.remove()" class="btn btn-xs btn-circle btn-ghost">✕</button>
           </div>
@@ -1406,7 +1400,7 @@ async function decryptMsg(msg, key) {
 async function joinCustomRoom() {
     const code = document.getElementById('room-code-input').value.trim();
     if (!code) {
-        alert("Please enter a room code!");
+        alert(t('enter_room_code'));
         return;
     }
     if (conn.readyState !== WebSocket.OPEN) return;
@@ -1450,7 +1444,7 @@ function setGroupUI(state, groupId = null) {
 function copyInviteLink() {
     const text = document.getElementById('group-invite-link').innerText;
     navigator.clipboard.writeText(text).then(() => {
-        alert("Link copied to clipboard!");
+        alert(t('link_copied'));
     });
 }
 
