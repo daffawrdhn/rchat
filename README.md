@@ -51,7 +51,6 @@ rchat/
 │   └── Chat.php          # WebSocket handler logic class (PHP Ratchet)
 ├── vendor/               # Third-party dependencies (Composer)
 ├── index.html            # Main Telegram-Style single page interface
-├── main_index.html       # Public landing landing page
 ├── script.js             # Frontend controller (WebSocket, WebRTC, UI logic)
 ├── styles.css            # Custom layout rules & theme tokens
 ├── server.php            # WebSocket runner script (CLI entry point)
@@ -250,11 +249,15 @@ sudo systemctl restart nginx
 ### 3. WebRTC STUN/TURN (COTURN) Setup
 To allow WebRTC video and voice streams to connect across cellular networks or symmetric firewalls, a TURN server is required. This project uses **COTURN** configured on port `3478` of your VPS.
 
-The client configuration in [script.js](file:///C:/Users/Think/Documents/www/rchat/script.js) matches the credentials below:
-*   **STUN Server:** `stun:stun.l.google.com:19302` (Google Public STUN)
-*   **TURN Server:** `turn:<YOUR_VPS_IP>:3478`
-*   **Username:** `<YOUR_TURN_USERNAME>`
-*   **Credential:** `<YOUR_TURN_PASSWORD>`
+**TURN credentials are no longer hardcoded in the client.** They are served server-side via the WebSocket `identity` message (see `src/Chat.php` and `config.php`). Configure them in `.env` on the server:
+
+```env
+TURN_URL=turn:your-vps-ip:3478
+TURN_USERNAME=your_turn_username
+TURN_PASSWORD=your_turn_password
+```
+
+The static clients (`netlify/`, `docs/`, `surge/`) no longer include TURN fields in `config.js` — they receive credentials dynamically from the WebSocket server on connect.
 
 #### COTURN Installation on Ubuntu VPS:
 1. Install coturn package:
@@ -279,7 +282,7 @@ The client configuration in [script.js](file:///C:/Users/Think/Documents/www/rch
    # Use long-term credential mechanism
    lt-cred-mech
    
-   # Static User Credentials (matches script.js)
+   # Static User Credentials (must match .env on app server)
    user=<YOUR_TURN_USERNAME>:<YOUR_TURN_PASSWORD>
    
    # Realm (use your domain name)
@@ -293,6 +296,8 @@ The client configuration in [script.js](file:///C:/Users/Think/Documents/www/rch
    sudo systemctl restart coturn
    sudo systemctl enable coturn
    ```
+
+> **Note:** The `.env` file on your application server (`TURN_URL`, `TURN_USERNAME`, `TURN_PASSWORD`) must match the credentials configured here in `/etc/turnserver.conf`.
 
 ---
 
